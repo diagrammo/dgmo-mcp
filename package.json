@@ -1,0 +1,30 @@
+{
+  "name": "@diagrammo/dgmo-mcp",
+  "version": "0.1.0",
+  "description": "MCP server for DGMO diagram rendering",
+  "bin": {
+    "dgmo-mcp": "./dist/index.js"
+  },
+  "main": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup src/index.ts --format cjs --dts",
+    "dev": "tsup src/index.ts --format cjs --dts --watch",
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@diagrammo/dgmo": "^0.2.27",
+    "@modelcontextprotocol/sdk": "^1.12.1",
+    "@resvg/resvg-js": "^2.6.2",
+    "zod": "^3.24.0"
+  },
+  "devDependencies": {
+    "@types/node": "^22.0.0",
+    "tsup": "^8.4.0",
+    "typescript": "^5.7.0"
+  },
+  "files": [
+    "dist"
+  ],
+  "license": "MIT"
+}
