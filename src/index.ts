@@ -147,9 +147,9 @@ const server = new McpServer({
 
 server.tool(
   'render_diagram',
-  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image.',
+  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. IMPORTANT: In DGMO, parentheses after a label specify color — e.g. "Sales (red)" colors the bar red, it does NOT label it "Sales (red)". Never use parentheses in labels for annotation; use dashes, commas, or separate words instead.',
   {
-    dgmo: z.string().describe('DGMO diagram markup'),
+    dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels are color notation — e.g. "Label (blue)" sets color, not text. Avoid parentheses in data labels.'),
     format: z.enum(['svg', 'png']).default('svg').describe('Output format'),
     theme: z.enum(['light', 'dark', 'transparent']).default('light').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette (nord, solarized, catppuccin, rose-pine, gruvbox, tokyo-night, one-dark, bold)'),
@@ -379,13 +379,13 @@ server.tool(
 
 server.tool(
   'preview_diagram',
-  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display.',
+  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. IMPORTANT: Parentheses in DGMO labels are color notation — "Label (red)" colors it red. Never use parentheses for annotation in labels.',
   {
     diagrams: z
       .array(
         z.object({
           title: z.string().optional().describe('Optional title for this diagram'),
-          dgmo: z.string().describe('DGMO diagram markup'),
+          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels are color notation, not text.'),
         }),
       )
       .min(1)
@@ -466,7 +466,7 @@ server.tool(
 
 server.tool(
   'generate_report',
-  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default.',
+  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. IMPORTANT: Parentheses in DGMO labels are color notation — "Label (red)" colors it red. Never use parentheses for annotation in labels.',
   {
     title: z.string().describe('Report title'),
     subtitle: z.string().optional().describe('Optional subtitle'),
@@ -475,7 +475,7 @@ server.tool(
         z.object({
           title: z.string().describe('Section title'),
           description: z.string().optional().describe('Optional section description'),
-          dgmo: z.string().describe('DGMO diagram markup'),
+          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels are color notation, not text.'),
         }),
       )
       .min(1)
