@@ -4,8 +4,10 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { exec } from 'node:child_process';
-import { readFileSync } from 'node:fs';
+import { readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { tmpdir } from 'node:os';
+import { randomUUID } from 'node:crypto';
 import {
   render,
   parseDgmo,
@@ -15,6 +17,9 @@ import {
   getPalette,
 } from '@diagrammo/dgmo';
 import { Resvg } from '@resvg/resvg-js';
+import { buildPreviewHtml, buildReportHtml } from './html-report.js';
+import type { ReportSection } from './html-report.js';
+import { openInBrowser } from './open-browser.js';
 
 // ---------------------------------------------------------------------------
 // Chart type descriptions (same as CLI)
@@ -100,6 +105,33 @@ function extractSection(markdown: string, chartType: string): string | null {
   const nextHeading = rest.search(new RegExp(`^${level.replace(/ $/, '')}[# ]`, 'm'));
   const end = nextHeading === -1 ? markdown.length : start + match[0].length + nextHeading;
   return markdown.slice(start, end).trim();
+}
+
+/** Write HTML to a temp file and return the path. */
+function writeTempHtml(html: string, prefix: string): string {
+  const filePath = join(tmpdir(), `${prefix}-${randomUUID()}.html`);
+  writeFileSync(filePath, html, 'utf-8');
+  return filePath;
+}
+
+/** Render a single DGMO string to SVG, returning { svg, error }. */
+async function tryRender(
+  dgmo: string,
+  theme: 'light' | 'dark',
+  palette: string,
+): Promise<{ svg: string | null; error: string | null }> {
+  const { diagnostics } = parseDgmo(dgmo);
+  const errors = diagnostics.filter((d) => d.severity === 'error');
+  if (errors.length > 0) {
+    return { svg: null, error: errors.map(formatDgmoError).join('\n') };
+  }
+  try {
+    const svg = await render(dgmo, { theme, palette, branding: false });
+    if (!svg) return { svg: null, error: 'Render returned empty SVG.' };
+    return { svg, error: null };
+  } catch (err) {
+    return { svg: null, error: err instanceof Error ? err.message : String(err) };
+  }
 }
 
 // ---------------------------------------------------------------------------
@@ -192,7 +224,7 @@ server.tool(
 
 server.tool(
   'open_in_app',
-  'Open a DGMO diagram in the Diagrammo desktop app (macOS only).',
+  'Open a DGMO diagram in the Diagrammo desktop app (macOS only). Falls back to browser preview if the app is not installed.',
   {
     dgmo: z.string().describe('DGMO diagram markup'),
   },
@@ -216,17 +248,51 @@ server.tool(
     const deepLink = `diagrammo://open?dgmo=${hash}`;
 
     return new Promise((resolve) => {
-      exec(`open ${JSON.stringify(deepLink)}`, (error) => {
+      exec(`open ${JSON.stringify(deepLink)}`, async (error) => {
         if (error) {
-          resolve({
-            content: [
-              {
-                type: 'text' as const,
-                text: `Failed to open Diagrammo app: ${error.message}. Is the app installed?`,
-              },
-            ],
-            isError: true,
-          });
+          // Fallback: render to SVG and open in browser
+          try {
+            const rendered = await tryRender(dgmo, 'light', 'nord');
+            if (!rendered.svg) {
+              resolve({
+                content: [
+                  {
+                    type: 'text' as const,
+                    text: `App not installed and render failed: ${rendered.error}`,
+                  },
+                ],
+                isError: true,
+              });
+              return;
+            }
+            const paletteConfig = getPalette('nord');
+            const html = buildPreviewHtml({
+              svg: rendered.svg,
+              title: 'Diagram Preview',
+              dgmoSource: dgmo,
+              palette: paletteConfig,
+            });
+            const filePath = writeTempHtml(html, 'dgmo-preview');
+            await openInBrowser(filePath);
+            resolve({
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Diagrammo app not found — opened preview in browser: ${filePath}`,
+                },
+              ],
+            });
+          } catch (fallbackErr) {
+            resolve({
+              content: [
+                {
+                  type: 'text' as const,
+                  text: `Failed to open Diagrammo app and browser fallback failed: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)}`,
+                },
+              ],
+              isError: true,
+            });
+          }
         } else {
           resolve({
             content: [
@@ -306,6 +372,179 @@ server.tool(
     }
 
     return { content: [{ type: 'text' as const, text: content }] };
+  },
+);
+
+// --- Tool 6: preview_diagram ---
+
+server.tool(
+  'preview_diagram',
+  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display.',
+  {
+    diagrams: z
+      .array(
+        z.object({
+          title: z.string().optional().describe('Optional title for this diagram'),
+          dgmo: z.string().describe('DGMO diagram markup'),
+        }),
+      )
+      .min(1)
+      .describe('One or more diagrams to preview'),
+    theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
+    palette: z.string().default('nord').describe('Color palette'),
+    include_source: z.boolean().default(false).describe('Show DGMO source in collapsible blocks'),
+  },
+  async ({ diagrams, theme, palette, include_source }) => {
+    const paletteConfig = getPalette(palette);
+    const results = await Promise.all(
+      diagrams.map(async (d) => {
+        const { svg, error } = await tryRender(d.dgmo, theme, palette);
+        return { title: d.title, dgmo: d.dgmo, svg, error };
+      }),
+    );
+
+    const successes = results.filter((r) => r.svg);
+    const failures = results.filter((r) => !r.svg);
+
+    if (successes.length === 0) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text:
+              'All diagrams failed to render:\n' +
+              failures.map((f) => `- ${f.title || 'untitled'}: ${f.error}`).join('\n'),
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    let html: string;
+    if (diagrams.length === 1 && successes.length === 1) {
+      // Single diagram → simple preview
+      const r = results[0];
+      html = buildPreviewHtml({
+        svg: r.svg!,
+        title: r.title,
+        dgmoSource: include_source ? r.dgmo : undefined,
+        palette: paletteConfig,
+      });
+    } else {
+      // Multiple diagrams → report layout
+      const sections: ReportSection[] = results.map((r) => ({
+        title: r.title || 'Untitled',
+        svg: r.svg,
+        dgmoSource: r.dgmo,
+        error: r.error ?? undefined,
+      }));
+      html = buildReportHtml({
+        title: 'Diagram Preview',
+        sections,
+        palette: paletteConfig,
+        includeSource: include_source,
+      });
+    }
+
+    const filePath = writeTempHtml(html, 'dgmo-preview');
+    await openInBrowser(filePath);
+
+    let message = `Opened preview in browser: ${filePath}`;
+    if (failures.length > 0) {
+      message +=
+        '\n\nWarning — some diagrams failed to render:\n' +
+        failures.map((f) => `- ${f.title || 'untitled'}: ${f.error}`).join('\n');
+    }
+
+    return {
+      content: [{ type: 'text' as const, text: message }],
+    };
+  },
+);
+
+// --- Tool 7: generate_report ---
+
+server.tool(
+  'generate_report',
+  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default.',
+  {
+    title: z.string().describe('Report title'),
+    subtitle: z.string().optional().describe('Optional subtitle'),
+    sections: z
+      .array(
+        z.object({
+          title: z.string().describe('Section title'),
+          description: z.string().optional().describe('Optional section description'),
+          dgmo: z.string().describe('DGMO diagram markup'),
+        }),
+      )
+      .min(1)
+      .describe('Report sections, each with a diagram'),
+    theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
+    palette: z.string().default('nord').describe('Color palette'),
+    include_source: z.boolean().default(false).describe('Show DGMO source in collapsible blocks'),
+    open: z.boolean().default(true).describe('Open the report in the browser'),
+  },
+  async ({ title, subtitle, sections: inputSections, theme, palette, include_source, open }) => {
+    const paletteConfig = getPalette(palette);
+    const results = await Promise.all(
+      inputSections.map(async (s) => {
+        const { svg, error } = await tryRender(s.dgmo, theme, palette);
+        return { ...s, svg, error };
+      }),
+    );
+
+    const successes = results.filter((r) => r.svg);
+    const failures = results.filter((r) => !r.svg);
+
+    if (successes.length === 0) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text:
+              'All sections failed to render:\n' +
+              failures.map((f) => `- ${f.title}: ${f.error}`).join('\n'),
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    const sections: ReportSection[] = results.map((r) => ({
+      title: r.title,
+      description: r.description,
+      svg: r.svg,
+      dgmoSource: r.dgmo,
+      error: r.error ?? undefined,
+    }));
+
+    const html = buildReportHtml({
+      title,
+      subtitle,
+      sections,
+      palette: paletteConfig,
+      includeSource: include_source,
+    });
+
+    const filePath = writeTempHtml(html, 'dgmo-report');
+
+    if (open) {
+      await openInBrowser(filePath);
+    }
+
+    let message = open
+      ? `Opened report in browser: ${filePath}`
+      : `Report saved to: ${filePath}`;
+    if (failures.length > 0) {
+      message +=
+        '\n\nWarning — some sections failed to render:\n' +
+        failures.map((f) => `- ${f.title}: ${f.error}`).join('\n');
+    }
+
+    return {
+      content: [{ type: 'text' as const, text: message }],
+    };
   },
 );
 
