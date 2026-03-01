@@ -114,6 +114,13 @@ function writeTempHtml(html: string, prefix: string): string {
   return filePath;
 }
 
+/** Write PNG buffer to a temp file and return the path. */
+function writeTempPng(base64: string): string {
+  const filePath = join(tmpdir(), `dgmo-render-${randomUUID()}.png`);
+  writeFileSync(filePath, Buffer.from(base64, 'base64'));
+  return filePath;
+}
+
 /** Render a single DGMO string to SVG, returning { svg, error }. */
 async function tryRender(
   dgmo: string,
@@ -147,7 +154,7 @@ const server = new McpServer({
 
 server.tool(
   'render_diagram',
-  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. IMPORTANT DGMO syntax rules: (1) Parentheses after a label specify color — "Sales (red)" colors it red, the text becomes just "Sales". Never use parentheses for annotation. Use dashes or separate words instead, e.g. "Diagrammo App - TS" not "Diagrammo App (TS)". (2) All element/label names must be unique — if parentheses are stripped as color, two labels like "App (TS)" and "App (Rust)" both become "App" causing a duplicate name error.',
+  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. IMPORTANT DGMO syntax rules: (1) Parentheses after a label specify color — "Sales (red)" colors it red, the text becomes just "Sales". Never use parentheses for annotation. Use dashes or separate words instead, e.g. "Diagrammo App - TS" not "Diagrammo App (TS)". (2) All element/label names must be unique — if parentheses are stripped as color, two labels like "App (TS)" and "App (Rust)" both become "App" causing a duplicate name error.',
   {
     dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation (stripped from display name). All labels must be unique after color stripping.'),
     format: z.enum(['svg', 'png']).default('svg').describe('Output format'),
@@ -182,8 +189,12 @@ server.tool(
       const paletteColors = getPalette(palette);
       const bg = theme === 'transparent' ? undefined : paletteColors[theme === 'dark' ? 'dark' : 'light'].bg;
       const base64 = svgToPngBase64(svg, bg);
+      const pngPath = writeTempPng(base64);
       return {
-        content: [{ type: 'image' as const, data: base64, mimeType: 'image/png' as const }],
+        content: [
+          { type: 'image' as const, data: base64, mimeType: 'image/png' as const },
+          { type: 'text' as const, text: `PNG saved to: ${pngPath}` },
+        ],
       };
     }
 
