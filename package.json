@@ -1,7 +1,25 @@
 {
   "name": "@diagrammo/dgmo-mcp",
   "version": "0.1.0",
-  "description": "MCP server for DGMO diagram rendering",
+  "description": "MCP server for rendering DGMO diagrams — SVG/PNG output, browser preview, HTML reports, and 29 chart types. Works with Claude Desktop, Claude Code, and any MCP client.",
+  "keywords": [
+    "mcp",
+    "mcp-server",
+    "diagrams",
+    "svg",
+    "charts",
+    "sequence-diagram",
+    "flowchart",
+    "diagrammo",
+    "dgmo",
+    "claude",
+    "ai"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/diagrammo/dgmo-mcp.git"
+  },
+  "homepage": "https://diagrammo.app/mcp",
   "bin": {
     "dgmo-mcp": "./dist/index.js"
   },
