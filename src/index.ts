@@ -147,9 +147,9 @@ const server = new McpServer({
 
 server.tool(
   'render_diagram',
-  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. IMPORTANT: In DGMO, parentheses after a label specify color — e.g. "Sales (red)" colors the bar red, it does NOT label it "Sales (red)". Never use parentheses in labels for annotation; use dashes, commas, or separate words instead.',
+  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. IMPORTANT DGMO syntax rules: (1) Parentheses after a label specify color — "Sales (red)" colors it red, the text becomes just "Sales". Never use parentheses for annotation. Use dashes or separate words instead, e.g. "Diagrammo App - TS" not "Diagrammo App (TS)". (2) All element/label names must be unique — if parentheses are stripped as color, two labels like "App (TS)" and "App (Rust)" both become "App" causing a duplicate name error.',
   {
-    dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels are color notation — e.g. "Label (blue)" sets color, not text. Avoid parentheses in data labels.'),
+    dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation (stripped from display name). All labels must be unique after color stripping.'),
     format: z.enum(['svg', 'png']).default('svg').describe('Output format'),
     theme: z.enum(['light', 'dark', 'transparent']).default('light').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette (nord, solarized, catppuccin, rose-pine, gruvbox, tokyo-night, one-dark, bold)'),
@@ -379,13 +379,13 @@ server.tool(
 
 server.tool(
   'preview_diagram',
-  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. IMPORTANT: Parentheses in DGMO labels are color notation — "Label (red)" colors it red. Never use parentheses for annotation in labels.',
+  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. IMPORTANT: Parentheses in DGMO labels = color notation (stripped from name). All labels must be unique. Use dashes for qualifiers, e.g. "App - TS" not "App (TS)".',
   {
     diagrams: z
       .array(
         z.object({
           title: z.string().optional().describe('Optional title for this diagram'),
-          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels are color notation, not text.'),
+          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'),
         }),
       )
       .min(1)
@@ -466,7 +466,7 @@ server.tool(
 
 server.tool(
   'generate_report',
-  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. IMPORTANT: Parentheses in DGMO labels are color notation — "Label (red)" colors it red. Never use parentheses for annotation in labels.',
+  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. IMPORTANT: Parentheses in DGMO labels = color notation (stripped from name). All labels must be unique. Use dashes for qualifiers, e.g. "App - TS" not "App (TS)".',
   {
     title: z.string().describe('Report title'),
     subtitle: z.string().optional().describe('Optional subtitle'),
@@ -475,7 +475,7 @@ server.tool(
         z.object({
           title: z.string().describe('Section title'),
           description: z.string().optional().describe('Optional section description'),
-          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels are color notation, not text.'),
+          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'),
         }),
       )
       .min(1)
