@@ -55,6 +55,7 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   kanban: 'Kanban board — task/workflow columns',
   c4: 'C4 diagram — system architecture (context, container, component, deployment)',
   'initiative-status': 'Initiative status — project roadmap with dependency tracking',
+  sitemap: 'Sitemap — navigable UI structure with pages, groups, and cross-link arrows',
 };
 
 // ---------------------------------------------------------------------------
