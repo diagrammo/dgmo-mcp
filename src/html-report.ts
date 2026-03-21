@@ -125,10 +125,10 @@ const THEME_TOGGLE_SCRIPT = `
   if (!btn) return;
   btn.addEventListener('click', function() {
     var html = document.documentElement;
-    var current = html.getAttribute('data-theme') || 'light';
-    var next = current === 'light' ? 'dark' : 'light';
+    var current = html.getAttribute('data-theme') || 'dark';
+    var next = current === 'dark' ? 'light' : 'dark';
     html.setAttribute('data-theme', next);
-    btn.textContent = next === 'light' ? '☾ Dark' : '☀ Light';
+    btn.textContent = next === 'dark' ? '☀ Light' : '☾ Dark';
   });
 })();
 </script>
@@ -167,7 +167,7 @@ export function buildPreviewHtml(options: PreviewHtmlOptions): string {
   const pageTitle = title || 'Diagram Preview';
 
   return `<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -175,9 +175,8 @@ export function buildPreviewHtml(options: PreviewHtmlOptions): string {
 <style>${buildCss(palette)}</style>
 </head>
 <body>
-<button class="theme-toggle">☾ Dark</button>
+<button class="theme-toggle">☀ Light</button>
 <div class="container">
-${title ? `<h1>${escapeHtml(title)}</h1>` : ''}
 <div class="diagram-wrapper">${svg}</div>
 ${dgmoSource ? sourceBlock(dgmoSource) : ''}
 </div>
@@ -219,7 +218,7 @@ export function buildReportHtml(options: ReportHtmlOptions): string {
   const now = new Date().toLocaleString();
 
   return `<!DOCTYPE html>
-<html lang="en" data-theme="light">
+<html lang="en" data-theme="dark">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -227,7 +226,7 @@ export function buildReportHtml(options: ReportHtmlOptions): string {
 <style>${buildCss(palette)}</style>
 </head>
 <body>
-<button class="theme-toggle">☾ Dark</button>
+<button class="theme-toggle">☀ Light</button>
 <div class="container">
 <h1>${escapeHtml(title)}</h1>
 ${subtitle ? `<p class="subtitle">${escapeHtml(subtitle)}</p>` : ''}

@@ -13,7 +13,6 @@ import {
   parseDgmo,
   formatDgmoError,
   encodeDiagramUrl,
-  DGMO_CHART_TYPE_MAP,
   getPalette,
 } from '@diagrammo/dgmo';
 import { Resvg } from '@resvg/resvg-js';
@@ -27,9 +26,9 @@ import { openInBrowser } from './open-browser.js';
 
 const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   bar: 'Bar chart — categorical comparisons',
-  line: 'Line chart — trends over time',
-  'multi-line': 'Multi-line chart — multiple series trends',
-  area: 'Area chart — filled line chart',
+  line: 'Line chart — trends over time; supports era bands (era start -> end: Label (color)) for annotating named periods',
+  'multi-line': 'Multi-line chart — multiple series trends; supports era bands',
+  area: 'Area chart — filled line chart; supports era bands',
   pie: 'Pie chart — part-to-whole proportions',
   doughnut: 'Doughnut chart — ring-style pie chart',
   radar: 'Radar chart — multi-dimensional metrics',
@@ -327,7 +326,7 @@ server.tool(
   'List all supported DGMO chart types with descriptions.',
   {},
   async () => {
-    const types = Object.keys(DGMO_CHART_TYPE_MAP);
+    const types = Object.keys(CHART_TYPE_DESCRIPTIONS);
     const lines = types.map((id) => {
       const desc = CHART_TYPE_DESCRIPTIONS[id];
       return desc ? `- ${id}: ${desc}` : `- ${id}`;
@@ -402,9 +401,9 @@ server.tool(
       )
       .min(1)
       .describe('One or more diagrams to preview'),
-    theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
+    theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette'),
-    include_source: z.boolean().default(false).describe('Show DGMO source in collapsible blocks'),
+    include_source: z.boolean().default(true).describe('Show DGMO source in collapsible blocks'),
   },
   async ({ diagrams, theme, palette, include_source }) => {
     const paletteConfig = getPalette(palette);
@@ -492,9 +491,9 @@ server.tool(
       )
       .min(1)
       .describe('Report sections, each with a diagram'),
-    theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
+    theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette'),
-    include_source: z.boolean().default(false).describe('Show DGMO source in collapsible blocks'),
+    include_source: z.boolean().default(true).describe('Show DGMO source in collapsible blocks'),
     open: z.boolean().default(true).describe('Open the report in the browser'),
   },
   async ({ title, subtitle, sections: inputSections, theme, palette, include_source, open }) => {
