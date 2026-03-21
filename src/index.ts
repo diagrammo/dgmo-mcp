@@ -282,6 +282,7 @@ server.tool(
               title: 'Diagram Preview',
               dgmoSource: dgmo,
               palette: paletteConfig,
+              shareUrl: url,
             });
             const filePath = writeTempHtml(html, 'dgmo-preview');
             await openInBrowser(filePath);
@@ -435,11 +436,14 @@ server.tool(
     if (diagrams.length === 1 && successes.length === 1) {
       // Single diagram → simple preview
       const r = results[0];
+      const shareResult = encodeDiagramUrl(r.dgmo);
+      const shareUrl = shareResult.error ? undefined : shareResult.url;
       html = buildPreviewHtml({
         svg: r.svg!,
         title: r.title,
         dgmoSource: include_source ? r.dgmo : undefined,
         palette: paletteConfig,
+        shareUrl,
       });
     } else {
       // Multiple diagrams → report layout

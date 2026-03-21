@@ -51,19 +51,6 @@ Add to your project's `.claude/settings.local.json`:
 {
   "mcpServers": {
     "dgmo": {
-      "command": "node",
-      "args": ["/path/to/dgmo-mcp/dist/index.js"]
-    }
-  }
-}
-```
-
-Or with npx (after publishing):
-
-```json
-{
-  "mcpServers": {
-    "dgmo": {
       "command": "npx",
       "args": ["-y", "@diagrammo/dgmo-mcp"]
     }
@@ -79,12 +66,14 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 {
   "mcpServers": {
     "dgmo": {
-      "command": "node",
-      "args": ["/path/to/dgmo-mcp/dist/index.js"]
+      "command": "npx",
+      "args": ["-y", "@diagrammo/dgmo-mcp"]
     }
   }
 }
 ```
+
+Restart Claude Desktop after saving. The tools appear automatically.
 
 ## Development
 
