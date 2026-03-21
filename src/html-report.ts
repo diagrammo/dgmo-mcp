@@ -61,16 +61,23 @@ function buildCss(palette: PaletteConfig): string {
       color: var(--text);
       line-height: 1.6;
     }
-    .container { max-width: 960px; margin: 0 auto; padding: 2rem 1.5rem; }
+    .container { max-width: 1400px; margin: 0 auto; padding: 2rem 1.5rem; }
     h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
     h2 { font-size: 1.35rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
     .subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
-    .diagram-wrapper { margin: 1rem 0; }
-    .diagram-wrapper svg { max-width: 100%; height: auto; display: block; }
+    .diagram-wrapper { margin: 1rem 0; overflow-x: auto; width: 100%; }
+    .diagram-wrapper svg { max-width: none; height: auto; display: block; }
     .description { color: var(--text-muted); margin-bottom: 0.75rem; }
     details { margin: 0.75rem 0; }
     summary { cursor: pointer; color: var(--text-muted); font-size: 0.85rem; user-select: none; }
     summary:hover { color: var(--primary); }
+    .source-header { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
+    .copy-btn {
+      background: var(--surface); border: 1px solid var(--border);
+      color: var(--text-muted); border-radius: 4px;
+      padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.75rem;
+    }
+    .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
     pre {
       background: var(--surface);
       border: 1px solid var(--border);
@@ -122,13 +129,27 @@ const THEME_TOGGLE_SCRIPT = `
 <script>
 (function() {
   var btn = document.querySelector('.theme-toggle');
-  if (!btn) return;
-  btn.addEventListener('click', function() {
-    var html = document.documentElement;
-    var current = html.getAttribute('data-theme') || 'dark';
-    var next = current === 'dark' ? 'light' : 'dark';
-    html.setAttribute('data-theme', next);
-    btn.textContent = next === 'dark' ? '☀ Light' : '☾ Dark';
+  if (btn) {
+    btn.addEventListener('click', function() {
+      var html = document.documentElement;
+      var current = html.getAttribute('data-theme') || 'dark';
+      var next = current === 'dark' ? 'light' : 'dark';
+      html.setAttribute('data-theme', next);
+      btn.textContent = next === 'dark' ? '☀ Light' : '☾ Dark';
+    });
+  }
+  document.addEventListener('click', function(e) {
+    var copyBtn = e.target.closest('.copy-btn');
+    if (!copyBtn) return;
+    var id = copyBtn.getAttribute('data-copy');
+    var pre = document.getElementById(id);
+    if (!pre) return;
+    var text = pre.textContent || '';
+    navigator.clipboard.writeText(text).then(function() {
+      var orig = copyBtn.textContent;
+      copyBtn.textContent = 'Copied!';
+      setTimeout(function() { copyBtn.textContent = orig; }, 1500);
+    });
   });
 })();
 </script>
@@ -151,7 +172,8 @@ function escapeHtml(text: string): string {
 }
 
 function sourceBlock(dgmoSource: string): string {
-  return `<details><summary>DGMO source</summary><pre><code>${escapeHtml(dgmoSource)}</code></pre></details>`;
+  const id = `src-${Math.random().toString(36).slice(2, 8)}`;
+  return `<details><summary>DGMO source</summary><div class="source-header"><span></span><button class="copy-btn" data-copy="${id}">Copy</button></div><pre id="${id}"><code>${escapeHtml(dgmoSource)}</code></pre></details>`;
 }
 
 function errorPlaceholder(error: string): string {
@@ -172,13 +194,19 @@ export function buildPreviewHtml(options: PreviewHtmlOptions): string {
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(pageTitle)}</title>
-<style>${buildCss(palette)}</style>
+<style>${buildCss(palette)}
+.preview-root { display: flex; flex-direction: column; min-height: 100vh; padding: 1rem; }
+.preview-diagram { flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: flex-start; }
+.preview-diagram svg { max-width: none; height: auto; display: block; }
+.preview-source { flex-shrink: 0; }
+</style>
 </head>
 <body>
 <button class="theme-toggle">☀ Light</button>
-<div class="container">
-<div class="diagram-wrapper">${svg}</div>
-${dgmoSource ? sourceBlock(dgmoSource) : ''}
+${title ? `<h1 style="padding:0 1rem 0.5rem;font-size:1.35rem">${escapeHtml(title)}</h1>` : ''}
+<div class="preview-root">
+<div class="preview-diagram">${svg}</div>
+${dgmoSource ? `<div class="preview-source">${sourceBlock(dgmoSource)}</div>` : ''}
 </div>
 ${THEME_TOGGLE_SCRIPT}
 </body>
