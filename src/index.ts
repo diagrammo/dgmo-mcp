@@ -26,8 +26,8 @@ import { openInBrowser } from './open-browser.js';
 
 const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   bar: 'Bar chart — categorical comparisons',
-  line: 'Line chart — trends over time; supports era bands (era start -> end: Label (color)) for annotating named periods',
-  'multi-line': 'Multi-line chart — multiple series trends; supports era bands',
+  line: 'Line chart — trends over time; supports era bands (era start -> end Label (color)) for annotating named periods',
+  'multi-line': 'Multi-line chart — multiple series trends over time; supports era bands',
   area: 'Area chart — filled line chart; supports era bands',
   pie: 'Pie chart — part-to-whole proportions',
   doughnut: 'Doughnut chart — ring-style pie chart',
@@ -55,6 +55,9 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   c4: 'C4 diagram — system architecture (context, container, component, deployment)',
   'initiative-status': 'Initiative status — project roadmap with dependency tracking',
   sitemap: 'Sitemap — navigable UI structure with pages, groups, and cross-link arrows',
+  state: 'State diagram — state machine / lifecycle transitions',
+  gantt: 'Gantt chart — project scheduling with task dependencies and milestones',
+  infra: 'Infrastructure diagram — traffic flow with RPS computation, capacity modeling, and latency analysis',
 };
 
 // ---------------------------------------------------------------------------
