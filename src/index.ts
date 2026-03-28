@@ -4,13 +4,14 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { exec } from 'node:child_process';
-import { readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import {
   render,
   parseDgmo,
+  parseDgmoChartType,
   formatDgmoError,
   encodeDiagramUrl,
   getPalette,
@@ -562,6 +563,158 @@ server.tool(
 
     return {
       content: [{ type: 'text' as const, text: message }],
+    };
+  },
+);
+
+// --- Tool 8: validate_diagram ---
+
+server.tool(
+  'validate_diagram',
+  'Validate DGMO markup without rendering. Returns structured parse errors and warnings. Much faster than render_diagram — use this to check syntax before rendering.',
+  {
+    dgmo: z.string().describe('DGMO diagram markup to validate'),
+  },
+  async ({ dgmo }) => {
+    const chartType = parseDgmoChartType(dgmo);
+    const { diagnostics } = parseDgmo(dgmo);
+    const errors = diagnostics.filter((d) => d.severity === 'error');
+    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+
+    if (errors.length === 0 && warnings.length === 0) {
+      const typeLabel = chartType ? `${chartType} diagram` : 'diagram';
+      return {
+        content: [{ type: 'text' as const, text: `Valid ${typeLabel} — no errors or warnings.` }],
+      };
+    }
+
+    const typeLabel = chartType ? ` in ${chartType} diagram` : '';
+    const parts: string[] = [];
+
+    if (errors.length > 0) {
+      parts.push(`${errors.length} error${errors.length > 1 ? 's' : ''}${warnings.length > 0 ? `, ${warnings.length} warning${warnings.length > 1 ? 's' : ''}` : ''}${typeLabel}\n`);
+      parts.push('Errors:');
+      for (const e of errors) parts.push(`  ${formatDgmoError(e)}`);
+    }
+
+    if (warnings.length > 0) {
+      if (errors.length === 0) {
+        parts.push(`Valid with ${warnings.length} warning${warnings.length > 1 ? 's' : ''}${typeLabel}\n`);
+      } else {
+        parts.push('');
+      }
+      parts.push('Warnings:');
+      for (const w of warnings) parts.push(`  ${formatDgmoError(w)}`);
+    }
+
+    return {
+      content: [{ type: 'text' as const, text: parts.join('\n') }],
+      isError: errors.length > 0,
+    };
+  },
+);
+
+// --- Tool 9: get_examples ---
+
+function resolveGalleryPath(): string {
+  // Try 1: resolve from @diagrammo/dgmo package
+  try {
+    const dgmoMain = require.resolve('@diagrammo/dgmo');
+    const pkgRoot = dirname(dirname(dgmoMain));
+    const galleryPath = join(pkgRoot, 'gallery', 'fixtures');
+    readdirSync(galleryPath); // throws if not found
+    return galleryPath;
+  } catch {
+    // Try 2: resolve from sibling dgmo/ directory (local dev workspace)
+    const workspacePath = join(__dirname, '..', '..', 'dgmo', 'gallery', 'fixtures');
+    return workspacePath;
+  }
+}
+
+server.tool(
+  'get_examples',
+  'Get example DGMO diagrams for a chart type. Returns real-world examples from the gallery that demonstrate syntax patterns. Use these as few-shot references when generating new diagrams.',
+  {
+    chart_type: z
+      .string()
+      .optional()
+      .describe('Chart type to get examples for (e.g. "sequence", "infra", "bar"). Omit to list all available example names.'),
+  },
+  async ({ chart_type }) => {
+    let galleryPath: string;
+    try {
+      galleryPath = resolveGalleryPath();
+    } catch {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: 'Could not find gallery fixtures. Is @diagrammo/dgmo installed?',
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    let files: string[];
+    try {
+      files = readdirSync(galleryPath)
+        .filter((f) => f.endsWith('.dgmo'))
+        .sort();
+    } catch {
+      return {
+        content: [
+          { type: 'text' as const, text: 'Could not read gallery directory.' },
+        ],
+        isError: true,
+      };
+    }
+
+    // If no chart_type, return a listing of all available examples
+    if (!chart_type) {
+      const names = files.map((f) => f.replace('.dgmo', ''));
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `Available examples (${files.length}):\n\n${names.map((n) => `- ${n}`).join('\n')}\n\nCall get_examples with a chart_type to see the full DGMO source.`,
+          },
+        ],
+      };
+    }
+
+    // Filter files matching the chart type prefix
+    const matching = files.filter((f) => {
+      const base = f.replace('.dgmo', '');
+      return base === chart_type || base.startsWith(chart_type + '-');
+    });
+
+    if (matching.length === 0) {
+      return {
+        content: [
+          {
+            type: 'text' as const,
+            text: `No examples found for "${chart_type}". Use get_examples() without arguments to see all available examples.`,
+          },
+        ],
+        isError: true,
+      };
+    }
+
+    // Cap at 5 examples to avoid overwhelming context
+    const toShow = matching.slice(0, 5);
+    const parts = toShow.map((f) => {
+      const content = readFileSync(join(galleryPath, f), 'utf-8');
+      return `## ${f.replace('.dgmo', '')}\n\n\`\`\`dgmo\n${content.trim()}\n\`\`\``;
+    });
+
+    let text = parts.join('\n\n---\n\n');
+    if (matching.length > 5) {
+      text += `\n\n(Showing 5 of ${matching.length} examples)`;
+    }
+
+    return {
+      content: [{ type: 'text' as const, text }],
     };
   },
 );
