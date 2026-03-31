@@ -54,11 +54,11 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   org: 'Org chart — hierarchical tree structures',
   kanban: 'Kanban board — task/workflow columns',
   c4: 'C4 diagram — system architecture (context, container, component, deployment)',
-  'initiative-status': 'Initiative status — project roadmap with dependency tracking',
   sitemap: 'Sitemap — navigable UI structure with pages, groups, and cross-link arrows',
   state: 'State diagram — state machine / lifecycle transitions',
   gantt: 'Gantt chart — project scheduling with task dependencies and milestones',
   infra: 'Infrastructure diagram — traffic flow with RPS computation, capacity modeling, and latency analysis',
+  'boxes-and-lines': 'Boxes and lines — general-purpose node-edge diagrams with nested groups, tags, and shape inference',
 };
 
 // ---------------------------------------------------------------------------
