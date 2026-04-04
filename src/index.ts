@@ -97,16 +97,16 @@ function resolveLanguageReference(): string {
 }
 
 function extractSection(markdown: string, chartType: string): string | null {
-  // Chart types use ### headings in the language reference
+  // Match ## or ### headings, with optional numbering (e.g. "## 2. Sequence Diagrams")
   const escaped = chartType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`^###? ${escaped}\\b.*$`, 'im');
+  const pattern = new RegExp(`^(#{2,3})\\s+(?:\\d+\\.\\s+)?${escaped}\\b.*$`, 'im');
   const match = pattern.exec(markdown);
   if (!match) return null;
 
-  const level = match[0].startsWith('### ') ? '### ' : '## ';
+  const level = match[1]; // "##" or "###"
   const start = match.index;
   const rest = markdown.slice(start + match[0].length);
-  const nextHeading = rest.search(new RegExp(`^${level.replace(/ $/, '')}[# ]`, 'm'));
+  const nextHeading = rest.search(new RegExp(`^${level}(?:#|\\s)`, 'm'));
   const end = nextHeading === -1 ? markdown.length : start + match[0].length + nextHeading;
   return markdown.slice(start, end).trim();
 }
