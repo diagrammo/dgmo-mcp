@@ -137,7 +137,7 @@ async function tryRender(
     return { svg: null, error: errors.map(formatDgmoError).join('\n') };
   }
   try {
-    const svg = await render(dgmo, { theme, palette, branding: false });
+    const { svg } = await render(dgmo, { theme, palette, branding: false });
     if (!svg) return { svg: null, error: 'Render returned empty SVG.' };
     return { svg, error: null };
   } catch (err) {
@@ -181,7 +181,7 @@ server.tool(
       };
     }
 
-    const svg = await render(dgmo, { theme, palette, branding: false });
+    const { svg } = await render(dgmo, { theme, palette, branding: false });
     if (!svg) {
       return {
         content: [{ type: 'text' as const, text: 'Render returned empty SVG.' }],
