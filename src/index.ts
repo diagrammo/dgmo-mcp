@@ -60,6 +60,7 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   infra: 'Infrastructure diagram — traffic flow with RPS computation, capacity modeling, and latency analysis',
   'boxes-and-lines': 'Boxes and lines — general-purpose node-edge diagrams with nested groups, tags, and shape inference',
   cycle: 'Cycle diagram — cyclical process visualization (PDCA, OODA, DevOps loops)',
+  'journey-map': 'Journey map — user experience flow with emotion scores, phases, and annotations',
 };
 
 // ---------------------------------------------------------------------------
