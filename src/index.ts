@@ -64,6 +64,7 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   'tech-radar': 'Tech radar — ThoughtWorks-style technology adoption quadrants (adopt/trial/assess/hold)',
   cycle: 'Cycle diagram — cyclical process visualization (PDCA, OODA, DevOps loops)',
   'journey-map': 'Journey map — user experience flow with emotion scores, phases, and annotations',
+  pyramid: 'Pyramid diagram — stacked hierarchy of layers with descriptions (Maslow, DIKW, funnels with `inverted`)',
 };
 
 // ---------------------------------------------------------------------------
