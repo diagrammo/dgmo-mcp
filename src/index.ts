@@ -59,6 +59,9 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
   gantt: 'Gantt chart — project scheduling with task dependencies and milestones',
   infra: 'Infrastructure diagram — traffic flow with RPS computation, capacity modeling, and latency analysis',
   'boxes-and-lines': 'Boxes and lines — general-purpose node-edge diagrams with nested groups, tags, and shape inference',
+  mindmap: 'Mindmap — radial hierarchy of ideas branching from a central topic',
+  wireframe: 'Wireframe — low-fidelity UI layout with panels, controls, and annotations',
+  'tech-radar': 'Tech radar — ThoughtWorks-style technology adoption quadrants (adopt/trial/assess/hold)',
   cycle: 'Cycle diagram — cyclical process visualization (PDCA, OODA, DevOps loops)',
   'journey-map': 'Journey map — user experience flow with emotion scores, phases, and annotations',
 };
