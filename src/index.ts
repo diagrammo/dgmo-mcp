@@ -4,7 +4,7 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { exec } from 'node:child_process';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
@@ -71,14 +71,40 @@ const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
 // Helpers
 // ---------------------------------------------------------------------------
 
-const DEFAULT_FONT_NAME = 'Helvetica';
+const DEFAULT_FONT_NAME = 'Inter';
+
+/**
+ * dgmo bundles Inter TTFs under its `fonts/` directory (see dgmo/src/cli.ts
+ * for the same pattern). Resolving them through `require.resolve` ensures
+ * we pick up the bundled copy whether @diagrammo/dgmo is installed from npm
+ * or linked from the local workspace.
+ *
+ * Falls back to system fonts if the TTFs aren't found (e.g. in an odd
+ * install layout) — resvg will then use whatever sans-serif it finds.
+ */
+function resolveBundledFonts(): string[] {
+  try {
+    const dgmoMain = require.resolve('@diagrammo/dgmo');
+    const pkgRoot = dirname(dirname(dgmoMain));
+    const candidates = [
+      join(pkgRoot, 'fonts', 'Inter-Regular.ttf'),
+      join(pkgRoot, 'fonts', 'Inter-Bold.ttf'),
+    ];
+    return candidates.filter((f) => existsSync(f));
+  } catch {
+    return [];
+  }
+}
+
+const BUNDLED_FONT_FILES = resolveBundledFonts();
 
 function svgToPngBase64(svg: string, background?: string): string {
   const resvg = new Resvg(svg, {
     fitTo: { mode: 'zoom' as const, value: 2 },
     ...(background ? { background } : {}),
     font: {
-      loadSystemFonts: true,
+      loadSystemFonts: BUNDLED_FONT_FILES.length === 0,
+      ...(BUNDLED_FONT_FILES.length > 0 ? { fontFiles: BUNDLED_FONT_FILES } : {}),
       defaultFontFamily: DEFAULT_FONT_NAME,
       sansSerifFamily: DEFAULT_FONT_NAME,
     },
