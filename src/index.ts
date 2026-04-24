@@ -15,57 +15,30 @@ import {
   formatDgmoError,
   encodeDiagramUrl,
   getPalette,
+  chartTypes,
+  CHART_TYPE_DESCRIPTIONS,
+  suggestChartTypes,
 } from '@diagrammo/dgmo';
+import type { ChartTypeScore } from '@diagrammo/dgmo';
 import { Resvg } from '@resvg/resvg-js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
 import { openInBrowser } from './open-browser.js';
 
 // ---------------------------------------------------------------------------
-// Chart type descriptions (same as CLI)
+// Chart-type schema
 // ---------------------------------------------------------------------------
 
-const CHART_TYPE_DESCRIPTIONS: Record<string, string> = {
-  bar: 'Bar chart — categorical comparisons',
-  line: 'Line chart — trends over time; supports era bands (era start -> end Label (color)) for annotating named periods',
-  'multi-line': 'Multi-line chart — multiple series trends over time; supports era bands',
-  area: 'Area chart — filled line chart; supports era bands',
-  pie: 'Pie chart — part-to-whole proportions',
-  doughnut: 'Doughnut chart — ring-style pie chart',
-  radar: 'Radar chart — multi-dimensional metrics',
-  'polar-area': 'Polar area chart — radial bar chart',
-  'bar-stacked': 'Stacked bar chart — multi-series categorical',
-  scatter: 'Scatter plot — 2D data points or bubble chart',
-  sankey: 'Sankey diagram — flow/allocation visualization',
-  chord: 'Chord diagram — circular flow relationships',
-  function: 'Function plot — mathematical expressions',
-  heatmap: 'Heatmap — matrix intensity visualization',
-  funnel: 'Funnel chart — conversion pipeline',
-  slope: 'Slope chart — change between two periods',
-  wordcloud: 'Word cloud — term frequency visualization',
-  arc: 'Arc diagram — network relationships',
-  timeline: 'Timeline — events, eras, and date ranges',
-  venn: 'Venn diagram — set overlaps',
-  quadrant: 'Quadrant chart — 2x2 positioning matrix',
-  sequence: 'Sequence diagram — message/interaction flows',
-  flowchart: 'Flowchart — decision trees and process flows',
-  class: 'Class diagram — UML class hierarchies',
-  er: 'ER diagram — database schemas and relationships',
-  org: 'Org chart — hierarchical tree structures',
-  kanban: 'Kanban board — task/workflow columns',
-  c4: 'C4 diagram — system architecture (context, container, component, deployment)',
-  sitemap: 'Sitemap — navigable UI structure with pages, groups, and cross-link arrows',
-  state: 'State diagram — state machine / lifecycle transitions',
-  gantt: 'Gantt chart — project scheduling with task dependencies and milestones',
-  infra: 'Infrastructure diagram — traffic flow with RPS computation, capacity modeling, and latency analysis',
-  'boxes-and-lines': 'Boxes and lines — general-purpose node-edge diagrams with nested groups, tags, and shape inference',
-  mindmap: 'Mindmap — radial hierarchy of ideas branching from a central topic',
-  wireframe: 'Wireframe — low-fidelity UI layout with panels, controls, and annotations',
-  'tech-radar': 'Tech radar — ThoughtWorks-style technology adoption quadrants (adopt/trial/assess/hold)',
-  cycle: 'Cycle diagram — cyclical process visualization (PDCA, OODA, DevOps loops)',
-  'journey-map': 'Journey map — user experience flow with emotion scores, phases, and annotations',
-  pyramid: 'Pyramid diagram — stacked hierarchy of layers with descriptions (Maslow, DIKW, funnels with `inverted`)',
-};
+// Runtime-safe validator for chart-type ids. Using z.string().refine avoids
+// the z.enum([...] as [string, ...string[]]) cast footgun (throws on empty
+// arrays, loses literal types) and lets us ship a helpful error message
+// that lists every valid id.
+const chartTypeIdSet = new Set(chartTypes.map((c) => c.id));
+const chartTypeIdSchema = z
+  .string()
+  .refine((v) => chartTypeIdSet.has(v), (v) => ({
+    message: `Unknown chart type '${v}'. Valid: ${[...chartTypeIdSet].join(', ')}`,
+  }));
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -385,7 +358,7 @@ server.tool(
   'get_language_reference',
   'Get the DGMO language reference documentation. Optionally filter by chart type.',
   {
-    chart_type: z.string().optional().describe('Optional chart type to get reference for (e.g. "sequence", "flowchart", "bar")'),
+    chart_type: chartTypeIdSchema.optional().describe('Optional chart type to get reference for (e.g. "sequence", "flowchart", "bar")'),
   },
   async ({ chart_type }) => {
     let content: string;
@@ -646,7 +619,73 @@ server.tool(
   },
 );
 
-// --- Tool 9: get_examples ---
+// --- Tool 9: suggest_chart_type ---
+
+/**
+ * Format ranked candidates for Claude. Locked-in layout so the tool output
+ * is easy to parse at a glance and remains stable across releases.
+ */
+function formatSuggestions(
+  ranked: readonly ChartTypeScore[],
+  fellBack: boolean,
+  confidenceBanner: 'high' | 'medium' | 'ambiguous',
+): string {
+  if (ranked.length === 0 || fellBack) {
+    const fallbacks = chartTypes.filter((c) => c.fallback);
+    const lines = [
+      'No strong trigger match for this prompt. Consider these general-purpose options:',
+      ...fallbacks.map((c) => `- ${c.id}: ${c.description}`),
+      '',
+      'If none of these fit, call `mcp__dgmo__list_chart_types` to see the full 39 types.',
+    ];
+    return lines.join('\n');
+  }
+
+  const banner =
+    confidenceBanner === 'high'
+      ? 'Confidence: high'
+      : confidenceBanner === 'medium'
+        ? 'Confidence: medium'
+        : "Confidence: ambiguous — top two are equally plausible. If you can't tell from context, ask the user one clarifying question before proceeding.";
+
+  const top3 = ranked.slice(0, 3);
+  const lines: string[] = [banner, ''];
+  for (const [i, r] of top3.entries()) {
+    const label = i === 0 ? 'Top match' : 'Secondary';
+    lines.push(`${label}: ${r.type.id}`);
+    lines.push(`  Description: ${r.type.description}`);
+    lines.push(
+      `  Matched triggers: ${r.matched.join(', ') || '(none — secondary score from description)'}`,
+    );
+    lines.push(
+      `  For a starter template, call mcp__dgmo__get_examples('${r.type.id}').`,
+    );
+    lines.push('');
+  }
+  return lines.join('\n').trimEnd();
+}
+
+server.tool(
+  'suggest_chart_type',
+  "Suggest the best DGMO chart type for a user's plain-English diagram request.\n\nALWAYS CALL THIS FIRST when creating a new diagram — it prevents guessing and is the authoritative selection mechanism.\n\nReturns: confidence banner (high/medium/ambiguous), up to 3 ranked candidates with descriptions, matched trigger phrases, and pointers to get_examples for starter DGMO stubs.",
+  {
+    prompt: z
+      .string()
+      .trim()
+      .min(3)
+      .max(5000)
+      .describe("User's plain-English diagram request"),
+  },
+  async ({ prompt }) => {
+    const { ranked, confidence, fellBack } = suggestChartTypes(prompt);
+    const text = formatSuggestions(ranked, fellBack, confidence);
+    return {
+      content: [{ type: 'text' as const, text }],
+    };
+  },
+);
+
+// --- Tool 10: get_examples ---
 
 function resolveGalleryPath(): string {
   // Try 1: resolve from @diagrammo/dgmo package
@@ -667,8 +706,7 @@ server.tool(
   'get_examples',
   'Get example DGMO diagrams for a chart type. Returns real-world examples from the gallery that demonstrate syntax patterns. Use these as few-shot references when generating new diagrams.',
   {
-    chart_type: z
-      .string()
+    chart_type: chartTypeIdSchema
       .optional()
       .describe('Chart type to get examples for (e.g. "sequence", "infra", "bar"). Omit to list all available example names.'),
   },
