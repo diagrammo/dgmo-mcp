@@ -33,7 +33,7 @@
     "bundle": "bash scripts/bundle.sh"
   },
   "dependencies": {
-    "@diagrammo/dgmo": "link:../dgmo",
+    "@diagrammo/dgmo": "^0.8.25",
     "@modelcontextprotocol/sdk": "^1.12.1",
     "@resvg/resvg-js": "^2.6.2",
     "jsdom": "^29.0.1",

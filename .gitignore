@@ -2,3 +2,9 @@ node_modules/
 dist/
 bundle/
 *.mcpb
+
+# Secrets — never commit
+.mcpregistry_*
+.env
+.env.*
+!.env.example

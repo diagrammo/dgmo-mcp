@@ -1,0 +1,93 @@
+name: Release
+
+on:
+  push:
+    tags:
+      - 'v*'
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: write
+      id-token: write
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+
+      - name: Setup pnpm
+        uses: pnpm/action-setup@v4
+        with:
+          version: 10
+
+      - name: Setup Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          registry-url: 'https://registry.npmjs.org'
+          cache: 'pnpm'
+
+      - name: Verify tag matches package.json / manifest.json / server.json
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION=$(node -p "require('./package.json').version")
+          MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
+          SERVER_VERSION=$(node -p "require('./server.json').version")
+          SERVER_PKG_VERSION=$(node -p "require('./server.json').packages[0].version")
+          echo "tag=$TAG_VERSION pkg=$PKG_VERSION manifest=$MANIFEST_VERSION server=$SERVER_VERSION server.packages[0]=$SERVER_PKG_VERSION"
+          if [ "$PKG_VERSION" != "$TAG_VERSION" ] || \
+             [ "$MANIFEST_VERSION" != "$TAG_VERSION" ] || \
+             [ "$SERVER_VERSION" != "$TAG_VERSION" ] || \
+             [ "$SERVER_PKG_VERSION" != "$TAG_VERSION" ]; then
+            echo "::error::Version mismatch — bump package.json, manifest.json, and server.json (both top-level and packages[0]) to $TAG_VERSION before tagging."
+            exit 1
+          fi
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Typecheck
+        run: pnpm typecheck
+
+      - name: Build
+        run: pnpm build
+
+      - name: Publish to npm
+        run: npm publish --access public --provenance
+        env:
+          NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
+
+      - name: Wait for npm propagation
+        run: |
+          for i in 1 2 3 4 5 6; do
+            if npm view "@diagrammo/dgmo-mcp@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1; then
+              echo "✓ npm shows ${GITHUB_REF_NAME#v}"
+              exit 0
+            fi
+            echo "Waiting for npm registry... ($i/6)"
+            sleep 10
+          done
+          echo "::warning::npm did not surface the new version within 60s — proceeding anyway"
+
+      - name: Build .mcpb bundle
+        run: bash scripts/bundle.sh
+
+      - name: Install mcp-publisher
+        run: |
+          curl -fsSL -o mcp-publisher.tar.gz \
+            https://github.com/modelcontextprotocol/registry/releases/latest/download/mcp-publisher_linux_amd64.tar.gz
+          tar -xzf mcp-publisher.tar.gz mcp-publisher
+          chmod +x mcp-publisher
+          ./mcp-publisher --version || true
+
+      - name: Publish to MCP Registry
+        run: |
+          ./mcp-publisher login github-oidc
+          ./mcp-publisher publish
+
+      - name: Attach .mcpb to GitHub release
+        uses: softprops/action-gh-release@v2
+        with:
+          files: dgmo-mcp.mcpb
+          fail_on_unmatched_files: true
+          generate_release_notes: true
