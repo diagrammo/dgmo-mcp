@@ -1,7 +1,7 @@
 {
   "$schema": "https://static.modelcontextprotocol.io/schemas/2025-12-11/server.schema.json",
   "name": "io.github.diagrammo/dgmo-mcp",
-  "description": "Render diagrams and charts (sequence, flowchart, ER, C4, gantt, sankey, and 30+ more) to SVG/PNG with browser preview and HTML reports.",
+  "description": "Render diagrams (sequence, flowchart, ER, C4, gantt, +more) to SVG/PNG with browser preview",
   "repository": {
     "url": "https://github.com/diagrammo/dgmo-mcp",
     "source": "github"
