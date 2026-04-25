@@ -171,6 +171,13 @@ server.tool(
     theme: z.enum(['light', 'dark', 'transparent']).default('light').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette (nord, solarized, catppuccin, rose-pine, gruvbox, tokyo-night, one-dark, bold)'),
   },
+  {
+    title: 'Render Diagram',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: false,
+    idempotentHint: true,
+  },
   async ({ dgmo, format, theme, palette }) => {
     // Validate first
     const { diagnostics } = parseDgmo(dgmo);
@@ -222,6 +229,13 @@ server.tool(
   {
     dgmo: z.string().describe('DGMO diagram markup'),
   },
+  {
+    title: 'Share Diagram',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: false,
+    idempotentHint: true,
+  },
   async ({ dgmo }) => {
     const result = encodeDiagramUrl(dgmo);
     if (result.error === 'too-large') {
@@ -248,6 +262,12 @@ server.tool(
   'Open a DGMO diagram in the Diagrammo desktop app (macOS only). Falls back to browser preview if the app is not installed.',
   {
     dgmo: z.string().describe('DGMO diagram markup'),
+  },
+  {
+    title: 'Open in Diagrammo App',
+    readOnlyHint: false,
+    destructiveHint: false,
+    openWorldHint: true,
   },
   async ({ dgmo }) => {
     const result = encodeDiagramUrl(dgmo);
@@ -336,6 +356,13 @@ server.tool(
   'list_chart_types',
   'List all supported DGMO chart types with descriptions.',
   {},
+  {
+    title: 'List Chart Types',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: false,
+    idempotentHint: true,
+  },
   async () => {
     const types = Object.keys(CHART_TYPE_DESCRIPTIONS);
     const lines = types.map((id) => {
@@ -360,6 +387,13 @@ server.tool(
   'Get the DGMO language reference documentation. Optionally filter by chart type.',
   {
     chart_type: chartTypeIdSchema.optional().describe('Optional chart type to get reference for (e.g. "sequence", "flowchart", "bar")'),
+  },
+  {
+    title: 'Get DGMO Language Reference',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: false,
+    idempotentHint: true,
   },
   async ({ chart_type }) => {
     let content: string;
@@ -415,6 +449,12 @@ server.tool(
     theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette'),
     include_source: z.boolean().default(true).describe('Show DGMO source in collapsible blocks'),
+  },
+  {
+    title: 'Preview Diagram',
+    readOnlyHint: false,
+    destructiveHint: false,
+    openWorldHint: true,
   },
   async ({ diagrams, theme, palette, include_source }) => {
     const paletteConfig = getPalette(palette);
@@ -509,6 +549,12 @@ server.tool(
     palette: z.string().default('nord').describe('Color palette'),
     include_source: z.boolean().default(true).describe('Show DGMO source in collapsible blocks'),
     open: z.boolean().default(true).describe('Open the report in the browser'),
+  },
+  {
+    title: 'Generate Report',
+    readOnlyHint: false,
+    destructiveHint: false,
+    openWorldHint: true,
   },
   async ({ title, subtitle, sections: inputSections, theme, palette, include_source, open }) => {
     const paletteConfig = getPalette(palette);
