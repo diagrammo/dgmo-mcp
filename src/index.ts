@@ -637,7 +637,7 @@ function formatSuggestions(
       'No strong trigger match for this prompt. Consider these general-purpose options:',
       ...fallbacks.map((c) => `- ${c.id}: ${c.description}`),
       '',
-      'If none of these fit, call `mcp__dgmo__list_chart_types` to see the full 39 types.',
+      'If none of these fit, call `mcp__dgmo__list_chart_types` to see the full list.',
     ];
     return lines.join('\n');
   }
