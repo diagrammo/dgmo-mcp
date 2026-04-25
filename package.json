@@ -1,6 +1,6 @@
 {
   "name": "@diagrammo/dgmo-mcp",
-  "version": "0.1.12",
+  "version": "0.1.13",
   "description": "MCP server for rendering DGMO diagrams — SVG/PNG output, browser preview, HTML reports, and 35+ chart types. Works with Claude Desktop, Claude Code, and any MCP client.",
   "keywords": [
     "mcp",
