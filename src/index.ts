@@ -24,6 +24,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
 import { openInBrowser } from './open-browser.js';
+import { version as PACKAGE_VERSION } from '../package.json';
 
 // ---------------------------------------------------------------------------
 // Chart-type schema
@@ -156,7 +157,7 @@ async function tryRender(
 
 const server = new McpServer({
   name: 'dgmo',
-  version: '0.1.0',
+  version: PACKAGE_VERSION,
 });
 
 // --- Tool 1: render_diagram ---
