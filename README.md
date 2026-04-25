@@ -9,7 +9,7 @@ MCP server for rendering DGMO diagrams. Works with Claude Desktop, Claude Code, 
 | `render_diagram` | Render DGMO markup to SVG or PNG |
 | `share_diagram` | Generate a shareable diagrammo.app URL |
 | `open_in_app` | Open diagram in Diagrammo desktop app (falls back to browser if app not installed) |
-| `list_chart_types` | List all 29 supported chart types |
+| `list_chart_types` | List all supported chart types |
 | `get_language_reference` | Get DGMO syntax documentation |
 | `preview_diagram` | Render one or more diagrams and open an HTML preview in the browser |
 | `generate_report` | Generate a polished HTML report with multiple diagrams, ToC, and optional source |
