@@ -1,26 +1,20 @@
 #!/usr/bin/env bash
-# Release pipeline for @diagrammo/dgmo-mcp.
+# Pre-flight checks for @diagrammo/dgmo-mcp.
 #
-# Validates version sync + dependency hygiene, builds, smoke-tests the packed
-# tarball end-to-end (install → MCP introspection), then publishes to npm,
-# pushes server.json to the Anthropic MCP registry, and rebuilds the .mcpb
-# bundle for Claude Desktop distribution.
+# Run this before tagging a new version — the tag-driven CI workflow does the
+# actual npm publish via OIDC trusted publishing, so this script is read-only.
+# It validates version sync, dependency hygiene, and end-to-end installability
+# (build → pack → install in a fresh dir → MCP introspection probe).
 #
-# Usage:
-#   ./release.sh           # full release pipeline (asks before publishing)
-#   ./release.sh --dry-run # validate + build + smoke test, stop before publish
+# Exits non-zero on any failure. Run from the repo root or via `./preflight.sh`.
 
 set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")" && pwd)"
 cd "$ROOT"
 
-DRY_RUN=0
-[[ "${1:-}" == "--dry-run" ]] && DRY_RUN=1
-
 red()    { printf "\033[31m%s\033[0m\n" "$*"; }
 green()  { printf "\033[32m%s\033[0m\n" "$*"; }
-yellow() { printf "\033[33m%s\033[0m\n" "$*"; }
 step()   { printf "\n\033[1;34m▸ %s\033[0m\n" "$*"; }
 
 # ──────────────────────────────────────────────────────────────────
@@ -36,13 +30,13 @@ fi
 green "✓ working tree clean"
 
 step "Pre-flight: required tooling?"
-for cmd in pnpm npm node mcp-publisher git; do
+for cmd in pnpm npm node git; do
   if ! command -v "$cmd" >/dev/null 2>&1; then
     red "✗ missing: $cmd"
     exit 1
   fi
 done
-green "✓ pnpm npm node mcp-publisher git all present"
+green "✓ pnpm npm node git all present"
 
 step "Pre-flight: version sync across package.json / manifest.json / server.json"
 PKG_VER=$(node -p "require('./package.json').version")
@@ -69,7 +63,7 @@ if node -e "
 "; then
   green "✓ all deps are real version ranges"
 else
-  red "✗ link:/file:/workspace: deps would break npm consumers (exactly today's bug)"
+  red "✗ link:/file:/workspace: deps would break npm consumers"
   exit 1
 fi
 
@@ -100,50 +94,10 @@ TARBALL="$ROOT/$TARBALL"
 echo "  tarball: $TARBALL"
 
 step "Smoke test (install in fresh dir, MCP introspection probe)"
+trap 'rm -f "$TARBALL"' EXIT
 node scripts/smoke.mjs "$TARBALL"
 
-# ──────────────────────────────────────────────────────────────────
-# 4. Publish (or stop, if --dry-run)
-# ──────────────────────────────────────────────────────────────────
-
-if [[ $DRY_RUN -eq 1 ]]; then
-  yellow "▸ --dry-run: stopping before publish"
-  yellow "  tarball preserved at: $TARBALL"
-  exit 0
-fi
-
-step "Confirm publish"
-echo "  Will publish:"
-echo "    @diagrammo/dgmo-mcp@$PKG_VER → npm"
-echo "    server.json (v$PKG_VER) → Anthropic MCP registry"
-echo "    rebuild dgmo-mcp.mcpb"
-echo "    git tag v$PKG_VER + push"
-read -rp "Proceed? [y/N] " ans
-[[ "$ans" =~ ^[Yy]$ ]] || { yellow "aborted"; rm -f "$TARBALL"; exit 1; }
-
-step "npm publish"
-npm publish "$TARBALL"
-
-step "Push server.json to Anthropic MCP registry"
-mcp-publisher publish
-
-step "Rebuild .mcpb bundle (Claude Desktop extension)"
-bash scripts/bundle.sh
-
-step "Tag + push"
-git tag -a "v$PKG_VER" -m "Release v$PKG_VER"
-git push --tags
-
-# ──────────────────────────────────────────────────────────────────
-# 5. Cleanup + next steps
-# ──────────────────────────────────────────────────────────────────
-
-rm -f "$TARBALL"
-
 green ""
-green "✓ released @diagrammo/dgmo-mcp@$PKG_VER"
+green "✓ pre-flight passed for $PKG_VER"
 green ""
-echo "Next:"
-echo "  1. Verify install: npx -y @diagrammo/dgmo-mcp@$PKG_VER (from a temp dir)"
-echo "  2. Smoke-test the funnel — Claude Desktop → make a sequence diagram → click share link"
-echo "  3. If Glama listing exists, the score badge auto-refreshes"
+echo "Next:  git tag v$PKG_VER && git push --tags  (CI publishes)"
