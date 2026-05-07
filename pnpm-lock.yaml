@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@diagrammo/dgmo':
-        specifier: ^0.11.2
-        version: 0.11.2
+        specifier: ^0.12.0
+        version: 0.12.0
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.27.1(zod@3.25.76)
@@ -134,8 +134,8 @@ packages:
   '@dagrejs/graphlib@4.0.1':
     resolution: {integrity: sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==}
 
-  '@diagrammo/dgmo@0.11.2':
-    resolution: {integrity: sha512-4yjuPhQh+gDICoJJqrq+qhOe4bfxUNRjmErhptFsuewB1G7UhWf9+uX2enQH2xT3o9Lc15iRoPQekqDnxoNDFw==}
+  '@diagrammo/dgmo@0.12.0':
+    resolution: {integrity: sha512-cu9gdbhiVidbWTxg6B0JX6u5S/+kUwY+wdqVzSwOPgw5RC7vkuUgXVYSvDaUWnNu5TXZRDizOEQ8+V3e6y/WxQ==}
     hasBin: true
     peerDependencies:
       '@codemirror/language': ^6.12.3
@@ -1567,7 +1567,7 @@ snapshots:
 
   '@dagrejs/graphlib@4.0.1': {}
 
-  '@diagrammo/dgmo@0.11.2':
+  '@diagrammo/dgmo@0.12.0':
     dependencies:
       '@dagrejs/dagre': 3.0.0
       '@resvg/resvg-js': 2.6.2
