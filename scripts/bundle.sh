@@ -12,7 +12,7 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUNDLE_DIR="$ROOT/bundle"
-DGMO_VERSION="${DGMO_VERSION:-^0.8.25}"
+DGMO_VERSION="${DGMO_VERSION:-^0.13.0}"
 
 echo "→ Cleaning bundle/"
 rm -rf "$BUNDLE_DIR"
