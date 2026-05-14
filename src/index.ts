@@ -18,8 +18,8 @@ import {
   chartTypes,
   CHART_TYPE_DESCRIPTIONS,
   suggestChartTypes,
-} from '@diagrammo/dgmo';
-import type { ChartTypeScore } from '@diagrammo/dgmo';
+} from '@diagrammo/dgmo/internal';
+import type { ChartTypeScore } from '@diagrammo/dgmo/internal';
 import { Resvg } from '@resvg/resvg-js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
