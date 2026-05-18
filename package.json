@@ -20,6 +20,9 @@
     "url": "https://github.com/diagrammo/dgmo-mcp.git"
   },
   "homepage": "https://github.com/diagrammo/dgmo-mcp#readme",
+  "engines": {
+    "node": ">=20.6"
+  },
   "mcpName": "io.github.diagrammo/dgmo-mcp",
   "bin": {
     "dgmo-mcp": "./dist/index.js"
@@ -44,7 +47,7 @@
     "@anthropic-ai/mcpb": "^2.1.2",
     "@types/node": "^22.0.0",
     "tsup": "^8.4.0",
-    "typescript": "^5.7.0"
+    "typescript": "^6.0.2"
   },
   "files": [
     "dist"
