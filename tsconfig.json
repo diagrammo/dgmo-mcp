@@ -6,6 +6,11 @@
     "esModuleInterop": true,
     "resolveJsonModule": true,
     "strict": true,
+    "noImplicitOverride": true,
+    "noPropertyAccessFromIndexSignature": true,
+    "noUnusedLocals": true,
+    "noUnusedParameters": true,
+    "noFallthroughCasesInSwitch": true,
     "outDir": "dist",
     "declaration": true,
     "skipLibCheck": true
