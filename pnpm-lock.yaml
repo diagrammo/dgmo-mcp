@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@diagrammo/dgmo':
-        specifier: ^0.15.0
-        version: 0.15.0
+        specifier: ^0.15.1
+        version: 0.15.1
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.27.1(zod@3.25.76)
@@ -149,8 +149,9 @@ packages:
   '@dagrejs/graphlib@4.0.1':
     resolution: {integrity: sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==}
 
-  '@diagrammo/dgmo@0.15.0':
-    resolution: {integrity: sha512-A4j0f3FgBnz89D1YssjnxoMB+EoraJURTPgWpn/nl+QV0liV70QSspvoMWvxX1352mZWSLILB1iPexEhHfhGiw==}
+  '@diagrammo/dgmo@0.15.1':
+    resolution: {integrity: sha512-CF9Tps6MHVZnphAgGXVOMhUsU9CsLydAOiP3I8FuBJza2cAFz+DRGVhVNV/WDNe8bMVQ/r4tB5ZXQA9L3R1v+g==}
+    engines: {node: '>=20.6'}
     hasBin: true
     peerDependencies:
       '@codemirror/language': ^6.12.3
@@ -1221,6 +1222,9 @@ packages:
   ee-first@1.1.1:
     resolution: {integrity: sha512-WMwm9LhRUo+WUaRN+vRuETqG89IgZphVSNkdFgeb6sS/E4OrDIN7t48CAewSHXc6C8lefD8KKfr5vY61brQlow==}
 
+  elkjs@0.11.1:
+    resolution: {integrity: sha512-zxxR9k+rx5ktMwT/FwyLdPCrq7xN6e4VGGHH8hA01vVYKjTFik7nHOxBnAYtrgYUB1RpAiLvA1/U2YraWxyKKg==}
+
   emoji-regex@8.0.0:
     resolution: {integrity: sha512-MSjYzcWNOA0ewAHpz0MxpYFvwg6yjy1NG3xteoqz644VCo/RPgnr1/GGt+ic3iJTzQ8Eu3TdM14SawnVUmGE6A==}
 
@@ -2205,7 +2209,7 @@ snapshots:
 
   '@dagrejs/graphlib@4.0.1': {}
 
-  '@diagrammo/dgmo@0.15.0':
+  '@diagrammo/dgmo@0.15.1':
     dependencies:
       '@dagrejs/dagre': 3.0.0
       '@resvg/resvg-js': 2.6.2
@@ -2216,6 +2220,7 @@ snapshots:
       d3-selection: 3.0.0
       d3-shape: 3.2.0
       echarts: 6.0.0
+      elkjs: 0.11.1
       jsdom: 29.1.1
       lz-string: 1.5.0
     transitivePeerDependencies:
@@ -3083,6 +3088,8 @@ snapshots:
       zrender: 6.0.0
 
   ee-first@1.1.1: {}
+
+  elkjs@0.11.1: {}
 
   emoji-regex@8.0.0: {}
 
