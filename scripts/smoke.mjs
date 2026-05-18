@@ -33,7 +33,9 @@ try {
   if (!result.tools || result.tools.length === 0) {
     throw new Error('tools/list returned empty');
   }
-  console.log(`✓ smoke: server reports ${result.tools.length} tools (${result.tools.slice(0, 3).join(', ')}, ...)`);
+  console.log(
+    `✓ smoke: server reports ${result.tools.length} tools (${result.tools.slice(0, 3).join(', ')}, ...)`
+  );
 } catch (err) {
   failed = true;
   console.error('✗ smoke FAILED:', err.message ?? err);
@@ -51,9 +53,28 @@ function probe(binPath) {
     child.stderr.on('data', (d) => (stderr += d));
     const send = (obj) => child.stdin.write(JSON.stringify(obj) + '\n');
 
-    setTimeout(() => send({ jsonrpc: '2.0', id: 1, method: 'initialize', params: { protocolVersion: '2024-11-05', capabilities: {}, clientInfo: { name: 'smoke', version: '1' } } }), 100);
-    setTimeout(() => send({ jsonrpc: '2.0', method: 'notifications/initialized' }), 600);
-    setTimeout(() => send({ jsonrpc: '2.0', id: 2, method: 'tools/list' }), 1200);
+    setTimeout(
+      () =>
+        send({
+          jsonrpc: '2.0',
+          id: 1,
+          method: 'initialize',
+          params: {
+            protocolVersion: '2024-11-05',
+            capabilities: {},
+            clientInfo: { name: 'smoke', version: '1' },
+          },
+        }),
+      100
+    );
+    setTimeout(
+      () => send({ jsonrpc: '2.0', method: 'notifications/initialized' }),
+      600
+    );
+    setTimeout(
+      () => send({ jsonrpc: '2.0', id: 2, method: 'tools/list' }),
+      1200
+    );
     setTimeout(() => child.stdin.end(), 2500);
     const killer = setTimeout(() => child.kill('SIGKILL'), 8000);
 
@@ -63,16 +84,30 @@ function probe(binPath) {
         return rej(new Error(`server exited code=${code}\nstderr: ${stderr}`));
       }
       const lines = stdout.split('\n').filter(Boolean);
-      const responses = lines.map((l) => {
-        try { return JSON.parse(l); } catch { return null; }
-      }).filter(Boolean);
+      const responses = lines
+        .map((l) => {
+          try {
+            return JSON.parse(l);
+          } catch {
+            return null;
+          }
+        })
+        .filter(Boolean);
       const initResp = responses.find((r) => r.id === 1);
       const toolsResp = responses.find((r) => r.id === 2);
       if (!initResp?.result?.protocolVersion) {
-        return rej(new Error(`no valid initialize response\nstdout: ${stdout.slice(0, 500)}`));
+        return rej(
+          new Error(
+            `no valid initialize response\nstdout: ${stdout.slice(0, 500)}`
+          )
+        );
       }
       if (!Array.isArray(toolsResp?.result?.tools)) {
-        return rej(new Error(`no valid tools/list response\nstdout: ${stdout.slice(0, 500)}`));
+        return rej(
+          new Error(
+            `no valid tools/list response\nstdout: ${stdout.slice(0, 500)}`
+          )
+        );
       }
       res({ tools: toolsResp.result.tools.map((t) => t.name) });
     });

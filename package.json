@@ -34,6 +34,11 @@
     "dev": "tsup src/index.ts --format cjs --dts --watch",
     "typecheck": "tsc --noEmit",
     "bundle": "bash scripts/bundle.sh",
+    "lint": "eslint .",
+    "lint:fix": "eslint . --fix",
+    "format": "prettier --write .",
+    "format:check": "prettier --check .",
+    "check:deadcode": "knip",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "dependencies": {
@@ -45,9 +50,14 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
+    "@eslint/js": "^10.0.1",
     "@types/node": "^22.0.0",
+    "eslint": "^10.4.0",
+    "knip": "^6.14.1",
+    "prettier": "^3.8.3",
     "tsup": "^8.4.0",
-    "typescript": "^6.0.2"
+    "typescript": "^6.0.2",
+    "typescript-eslint": "^8.59.3"
   },
   "files": [
     "dist"

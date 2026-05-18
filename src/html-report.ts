@@ -152,7 +152,10 @@ const COPY_SCRIPT = `
 // ---------------------------------------------------------------------------
 
 function slugify(text: string): string {
-  return text.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/(^-|-$)/g, '');
+  return text
+    .toLowerCase()
+    .replace(/[^a-z0-9]+/g, '-')
+    .replace(/(^-|-$)/g, '');
 }
 
 function escapeHtml(text: string): string {
@@ -212,13 +215,16 @@ ${COPY_SCRIPT}
 // ---------------------------------------------------------------------------
 
 export function buildReportHtml(options: ReportHtmlOptions): string {
-  const { title, subtitle, sections, palette, includeSource, shareUrl } = options;
+  const { title, subtitle, sections, palette, includeSource, shareUrl } =
+    options;
   const showToc = sections.length > 3;
 
   let toc = '';
   if (showToc) {
     const items = sections
-      .map((s, i) => `<li><a href="#section-${i}">${escapeHtml(s.title)}</a></li>`)
+      .map(
+        (s, i) => `<li><a href="#section-${i}">${escapeHtml(s.title)}</a></li>`
+      )
       .join('\n');
     toc = `<nav class="toc"><h3>Contents</h3><ol>${items}</ol></nav>`;
   }
@@ -228,11 +234,14 @@ export function buildReportHtml(options: ReportHtmlOptions): string {
       const anchor = `section-${i}`;
       const slug = slugify(s.title);
       const id = showToc ? anchor : slug;
-      const desc = s.description ? `<p class="description">${escapeHtml(s.description)}</p>` : '';
+      const desc = s.description
+        ? `<p class="description">${escapeHtml(s.description)}</p>`
+        : '';
       const diagram = s.svg
         ? `<div class="diagram-wrapper">${s.svg}</div>`
         : errorPlaceholder(s.error || 'Unknown render error');
-      const source = includeSource && s.dgmoSource ? sourceBlock(s.dgmoSource) : '';
+      const source =
+        includeSource && s.dgmoSource ? sourceBlock(s.dgmoSource) : '';
       return `<section id="${id}"><h2>${escapeHtml(s.title)}</h2>${desc}${diagram}${source}</section>`;
     })
     .join('\n');

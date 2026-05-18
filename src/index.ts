@@ -35,11 +35,12 @@ import { version as PACKAGE_VERSION } from '../package.json';
 // arrays, loses literal types) and lets us ship a helpful error message
 // that lists every valid id.
 const chartTypeIdSet = new Set(chartTypes.map((c) => c.id));
-const chartTypeIdSchema = z
-  .string()
-  .refine((v) => chartTypeIdSet.has(v), (v) => ({
+const chartTypeIdSchema = z.string().refine(
+  (v) => chartTypeIdSet.has(v),
+  (v) => ({
     message: `Unknown chart type '${v}'. Valid: ${[...chartTypeIdSet].join(', ')}`,
-  }));
+  })
+);
 
 // ---------------------------------------------------------------------------
 // Helpers
@@ -78,7 +79,9 @@ function svgToPngBase64(svg: string, background?: string): string {
     ...(background ? { background } : {}),
     font: {
       loadSystemFonts: BUNDLED_FONT_FILES.length === 0,
-      ...(BUNDLED_FONT_FILES.length > 0 ? { fontFiles: BUNDLED_FONT_FILES } : {}),
+      ...(BUNDLED_FONT_FILES.length > 0
+        ? { fontFiles: BUNDLED_FONT_FILES }
+        : {}),
       defaultFontFamily: DEFAULT_FONT_NAME,
       sansSerifFamily: DEFAULT_FONT_NAME,
     },
@@ -97,7 +100,14 @@ function resolveLanguageReference(): string {
   } catch {
     // Try 2: resolve from sibling dgmo/ directory (local dev workspace)
     // __dirname is dist/, go up to dgmo-mcp/ then up to workspace root
-    const workspacePath = join(__dirname, '..', '..', 'dgmo', 'docs', 'language-reference.md');
+    const workspacePath = join(
+      __dirname,
+      '..',
+      '..',
+      'dgmo',
+      'docs',
+      'language-reference.md'
+    );
     return readFileSync(workspacePath, 'utf-8');
   }
 }
@@ -105,7 +115,10 @@ function resolveLanguageReference(): string {
 function extractSection(markdown: string, chartType: string): string | null {
   // Match ## or ### headings, with optional numbering (e.g. "## 2. Sequence Diagrams")
   const escaped = chartType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(`^(#{2,3})\\s+(?:\\d+\\.\\s+)?${escaped}\\b.*$`, 'im');
+  const pattern = new RegExp(
+    `^(#{2,3})\\s+(?:\\d+\\.\\s+)?${escaped}\\b.*$`,
+    'im'
+  );
   const match = pattern.exec(markdown);
   if (!match) return null;
 
@@ -113,7 +126,10 @@ function extractSection(markdown: string, chartType: string): string | null {
   const start = match.index;
   const rest = markdown.slice(start + match[0].length);
   const nextHeading = rest.search(new RegExp(`^${level}(?:#|\\s)`, 'm'));
-  const end = nextHeading === -1 ? markdown.length : start + match[0].length + nextHeading;
+  const end =
+    nextHeading === -1
+      ? markdown.length
+      : start + match[0].length + nextHeading;
   return markdown.slice(start, end).trim();
 }
 
@@ -135,7 +151,7 @@ function writeTempPng(base64: string): string {
 async function tryRender(
   dgmo: string,
   theme: 'light' | 'dark',
-  palette: string,
+  palette: string
 ): Promise<{ svg: string | null; error: string | null }> {
   const { diagnostics } = parseDgmo(dgmo);
   const errors = diagnostics.filter((d) => d.severity === 'error');
@@ -147,7 +163,10 @@ async function tryRender(
     if (!svg) return { svg: null, error: 'Render returned empty SVG.' };
     return { svg, error: null };
   } catch (err) {
-    return { svg: null, error: err instanceof Error ? err.message : String(err) };
+    return {
+      svg: null,
+      error: err instanceof Error ? err.message : String(err),
+    };
   }
 }
 
@@ -166,10 +185,22 @@ server.tool(
   'render_diagram',
   'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. IMPORTANT DGMO syntax rules: (1) Parentheses after a label specify color — "Sales (red)" colors it red, the text becomes just "Sales". Never use parentheses for annotation. Use dashes or separate words instead, e.g. "Diagrammo App - TS" not "Diagrammo App (TS)". (2) All element/label names must be unique — if parentheses are stripped as color, two labels like "App (TS)" and "App (Rust)" both become "App" causing a duplicate name error.',
   {
-    dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation (stripped from display name). All labels must be unique after color stripping.'),
+    dgmo: z
+      .string()
+      .describe(
+        'DGMO diagram markup. Parentheses in labels = color notation (stripped from display name). All labels must be unique after color stripping.'
+      ),
     format: z.enum(['svg', 'png']).default('svg').describe('Output format'),
-    theme: z.enum(['light', 'dark', 'transparent']).default('light').describe('Color theme'),
-    palette: z.string().default('nord').describe('Color palette (nord, solarized, catppuccin, rose-pine, gruvbox, tokyo-night, one-dark, bold)'),
+    theme: z
+      .enum(['light', 'dark', 'transparent'])
+      .default('light')
+      .describe('Color theme'),
+    palette: z
+      .string()
+      .default('nord')
+      .describe(
+        'Color palette (nord, solarized, catppuccin, rose-pine, gruvbox, tokyo-night, one-dark, bold)'
+      ),
   },
   {
     title: 'Render Diagram',
@@ -187,7 +218,8 @@ server.tool(
         content: [
           {
             type: 'text' as const,
-            text: 'Diagram has errors:\n' + errors.map(formatDgmoError).join('\n'),
+            text:
+              'Diagram has errors:\n' + errors.map(formatDgmoError).join('\n'),
           },
         ],
         isError: true,
@@ -197,19 +229,28 @@ server.tool(
     const { svg } = await render(dgmo, { theme, palette });
     if (!svg) {
       return {
-        content: [{ type: 'text' as const, text: 'Render returned empty SVG.' }],
+        content: [
+          { type: 'text' as const, text: 'Render returned empty SVG.' },
+        ],
         isError: true,
       };
     }
 
     if (format === 'png') {
       const paletteColors = getPalette(palette);
-      const bg = theme === 'transparent' ? undefined : paletteColors[theme === 'dark' ? 'dark' : 'light'].bg;
+      const bg =
+        theme === 'transparent'
+          ? undefined
+          : paletteColors[theme === 'dark' ? 'dark' : 'light'].bg;
       const base64 = svgToPngBase64(svg, bg);
       const pngPath = writeTempPng(base64);
       return {
         content: [
-          { type: 'image' as const, data: base64, mimeType: 'image/png' as const },
+          {
+            type: 'image' as const,
+            data: base64,
+            mimeType: 'image/png' as const,
+          },
           { type: 'text' as const, text: `PNG saved to: ${pngPath}` },
         ],
       };
@@ -218,7 +259,7 @@ server.tool(
     return {
       content: [{ type: 'text' as const, text: svg }],
     };
-  },
+  }
 );
 
 // --- Tool 2: share_diagram ---
@@ -252,7 +293,7 @@ server.tool(
     return {
       content: [{ type: 'text' as const, text: result.url }],
     };
-  },
+  }
 );
 
 // --- Tool 3: open_in_app ---
@@ -347,7 +388,7 @@ server.tool(
         }
       });
     });
-  },
+  }
 );
 
 // --- Tool 4: list_chart_types ---
@@ -377,7 +418,7 @@ server.tool(
         },
       ],
     };
-  },
+  }
 );
 
 // --- Tool 5: get_language_reference ---
@@ -386,7 +427,11 @@ server.tool(
   'get_language_reference',
   'Get the DGMO language reference documentation. Optionally filter by chart type.',
   {
-    chart_type: chartTypeIdSchema.optional().describe('Optional chart type to get reference for (e.g. "sequence", "flowchart", "bar")'),
+    chart_type: chartTypeIdSchema
+      .optional()
+      .describe(
+        'Optional chart type to get reference for (e.g. "sequence", "flowchart", "bar")'
+      ),
   },
   {
     title: 'Get DGMO Language Reference',
@@ -428,7 +473,7 @@ server.tool(
     }
 
     return { content: [{ type: 'text' as const, text: content }] };
-  },
+  }
 );
 
 // --- Tool 6: preview_diagram ---
@@ -440,15 +485,25 @@ server.tool(
     diagrams: z
       .array(
         z.object({
-          title: z.string().optional().describe('Optional title for this diagram'),
-          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'),
-        }),
+          title: z
+            .string()
+            .optional()
+            .describe('Optional title for this diagram'),
+          dgmo: z
+            .string()
+            .describe(
+              'DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'
+            ),
+        })
       )
       .min(1)
       .describe('One or more diagrams to preview'),
     theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette'),
-    include_source: z.boolean().default(true).describe('Show DGMO source in collapsible blocks'),
+    include_source: z
+      .boolean()
+      .default(true)
+      .describe('Show DGMO source in collapsible blocks'),
   },
   {
     title: 'Preview Diagram',
@@ -462,7 +517,7 @@ server.tool(
       diagrams.map(async (d) => {
         const { svg, error } = await tryRender(d.dgmo, theme, palette);
         return { title: d.title, dgmo: d.dgmo, svg, error };
-      }),
+      })
     );
 
     const successes = results.filter((r) => r.svg);
@@ -475,7 +530,9 @@ server.tool(
             type: 'text' as const,
             text:
               'All diagrams failed to render:\n' +
-              failures.map((f) => `- ${f.title || 'untitled'}: ${f.error}`).join('\n'),
+              failures
+                .map((f) => `- ${f.title || 'untitled'}: ${f.error}`)
+                .join('\n'),
           },
         ],
         isError: true,
@@ -518,13 +575,15 @@ server.tool(
     if (failures.length > 0) {
       message +=
         '\n\nWarning — some diagrams failed to render:\n' +
-        failures.map((f) => `- ${f.title || 'untitled'}: ${f.error}`).join('\n');
+        failures
+          .map((f) => `- ${f.title || 'untitled'}: ${f.error}`)
+          .join('\n');
     }
 
     return {
       content: [{ type: 'text' as const, text: message }],
     };
-  },
+  }
 );
 
 // --- Tool 7: generate_report ---
@@ -539,15 +598,25 @@ server.tool(
       .array(
         z.object({
           title: z.string().describe('Section title'),
-          description: z.string().optional().describe('Optional section description'),
-          dgmo: z.string().describe('DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'),
-        }),
+          description: z
+            .string()
+            .optional()
+            .describe('Optional section description'),
+          dgmo: z
+            .string()
+            .describe(
+              'DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'
+            ),
+        })
       )
       .min(1)
       .describe('Report sections, each with a diagram'),
     theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
     palette: z.string().default('nord').describe('Color palette'),
-    include_source: z.boolean().default(true).describe('Show DGMO source in collapsible blocks'),
+    include_source: z
+      .boolean()
+      .default(true)
+      .describe('Show DGMO source in collapsible blocks'),
     open: z.boolean().default(true).describe('Open the report in the browser'),
   },
   {
@@ -556,13 +625,21 @@ server.tool(
     destructiveHint: false,
     openWorldHint: true,
   },
-  async ({ title, subtitle, sections: inputSections, theme, palette, include_source, open }) => {
+  async ({
+    title,
+    subtitle,
+    sections: inputSections,
+    theme,
+    palette,
+    include_source,
+    open,
+  }) => {
     const paletteConfig = getPalette(palette);
     const results = await Promise.all(
       inputSections.map(async (s) => {
         const { svg, error } = await tryRender(s.dgmo, theme, palette);
         return { ...s, svg, error };
-      }),
+      })
     );
 
     const successes = results.filter((r) => r.svg);
@@ -616,7 +693,7 @@ server.tool(
     return {
       content: [{ type: 'text' as const, text: message }],
     };
-  },
+  }
 );
 
 // --- Tool 8: validate_diagram ---
@@ -636,7 +713,12 @@ server.tool(
     if (errors.length === 0 && warnings.length === 0) {
       const typeLabel = chartType ? `${chartType} diagram` : 'diagram';
       return {
-        content: [{ type: 'text' as const, text: `Valid ${typeLabel} — no errors or warnings.` }],
+        content: [
+          {
+            type: 'text' as const,
+            text: `Valid ${typeLabel} — no errors or warnings.`,
+          },
+        ],
       };
     }
 
@@ -644,14 +726,18 @@ server.tool(
     const parts: string[] = [];
 
     if (errors.length > 0) {
-      parts.push(`${errors.length} error${errors.length > 1 ? 's' : ''}${warnings.length > 0 ? `, ${warnings.length} warning${warnings.length > 1 ? 's' : ''}` : ''}${typeLabel}\n`);
+      parts.push(
+        `${errors.length} error${errors.length > 1 ? 's' : ''}${warnings.length > 0 ? `, ${warnings.length} warning${warnings.length > 1 ? 's' : ''}` : ''}${typeLabel}\n`
+      );
       parts.push('Errors:');
       for (const e of errors) parts.push(`  ${formatDgmoError(e)}`);
     }
 
     if (warnings.length > 0) {
       if (errors.length === 0) {
-        parts.push(`Valid with ${warnings.length} warning${warnings.length > 1 ? 's' : ''}${typeLabel}\n`);
+        parts.push(
+          `Valid with ${warnings.length} warning${warnings.length > 1 ? 's' : ''}${typeLabel}\n`
+        );
       } else {
         parts.push('');
       }
@@ -663,7 +749,7 @@ server.tool(
       content: [{ type: 'text' as const, text: parts.join('\n') }],
       isError: errors.length > 0,
     };
-  },
+  }
 );
 
 // --- Tool 9: suggest_chart_type ---
@@ -675,7 +761,7 @@ server.tool(
 function formatSuggestions(
   ranked: readonly ChartTypeScore[],
   fellBack: boolean,
-  confidenceBanner: 'high' | 'medium' | 'ambiguous',
+  confidenceBanner: 'high' | 'medium' | 'ambiguous'
 ): string {
   if (ranked.length === 0 || fellBack) {
     const fallbacks = chartTypes.filter((c) => c.fallback);
@@ -702,10 +788,10 @@ function formatSuggestions(
     lines.push(`${label}: ${r.type.id}`);
     lines.push(`  Description: ${r.type.description}`);
     lines.push(
-      `  Matched triggers: ${r.matched.join(', ') || '(none — secondary score from description)'}`,
+      `  Matched triggers: ${r.matched.join(', ') || '(none — secondary score from description)'}`
     );
     lines.push(
-      `  For a starter template, call mcp__dgmo__get_examples('${r.type.id}').`,
+      `  For a starter template, call mcp__dgmo__get_examples('${r.type.id}').`
     );
     lines.push('');
   }
@@ -729,7 +815,7 @@ server.tool(
     return {
       content: [{ type: 'text' as const, text }],
     };
-  },
+  }
 );
 
 // --- Tool 10: get_examples ---
@@ -744,7 +830,14 @@ function resolveGalleryPath(): string {
     return galleryPath;
   } catch {
     // Try 2: resolve from sibling dgmo/ directory (local dev workspace)
-    const workspacePath = join(__dirname, '..', '..', 'dgmo', 'gallery', 'fixtures');
+    const workspacePath = join(
+      __dirname,
+      '..',
+      '..',
+      'dgmo',
+      'gallery',
+      'fixtures'
+    );
     return workspacePath;
   }
 }
@@ -755,7 +848,9 @@ server.tool(
   {
     chart_type: chartTypeIdSchema
       .optional()
-      .describe('Chart type to get examples for (e.g. "sequence", "infra", "bar"). Omit to list all available example names.'),
+      .describe(
+        'Chart type to get examples for (e.g. "sequence", "infra", "bar"). Omit to list all available example names.'
+      ),
   },
   async ({ chart_type }) => {
     let galleryPath: string;
@@ -833,7 +928,7 @@ server.tool(
     return {
       content: [{ type: 'text' as const, text }],
     };
-  },
+  }
 );
 
 // ---------------------------------------------------------------------------
