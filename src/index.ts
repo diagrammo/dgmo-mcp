@@ -183,12 +183,12 @@ const server = new McpServer({
 
 server.tool(
   'render_diagram',
-  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. IMPORTANT DGMO syntax rules: (1) Parentheses after a label specify color — "Sales (red)" colors it red, the text becomes just "Sales". Never use parentheses for annotation. Use dashes or separate words instead, e.g. "Diagrammo App - TS" not "Diagrammo App (TS)". (2) All element/label names must be unique — if parentheses are stripped as color, two labels like "App (TS)" and "App (Rust)" both become "App" causing a duplicate name error.',
+  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. DGMO color syntax: color a label by appending a lowercase color name as its trailing whitespace-delimited token — "Sales red" yields value "Sales" colored red. The 11 colors are red, orange, yellow, green, blue, purple, teal, cyan, gray, black, white. Capitalize ("Red") to use a color word as a literal label. Parentheses in labels are literal text, not color notation.',
   {
     dgmo: z
       .string()
       .describe(
-        'DGMO diagram markup. Parentheses in labels = color notation (stripped from display name). All labels must be unique after color stripping.'
+        'DGMO diagram markup. Color a label by appending a lowercase color name as the trailing token (e.g. "Sales red"); capitalize ("Red") to use a color word as literal text.'
       ),
     format: z.enum(['svg', 'png']).default('svg').describe('Output format'),
     theme: z
@@ -480,7 +480,7 @@ server.tool(
 
 server.tool(
   'preview_diagram',
-  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. IMPORTANT: Parentheses in DGMO labels = color notation (stripped from name). All labels must be unique. Use dashes for qualifiers, e.g. "App - TS" not "App (TS)".',
+  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. DGMO color syntax: color a label by appending a lowercase color name as its trailing whitespace-delimited token — "Sales red" yields value "Sales" colored red. The 11 colors are red, orange, yellow, green, blue, purple, teal, cyan, gray, black, white. Capitalize ("Red") to use a color word as a literal label. Parentheses in labels are literal text, not color notation.',
   {
     diagrams: z
       .array(
@@ -492,7 +492,7 @@ server.tool(
           dgmo: z
             .string()
             .describe(
-              'DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'
+              'DGMO diagram markup. Color a label by appending a lowercase color name as the trailing token (e.g. "Sales red"); capitalize ("Red") to use a color word as literal text.'
             ),
         })
       )
@@ -590,7 +590,7 @@ server.tool(
 
 server.tool(
   'generate_report',
-  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. IMPORTANT: Parentheses in DGMO labels = color notation (stripped from name). All labels must be unique. Use dashes for qualifiers, e.g. "App - TS" not "App (TS)".',
+  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. DGMO color syntax: color a label by appending a lowercase color name as its trailing whitespace-delimited token — "Sales red" yields value "Sales" colored red. The 11 colors are red, orange, yellow, green, blue, purple, teal, cyan, gray, black, white. Capitalize ("Red") to use a color word as a literal label. Parentheses in labels are literal text, not color notation.',
   {
     title: z.string().describe('Report title'),
     subtitle: z.string().optional().describe('Optional subtitle'),
@@ -605,7 +605,7 @@ server.tool(
           dgmo: z
             .string()
             .describe(
-              'DGMO diagram markup. Parentheses in labels = color notation. All labels must be unique.'
+              'DGMO diagram markup. Color a label by appending a lowercase color name as the trailing token (e.g. "Sales red"); capitalize ("Red") to use a color word as literal text.'
             ),
         })
       )
