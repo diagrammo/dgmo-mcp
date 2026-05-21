@@ -330,7 +330,10 @@ server.tool(
     const deepLink = `diagrammo://open?dgmo=${hash}`;
 
     return new Promise((resolve) => {
-      exec(`open ${JSON.stringify(deepLink)}`, async (error) => {
+      // exec's callback is sync-typed; wrap the async body in a void IIFE
+      // so the Promise return doesn't violate @typescript-eslint/no-misused-promises.
+      exec(`open ${JSON.stringify(deepLink)}`, (error) => {
+        void (async () => {
         if (error) {
           // Fallback: render to SVG and open in browser
           try {
@@ -386,6 +389,7 @@ server.tool(
             ],
           });
         }
+        })();
       });
     });
   }
