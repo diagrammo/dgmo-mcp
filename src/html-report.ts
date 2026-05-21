@@ -6,29 +6,29 @@ import type { PaletteConfig } from '@diagrammo/dgmo/internal';
 
 export interface PreviewHtmlOptions {
   svg: string;
-  title?: string;
-  dgmoSource?: string;
+  title?: string | undefined;
+  dgmoSource?: string | undefined;
   palette: PaletteConfig;
-  shareUrl?: string;
+  shareUrl?: string | undefined;
 }
 
 export interface ReportSection {
   title: string;
-  description?: string;
+  description?: string | undefined;
   /** SVG string, or null if rendering failed */
   svg: string | null;
-  dgmoSource?: string;
+  dgmoSource?: string | undefined;
   /** Error message when svg is null */
-  error?: string;
+  error?: string | undefined;
 }
 
 export interface ReportHtmlOptions {
   title: string;
-  subtitle?: string;
+  subtitle?: string | undefined;
   sections: ReportSection[];
   palette: PaletteConfig;
   includeSource: boolean;
-  shareUrl?: string;
+  shareUrl?: string | undefined;
 }
 
 // ---------------------------------------------------------------------------
