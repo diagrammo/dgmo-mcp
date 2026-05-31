@@ -9,8 +9,8 @@ importers:
   .:
     dependencies:
       '@diagrammo/dgmo':
-        specifier: ^0.18.0
-        version: 0.18.0
+        specifier: ^0.20.0
+        version: 0.20.0
       '@modelcontextprotocol/sdk':
         specifier: ^1.12.1
         version: 1.27.1(zod@3.25.76)
@@ -149,8 +149,8 @@ packages:
   '@dagrejs/graphlib@4.0.1':
     resolution: {integrity: sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==}
 
-  '@diagrammo/dgmo@0.18.0':
-    resolution: {integrity: sha512-hW+82xWTfi1H3RU6nX0+wvw/5uNDlHr3aO2SBQ7DUy9uCnsUBAm6cXsH1TM3ZNPqESn5Ca/rx5W3gK6KNg+e9A==}
+  '@diagrammo/dgmo@0.20.0':
+    resolution: {integrity: sha512-uuDVFWNZgs4OD4F/MrpukYCZTKbnbqYnLJb13v9lgmHZWrJLkTZ0gJDMAE2bkFZsEfu6ZerwKWeIByetz6iA5g==}
     engines: {node: '>=20.6'}
     hasBin: true
     peerDependencies:
@@ -1100,6 +1100,9 @@ packages:
     resolution: {integrity: sha512-/rFeCpNJQbhSZjGVwO9RFV3xPqbnERS8MmIQzCtD/zl6gpJuV/bMLuN92oG3F7d8oDEHHRrujSXNUr8fpjntKw==}
     engines: {node: '>=18'}
 
+  commander@2.20.3:
+    resolution: {integrity: sha512-GpVkmM8vF2vQUkj2LvZmD35JxeJOLCwJ9cUkugyk2nuhbv3+mJvpLYYt+0+USMxE+oj+ey/lJEnhZw75x/OMcQ==}
+
   commander@4.1.1:
     resolution: {integrity: sha512-NOKm8xhkzAjzFx8B2v5OAHT+u5pRQc2UCa2Vq9jYL/31o2wi9mxBA7LIFs3sV5VSC49z6pEhfbMULvShKj26WA==}
     engines: {node: '>= 6'}
@@ -1155,6 +1158,10 @@ packages:
 
   d3-format@3.1.2:
     resolution: {integrity: sha512-AJDdYOdnyRDV5b6ArilzCPPwc1ejkHcoyFarqlPqT7zRYjhavcT3uSrqcMvsgh2CgoPbK3RCwyHaVyxYcP2Arg==}
+    engines: {node: '>=12'}
+
+  d3-geo@3.1.1:
+    resolution: {integrity: sha512-637ln3gXKXOwhalDzinUgY83KzNWZRKbYubaG+fGVuc/dxO64RRljtCTnf5ecMyE1RIdtqpkVcq0IbtU2S8j2Q==}
     engines: {node: '>=12'}
 
   d3-hierarchy@3.1.2:
@@ -1934,6 +1941,10 @@ packages:
     resolution: {integrity: sha512-o5sSPKEkg/DIQNmH43V0/uerLrpzVedkUh8tGNvaeXpfpuwjKenlSox/2O/BTlZUtEe+JG7s5YhEz608PlAHRA==}
     engines: {node: '>=0.6'}
 
+  topojson-client@3.1.0:
+    resolution: {integrity: sha512-605uxS6bcYxGXw9qi62XyrV6Q3xwbndjachmNxu8HWTtVPxZfEJN9fd/SZS1Q54Sn2y0TMyMxFj/cJINqGHrKw==}
+    hasBin: true
+
   tough-cookie@6.0.1:
     resolution: {integrity: sha512-LktZQb3IeoUWB9lqR5EWTHgW/VTITCXg4D21M+lvybRVdylLrRMnqaIONLVb5mav8vM19m44HIcGq4qASeu2Qw==}
     engines: {node: '>=16'}
@@ -2209,12 +2220,13 @@ snapshots:
 
   '@dagrejs/graphlib@4.0.1': {}
 
-  '@diagrammo/dgmo@0.18.0':
+  '@diagrammo/dgmo@0.20.0':
     dependencies:
       '@dagrejs/dagre': 3.0.0
       '@resvg/resvg-js': 2.6.2
       d3-array: 3.2.4
       d3-cloud: 1.2.9
+      d3-geo: 3.1.1
       d3-hierarchy: 3.1.2
       d3-scale: 4.0.2
       d3-selection: 3.0.0
@@ -2223,6 +2235,7 @@ snapshots:
       elkjs: 0.11.1
       jsdom: 29.1.1
       lz-string: 1.5.0
+      topojson-client: 3.1.0
     transitivePeerDependencies:
       - '@noble/hashes'
       - canvas
@@ -2985,6 +2998,8 @@ snapshots:
 
   commander@13.1.0: {}
 
+  commander@2.20.3: {}
+
   commander@4.1.1: {}
 
   confbox@0.1.8: {}
@@ -3028,6 +3043,10 @@ snapshots:
   d3-dispatch@1.0.6: {}
 
   d3-format@3.1.2: {}
+
+  d3-geo@3.1.1:
+    dependencies:
+      d3-array: 3.2.4
 
   d3-hierarchy@3.1.2: {}
 
@@ -3933,6 +3952,10 @@ snapshots:
       os-tmpdir: 1.0.2
 
   toidentifier@1.0.1: {}
+
+  topojson-client@3.1.0:
+    dependencies:
+      commander: 2.20.3
 
   tough-cookie@6.0.1:
     dependencies:
