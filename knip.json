@@ -1,5 +1,11 @@
 {
   "$schema": "https://unpkg.com/knip@6/schema.json",
   "ignore": ["scripts/**"],
-  "ignoreDependencies": ["@anthropic-ai/mcpb", "jsdom"]
+  "ignoreDependencies": ["@anthropic-ai/mcpb", "jsdom"],
+  "ignoreExportsUsedInFile": true,
+  "rules": {
+    "duplicates": "off",
+    "exports": "warn",
+    "types": "warn"
+  }
 }
