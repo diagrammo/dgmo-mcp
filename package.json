@@ -41,6 +41,7 @@
     "check:deadcode": "knip",
     "check:duplication": "jscpd ./src",
     "check:deps": "depcheck --ignores='jsdom,@anthropic-ai/mcpb'",
+    "check:all": "pnpm check:deadcode && pnpm check:duplication && pnpm check:deps",
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "dependencies": {
