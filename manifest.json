@@ -2,7 +2,7 @@
   "manifest_version": "0.3",
   "name": "dgmo-mcp",
   "display_name": "Diagrammo (dgmo)",
-  "version": "0.2.2",
+  "version": "0.2.3",
   "description": "Render diagrams (sequence, flowchart, ER, C4, gantt, +more) to SVG/PNG with browser preview",
   "long_description": "MCP server for rendering DGMO diagrams. Generate sequence diagrams, flowcharts, ER diagrams, C4 architecture, gantt charts, kanban, sitemaps, mind maps, and 30+ other chart types from concise text markup. Outputs SVG or PNG, can open diagrams in the local Diagrammo desktop app, generate shareable diagrammo.app URLs, and produce polished multi-section HTML reports. All rendering is local — no diagram data leaves your machine.",
   "author": {
