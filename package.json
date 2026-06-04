@@ -54,7 +54,7 @@
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
     "@eslint/js": "^10.0.1",
-    "@types/node": "^22.19.19",
+    "@types/node": "^24.0.0",
     "depcheck": "^1.4.7",
     "eslint": "^10.4.1",
     "jscpd": "^4.2.4",
