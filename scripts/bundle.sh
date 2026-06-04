@@ -12,7 +12,9 @@ set -euo pipefail
 
 ROOT="$(cd "$(dirname "$0")/.." && pwd)"
 BUNDLE_DIR="$ROOT/bundle"
-DGMO_VERSION="${DGMO_VERSION:-^0.13.0}"
+# Default to the @diagrammo/dgmo range already declared in package.json so the
+# bundled version can't drift behind the dependency. Override with DGMO_VERSION.
+DGMO_VERSION="${DGMO_VERSION:-}"
 
 echo "→ Cleaning bundle/"
 rm -rf "$BUNDLE_DIR"
@@ -29,8 +31,9 @@ cp "$ROOT/README.md" "$BUNDLE_DIR/"
 [ -f "$ROOT/LICENSE" ] && cp "$ROOT/LICENSE" "$BUNDLE_DIR/"
 
 echo "→ Writing bundle/package.json (prod deps, npm-resolved dgmo)"
-node -e "
+DGMO_VERSION="$DGMO_VERSION" node -e "
   const pkg = require('$ROOT/package.json');
+  const dgmoVersion = process.env.DGMO_VERSION || pkg.dependencies['@diagrammo/dgmo'];
   const out = {
     name: pkg.name,
     version: pkg.version,
@@ -38,7 +41,7 @@ node -e "
     main: pkg.main,
     bin: pkg.bin,
     license: pkg.license,
-    dependencies: { ...pkg.dependencies, '@diagrammo/dgmo': '$DGMO_VERSION' },
+    dependencies: { ...pkg.dependencies, '@diagrammo/dgmo': dgmoVersion },
   };
   require('fs').writeFileSync('$BUNDLE_DIR/package.json', JSON.stringify(out, null, 2));
 "
