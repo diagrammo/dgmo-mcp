@@ -199,7 +199,7 @@ server.tool(
       .describe('Color theme'),
     palette: z
       .string()
-      .default('nord')
+      .default('slate')
       .describe(
         'Color palette (nord, atlas, blueprint, slate, tidewater, solarized, catppuccin, rose-pine, gruvbox, tokyo-night)'
       ),
@@ -339,7 +339,7 @@ server.tool(
         if (error) {
           // Fallback: render to SVG and open in browser
           try {
-            const rendered = await tryRender(dgmo, 'light', 'nord');
+            const rendered = await tryRender(dgmo, 'light', 'slate');
             if (!rendered.svg) {
               resolve({
                 content: [
@@ -352,7 +352,7 @@ server.tool(
               });
               return;
             }
-            const paletteConfig = getPalette('nord');
+            const paletteConfig = getPalette('slate');
             const html = buildPreviewHtml({
               svg: rendered.svg,
               title: 'Diagram Preview',
@@ -505,7 +505,7 @@ server.tool(
       .min(1)
       .describe('One or more diagrams to preview'),
     theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
-    palette: z.string().default('nord').describe('Color palette'),
+    palette: z.string().default('slate').describe('Color palette'),
     include_source: z
       .boolean()
       .default(true)
@@ -618,7 +618,7 @@ server.tool(
       .min(1)
       .describe('Report sections, each with a diagram'),
     theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
-    palette: z.string().default('nord').describe('Color palette'),
+    palette: z.string().default('slate').describe('Color palette'),
     include_source: z
       .boolean()
       .default(true)
