@@ -201,7 +201,7 @@ server.tool(
       .string()
       .default('slate')
       .describe(
-        'Color palette (nord, atlas, blueprint, slate, tidewater, solarized, catppuccin, rose-pine, gruvbox, tokyo-night)'
+        'Color palette (slate, atlas, blueprint, facet, tidewater, nord, catppuccin, tokyo-night)'
       ),
   },
   {
