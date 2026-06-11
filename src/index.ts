@@ -26,6 +26,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
 import { openInBrowser } from './open-browser.js';
+import { extractSection } from './reference.js';
 import { version as PACKAGE_VERSION } from '../package.json';
 
 // ---------------------------------------------------------------------------
@@ -114,26 +115,7 @@ function resolveLanguageReference(): string {
   }
 }
 
-function extractSection(markdown: string, chartType: string): string | null {
-  // Match ## or ### headings, with optional numbering (e.g. "## 2. Sequence Diagrams")
-  const escaped = chartType.replace(/[.*+?^${}()|[\]\\]/g, '\\$&');
-  const pattern = new RegExp(
-    `^(#{2,3})\\s+(?:\\d+\\.\\s+)?${escaped}\\b.*$`,
-    'im'
-  );
-  const match = pattern.exec(markdown);
-  if (!match) return null;
-
-  const level = match[1]; // "##" or "###"
-  const start = match.index;
-  const rest = markdown.slice(start + match[0].length);
-  const nextHeading = rest.search(new RegExp(`^${level}(?:#|\\s)`, 'm'));
-  const end =
-    nextHeading === -1
-      ? markdown.length
-      : start + match[0].length + nextHeading;
-  return markdown.slice(start, end).trim();
-}
+// Per-type reference slicing lives in ./reference.ts (pure + unit-tested).
 
 /** Write HTML to a temp file and return the path. */
 function writeTempHtml(html: string, prefix: string): string {
@@ -185,7 +167,7 @@ const server = new McpServer({
 
 server.tool(
   'render_diagram',
-  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. DGMO color syntax: color a label by appending a lowercase color name as its trailing whitespace-delimited token — "Sales red" yields value "Sales" colored red. The 11 colors are red, orange, yellow, green, blue, purple, teal, cyan, gray, black, white. Capitalize ("Red") to use a color word as a literal label. Parentheses in labels are literal text, not color notation.',
+  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
   {
     dgmo: z
       .string()
@@ -336,61 +318,61 @@ server.tool(
       // so the Promise return doesn't violate @typescript-eslint/no-misused-promises.
       exec(`open ${JSON.stringify(deepLink)}`, (error) => {
         void (async () => {
-        if (error) {
-          // Fallback: render to SVG and open in browser
-          try {
-            const rendered = await tryRender(dgmo, 'light', 'slate');
-            if (!rendered.svg) {
+          if (error) {
+            // Fallback: render to SVG and open in browser
+            try {
+              const rendered = await tryRender(dgmo, 'light', 'slate');
+              if (!rendered.svg) {
+                resolve({
+                  content: [
+                    {
+                      type: 'text' as const,
+                      text: `App not installed and render failed: ${rendered.error}`,
+                    },
+                  ],
+                  isError: true,
+                });
+                return;
+              }
+              const paletteConfig = getPalette('slate');
+              const html = buildPreviewHtml({
+                svg: rendered.svg,
+                title: 'Diagram Preview',
+                dgmoSource: dgmo,
+                palette: paletteConfig,
+                shareUrl: url,
+              });
+              const filePath = writeTempHtml(html, 'dgmo-preview');
+              await openInBrowser(filePath);
               resolve({
                 content: [
                   {
                     type: 'text' as const,
-                    text: `App not installed and render failed: ${rendered.error}`,
+                    text: `Diagrammo app not found — opened preview in browser: ${filePath}`,
+                  },
+                ],
+              });
+            } catch (fallbackErr) {
+              resolve({
+                content: [
+                  {
+                    type: 'text' as const,
+                    text: `Failed to open Diagrammo app and browser fallback failed: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)}`,
                   },
                 ],
                 isError: true,
               });
-              return;
             }
-            const paletteConfig = getPalette('slate');
-            const html = buildPreviewHtml({
-              svg: rendered.svg,
-              title: 'Diagram Preview',
-              dgmoSource: dgmo,
-              palette: paletteConfig,
-              shareUrl: url,
-            });
-            const filePath = writeTempHtml(html, 'dgmo-preview');
-            await openInBrowser(filePath);
+          } else {
             resolve({
               content: [
                 {
                   type: 'text' as const,
-                  text: `Diagrammo app not found — opened preview in browser: ${filePath}`,
+                  text: 'Opened diagram in Diagrammo app.',
                 },
               ],
-            });
-          } catch (fallbackErr) {
-            resolve({
-              content: [
-                {
-                  type: 'text' as const,
-                  text: `Failed to open Diagrammo app and browser fallback failed: ${fallbackErr instanceof Error ? fallbackErr.message : String(fallbackErr)}`,
-                },
-              ],
-              isError: true,
             });
           }
-        } else {
-          resolve({
-            content: [
-              {
-                type: 'text' as const,
-                text: 'Opened diagram in Diagrammo app.',
-              },
-            ],
-          });
-        }
         })();
       });
     });
@@ -486,7 +468,7 @@ server.tool(
 
 server.tool(
   'preview_diagram',
-  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. DGMO color syntax: color a label by appending a lowercase color name as its trailing whitespace-delimited token — "Sales red" yields value "Sales" colored red. The 11 colors are red, orange, yellow, green, blue, purple, teal, cyan, gray, black, white. Capitalize ("Red") to use a color word as a literal label. Parentheses in labels are literal text, not color notation.',
+  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
   {
     diagrams: z
       .array(
@@ -596,7 +578,7 @@ server.tool(
 
 server.tool(
   'generate_report',
-  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. DGMO color syntax: color a label by appending a lowercase color name as its trailing whitespace-delimited token — "Sales red" yields value "Sales" colored red. The 11 colors are red, orange, yellow, green, blue, purple, teal, cyan, gray, black, white. Capitalize ("Red") to use a color word as a literal label. Parentheses in labels are literal text, not color notation.',
+  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
   {
     title: z.string().describe('Report title'),
     subtitle: z.string().optional().describe('Optional subtitle'),
@@ -817,7 +799,26 @@ server.tool(
   },
   async ({ prompt }) => {
     const { ranked, confidence, fellBack } = suggestChartTypes(prompt);
-    const text = formatSuggestions(ranked, fellBack, confidence);
+    let text = formatSuggestions(ranked, fellBack, confidence);
+
+    // Workflow-driven fetch (AC14/ADR-5): since this tool is "ALWAYS CALL
+    // FIRST", ride that step to deliver the chosen type's syntax. Append the
+    // top match's per-type reference block so the model gets it without a
+    // separate get_language_reference round-trip it might skip.
+    if (!fellBack && ranked.length > 0) {
+      try {
+        const section = extractSection(
+          resolveLanguageReference(),
+          ranked[0].type.id
+        );
+        if (section) {
+          text += `\n\n---\nLanguage reference for ${ranked[0].type.id} (Tier 1):\n\n${section}`;
+        }
+      } catch {
+        // reference unavailable — suggestions alone are still useful
+      }
+    }
+
     return {
       content: [{ type: 'text' as const, text }],
     };
