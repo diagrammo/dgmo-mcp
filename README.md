@@ -1,51 +1,94 @@
 # @diagrammo/dgmo-mcp
 
-MCP server for rendering DGMO diagrams. Works with Claude Desktop, Claude Code, and any MCP-compatible AI tool.
+**Turn a conversation into a real diagram — without leaving your AI tool.**
+
+[![npm version](https://img.shields.io/npm/v/@diagrammo/dgmo-mcp.svg)](https://www.npmjs.com/package/@diagrammo/dgmo-mcp)
+[![npm downloads](https://img.shields.io/npm/dm/@diagrammo/dgmo-mcp.svg)](https://www.npmjs.com/package/@diagrammo/dgmo-mcp)
+[![license](https://img.shields.io/npm/l/@diagrammo/dgmo-mcp.svg)](./LICENSE)
+
+This MCP server gives Claude (and any MCP-compatible AI tool) the ability to render
+**sequence diagrams, flowcharts, ER diagrams, C4 architecture, gantt charts, and 35+
+other chart types** from concise text markup — then hand the result off to a full
+editor for refinement. Ask for a diagram in chat; get a real one back.
+
+<table>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/diagrammo/dgmo-mcp/main/assets/sequence.png" alt="Sequence diagram" /></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/diagrammo/dgmo-mcp/main/assets/c4.png" alt="C4 architecture diagram" /></td>
+  </tr>
+  <tr>
+    <td width="50%"><img src="https://raw.githubusercontent.com/diagrammo/dgmo-mcp/main/assets/gantt.png" alt="Gantt chart" /></td>
+    <td width="50%"><img src="https://raw.githubusercontent.com/diagrammo/dgmo-mcp/main/assets/flowchart.png" alt="Flowchart" /></td>
+  </tr>
+</table>
+
+## What you can do
+
+Ask in plain language — *"diagram the auth flow as a sequence"*, *"chart the Q3 plan as
+a gantt"*, *"draw our services as a C4 diagram"* — and Claude writes the markup and
+renders it. The markup stays readable and diffable:
+
+```
+flowchart Mutiny Resolution
+direction-tb
+
+[Sail]     Set sail under the captain
+{Trouble?} Discontent in the crew?
+{Vote}     Crew vote called
+[Mutiny]   Seize the ship
+
+(Sail) -> (Trouble?)
+(Trouble?) -Yes-> (Vote)
+(Vote) -Mutiny-> (Mutiny)
+```
+
+→ renders to the flowchart above. All rendering happens **locally** — no diagram data
+leaves your machine.
 
 ## Tools
 
-| Tool                     | Description                                                                        |
-| ------------------------ | ---------------------------------------------------------------------------------- |
-| `render_diagram`         | Render DGMO markup to SVG or PNG                                                   |
-| `share_diagram`          | Generate a shareable diagrammo.app URL                                             |
-| `open_in_app`            | Open diagram in Diagrammo desktop app (falls back to browser if app not installed) |
-| `list_chart_types`       | List all supported chart types                                                     |
-| `get_language_reference` | Get DGMO syntax documentation                                                      |
-| `preview_diagram`        | Render one or more diagrams and open an HTML preview in the browser                |
-| `generate_report`        | Generate a polished HTML report with multiple diagrams, ToC, and optional source   |
+| Tool | What it does |
+| --- | --- |
+| `render_diagram` | Render DGMO markup to **SVG or PNG** |
+| `preview_diagram` | Render one or more diagrams and open an **HTML preview** in the browser |
+| `generate_report` | Build a polished **multi-section HTML report** with ToC and optional source |
+| `list_chart_types` | List all supported chart types |
+| `get_language_reference` | Get DGMO syntax documentation for accurate generation |
+| **`share_diagram`** | Get a shareable **diagrammo.app** URL — hand your diagram to the web editor |
+| **`open_in_app`** | Open the diagram **straight into the Diagrammo desktop app** for editing |
 
-### preview_diagram
+The last two are the bridge out of chat: a diagram Claude generates becomes something
+you can refine, restyle, and embed — see below.
 
-Renders one or more DGMO diagrams to SVG and opens a self-contained HTML page in the default browser. The page includes a light/dark theme toggle and responsive SVG layout.
+## Beyond the MCP server
 
-| Parameter        | Type                 | Default      | Description                            |
-| ---------------- | -------------------- | ------------ | -------------------------------------- |
-| `diagrams`       | `[{ title?, dgmo }]` | _(required)_ | One or more diagrams to preview        |
-| `theme`          | `'light' \| 'dark'`  | `'light'`    | Color theme for rendered SVGs          |
-| `palette`        | `string`             | `'nord'`     | Color palette                          |
-| `include_source` | `boolean`            | `false`      | Show DGMO source in collapsible blocks |
+The MCP server is one entry point into **[Diagrammo](https://diagrammo.app)** — a whole
+ecosystem built on the same DGMO markup. Generate in chat, refine in a real editor,
+embed anywhere:
 
-A single diagram renders as a simple preview page. Multiple diagrams produce a report-style layout with a table of contents (when >3 sections). If some diagrams fail to render, successful ones are shown with error placeholders for the failures.
+- **[diagrammo.app](https://diagrammo.app)** — the desktop app. `open_in_app` drops an
+  AI-generated diagram straight into it, with live preview, palettes, and export.
+- **[online.diagrammo.app](https://online.diagrammo.app)** — a full editor in the
+  browser, zero install. `share_diagram` URLs open right here.
+- **Docs integrations** — drop DGMO fenced code blocks into your docs site:
+  [remark-dgmo](https://www.npmjs.com/package/remark-dgmo),
+  [astro-dgmo](https://www.npmjs.com/package/astro-dgmo),
+  [docusaurus-plugin-dgmo](https://www.npmjs.com/package/docusaurus-plugin-dgmo),
+  [fumadocs-dgmo](https://www.npmjs.com/package/fumadocs-dgmo).
+- **Obsidian** — the *Diagrammo Diagrams* community plugin renders DGMO in your vault.
+- **CLI** — `npx @diagrammo/dgmo file.dgmo -o out.png`, or install via Homebrew.
 
-### generate_report
+> **One markup, everywhere.** A diagram you generate here renders identically in the
+> app, in your docs, and in Obsidian — because they all speak DGMO.
 
-Generates a polished multi-section HTML report and optionally opens it in the browser. Includes a title, optional subtitle, auto-generated table of contents, per-section descriptions, and a timestamp footer. Suitable for bundling project analysis into a shareable document.
-
-| Parameter        | Type                              | Default      | Description                            |
-| ---------------- | --------------------------------- | ------------ | -------------------------------------- |
-| `title`          | `string`                          | _(required)_ | Report title                           |
-| `subtitle`       | `string`                          | —            | Optional subtitle                      |
-| `sections`       | `[{ title, description?, dgmo }]` | _(required)_ | Report sections, each with a diagram   |
-| `theme`          | `'light' \| 'dark'`               | `'light'`    | Color theme for rendered SVGs          |
-| `palette`        | `string`                          | `'nord'`     | Color palette                          |
-| `include_source` | `boolean`                         | `false`      | Show DGMO source in collapsible blocks |
-| `open`           | `boolean`                         | `true`       | Open the report in the browser         |
+**[→ Try it free at diagrammo.app](https://diagrammo.app)**
 
 ## Setup
 
 ### Claude Code
 
-Add to your project's `.claude/settings.local.json`:
+Add to your project's `.claude/settings.local.json` (or run
+`npx @diagrammo/dgmo --install-claude-code-integration` to do it automatically):
 
 ```json
 {
@@ -73,51 +116,18 @@ Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
 }
 ```
 
-Restart Claude Desktop after saving. The tools appear automatically.
+Restart Claude Desktop after saving — the tools appear automatically.
 
-## Development
+## Privacy
 
-```bash
-pnpm install
-pnpm build
-pnpm typecheck
-```
+All rendering is **local**. Your diagram markup and the images it produces never leave
+your machine, except when you explicitly call `share_diagram` (which encodes the diagram
+into a diagrammo.app URL). See the [privacy terms](https://diagrammo.app/terms#mcp-privacy).
 
-To iterate against an unpublished `@diagrammo/dgmo` checked out in `../dgmo`,
-override the npm-resolved dep with a workspace symlink **after** install:
+## Contributing & releases
 
-```bash
-pnpm install
-pnpm link ../dgmo   # symlink node_modules/@diagrammo/dgmo → ../dgmo
-pnpm --filter @diagrammo/dgmo build   # ensure dist/ is up to date
-```
+Development setup and the release workflow live in [CONTRIBUTING.md](./CONTRIBUTING.md).
 
-`pnpm install` will undo the link, so re-run `pnpm link ../dgmo` if deps change.
+## License
 
-## Releasing
-
-Releases are tag-driven via `.github/workflows/release.yml`:
-
-1. Bump the version in **all three** files (must match exactly — workflow
-   verifies):
-   - `package.json` → `version`
-   - `manifest.json` → `version`
-   - `server.json` → `version` _and_ `packages[0].version`
-2. Commit and tag:
-   ```bash
-   git commit -am "Release vX.Y.Z"
-   git tag vX.Y.Z
-   git push && git push --tags
-   ```
-3. The workflow runs typecheck + build, publishes to npm with provenance,
-   bundles the `.mcpb`, publishes to the MCP registry via GitHub OIDC, and
-   attaches the `.mcpb` to a GitHub release.
-
-### Required secrets
-
-- `NPM_TOKEN` — npm granular access token scoped to `@diagrammo/*` write.
-  Settings → Secrets and variables → Actions → New repository secret.
-
-MCP registry auth uses GitHub OIDC automatically (no token needed) because the
-repo is in the `diagrammo` org and the server namespace is
-`io.github.diagrammo/*`.
+MIT
