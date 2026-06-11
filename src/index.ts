@@ -158,7 +158,11 @@ async function tryRender(
 // MCP Server
 // ---------------------------------------------------------------------------
 
-const server = new McpServer({
+// Exported so the test harness can connect it to an in-memory transport
+// (tests/tools.test.ts) instead of stdio. The stdio bootstrap at the bottom is
+// guarded by DGMO_MCP_TEST so importing this module in Vitest does not grab
+// stdin and hang.
+export const server = new McpServer({
   name: 'dgmo',
   version: PACKAGE_VERSION,
 });
@@ -1004,7 +1008,11 @@ async function main() {
   await server.connect(transport);
 }
 
-main().catch((err) => {
-  console.error('Failed to start dgmo MCP server:', err);
-  process.exit(1);
-});
+// Skip the stdio bootstrap under test (the harness drives the server over an
+// in-memory transport). DGMO_MCP_TEST is set by vitest.config.ts.
+if (!process.env['DGMO_MCP_TEST']) {
+  main().catch((err) => {
+    console.error('Failed to start dgmo MCP server:', err);
+    process.exit(1);
+  });
+}
