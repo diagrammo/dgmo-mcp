@@ -17,11 +17,13 @@ import {
   getPalette,
   chartTypes,
   CHART_TYPE_DESCRIPTIONS,
-  suggestChartTypes,
   migrateContent,
   formatLineDiff,
 } from '@diagrammo/dgmo/internal';
-import type { ChartTypeScore } from '@diagrammo/dgmo/internal';
+// Chart-type SELECTION lives HERE, not in the dgmo render library — it is
+// AI-authoring functionality only this MCP server (and the eval harness) needs.
+import { suggestChartTypes } from './suggest/scoring.js';
+import type { ChartTypeScore } from './suggest/scoring.js';
 import { Resvg } from '@resvg/resvg-js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';

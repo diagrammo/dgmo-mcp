@@ -29,9 +29,21 @@
   },
   "main": "./dist/index.js",
   "types": "./dist/index.d.ts",
+  "exports": {
+    ".": {
+      "import": "./dist/index.mjs",
+      "require": "./dist/index.js",
+      "types": "./dist/index.d.ts"
+    },
+    "./suggest": {
+      "import": "./dist/suggest/scoring.mjs",
+      "require": "./dist/suggest/scoring.js",
+      "types": "./dist/suggest/scoring.d.ts"
+    }
+  },
   "scripts": {
-    "build": "tsup src/index.ts --format cjs --dts",
-    "dev": "tsup src/index.ts --format cjs --dts --watch",
+    "build": "tsup src/index.ts src/suggest/scoring.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/suggest/scoring.ts --format cjs,esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
