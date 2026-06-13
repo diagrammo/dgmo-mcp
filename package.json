@@ -59,7 +59,7 @@
     "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
   },
   "dependencies": {
-    "@diagrammo/dgmo": "^0.28.0",
+    "@diagrammo/dgmo": "^0.29.0",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@resvg/resvg-js": "^2.6.2",
     "jsdom": "^29.1.1",
