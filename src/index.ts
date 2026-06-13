@@ -137,24 +137,46 @@ function writeTempPng(base64: string): string {
   return filePath;
 }
 
-/** Render a single DGMO string to SVG, returning { svg, error }. */
-async function tryRender(
+// ---------------------------------------------------------------------------
+// Render pipeline — the one parse → validate → render → normalize path behind
+// every tool (Story 110.3). Tools differ only in how they present the result.
+// Palette resolution + its fallback warning stay tool-level (Story 110.2): they
+// are a per-request concern, not per-diagram.
+// ---------------------------------------------------------------------------
+
+type RenderDiagnostics = ReturnType<typeof parseDgmo>['diagnostics'];
+
+/** Discriminated on `error`: a null error guarantees a non-null svg. */
+type RenderPipelineResult =
+  | { svg: string; diagnostics: RenderDiagnostics; error: null }
+  | { svg: null; diagnostics: RenderDiagnostics; error: string };
+
+export async function renderPipeline(
   dgmo: string,
-  theme: 'light' | 'dark',
-  palette: string
-): Promise<{ svg: string | null; error: string | null }> {
+  opts: { theme: 'light' | 'dark' | 'transparent'; palette: string }
+): Promise<RenderPipelineResult> {
   const { diagnostics } = parseDgmo(dgmo);
   const errors = diagnostics.filter((d) => d.severity === 'error');
   if (errors.length > 0) {
-    return { svg: null, error: errors.map(formatDgmoError).join('\n') };
+    return {
+      svg: null,
+      diagnostics,
+      error: errors.map(formatDgmoError).join('\n'),
+    };
   }
   try {
-    const { svg } = await render(dgmo, { theme, palette });
-    if (!svg) return { svg: null, error: 'Render returned empty SVG.' };
-    return { svg, error: null };
+    const { svg } = await render(dgmo, {
+      theme: opts.theme,
+      palette: opts.palette,
+    });
+    if (!svg) {
+      return { svg: null, diagnostics, error: 'Render returned empty SVG.' };
+    }
+    return { svg, diagnostics, error: null };
   } catch (err) {
     return {
       svg: null,
+      diagnostics,
       error: err instanceof Error ? err.message : String(err),
     };
   }
@@ -204,22 +226,6 @@ server.tool(
     idempotentHint: true,
   },
   async ({ dgmo, format, theme, palette }) => {
-    // Validate first
-    const { diagnostics } = parseDgmo(dgmo);
-    const errors = diagnostics.filter((d) => d.severity === 'error');
-    if (errors.length > 0) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text:
-              'Diagram has errors:\n' + errors.map(formatDgmoError).join('\n'),
-          },
-        ],
-        isError: true,
-      };
-    }
-
     // Resolve the palette here (not only inside render) so the fallback warning
     // that render() swallows is surfaced to the caller (Story 110.2 AC3).
     const paletteNotes: { type: 'text'; text: string }[] = [];
@@ -227,15 +233,26 @@ server.tool(
       paletteNotes.push({ type: 'text' as const, text: message })
     );
 
-    const { svg } = await render(dgmo, { theme, palette });
-    if (!svg) {
+    const result = await renderPipeline(dgmo, { theme, palette });
+    if (result.error !== null) {
+      // Parse errors keep the "Diagram has errors:" lead-in; a render failure
+      // (empty svg / thrown) surfaces its raw message.
+      const hasParseErrors = result.diagnostics.some(
+        (d) => d.severity === 'error'
+      );
       return {
         content: [
-          { type: 'text' as const, text: 'Render returned empty SVG.' },
+          {
+            type: 'text' as const,
+            text: hasParseErrors
+              ? 'Diagram has errors:\n' + result.error
+              : result.error,
+          },
         ],
         isError: true,
       };
     }
+    const svg = result.svg;
 
     if (format === 'png') {
       const bg =
@@ -338,7 +355,10 @@ server.tool(
           if (error) {
             // Fallback: render to SVG and open in browser
             try {
-              const rendered = await tryRender(dgmo, 'light', 'slate');
+              const rendered = await renderPipeline(dgmo, {
+                theme: 'light',
+                palette: 'slate',
+              });
               if (!rendered.svg) {
                 resolve({
                   content: [
@@ -524,7 +544,7 @@ server.tool(
     );
     const results = await Promise.all(
       diagrams.map(async (d) => {
-        const { svg, error } = await tryRender(d.dgmo, theme, palette);
+        const { svg, error } = await renderPipeline(d.dgmo, { theme, palette });
         return { title: d.title, dgmo: d.dgmo, svg, error };
       })
     );
@@ -649,7 +669,7 @@ server.tool(
     const paletteConfig = getPalette(palette);
     const results = await Promise.all(
       inputSections.map(async (s) => {
-        const { svg, error } = await tryRender(s.dgmo, theme, palette);
+        const { svg, error } = await renderPipeline(s.dgmo, { theme, palette });
         return { ...s, svg, error };
       })
     );
