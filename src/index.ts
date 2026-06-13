@@ -20,6 +20,10 @@ import {
   migrateContent,
   formatLineDiff,
 } from '@diagrammo/dgmo/internal';
+// Public entry: the shared resolve·fallback·warn seam (Story 110.2). Imported
+// here so the MCP layer can surface the palette-fallback warning that render()
+// would otherwise swallow.
+import { resolvePaletteOrFallback } from '@diagrammo/dgmo';
 // Chart-type SELECTION lives HERE, not in the dgmo render library — it is
 // AI-authoring functionality only this MCP server (and the eval harness) needs.
 import { suggestChartTypes } from './suggest/scoring.js';
@@ -216,6 +220,13 @@ server.tool(
       };
     }
 
+    // Resolve the palette here (not only inside render) so the fallback warning
+    // that render() swallows is surfaced to the caller (Story 110.2 AC3).
+    const paletteNotes: { type: 'text'; text: string }[] = [];
+    const paletteColors = resolvePaletteOrFallback(palette, (message) =>
+      paletteNotes.push({ type: 'text' as const, text: message })
+    );
+
     const { svg } = await render(dgmo, { theme, palette });
     if (!svg) {
       return {
@@ -227,7 +238,6 @@ server.tool(
     }
 
     if (format === 'png') {
-      const paletteColors = getPalette(palette);
       const bg =
         theme === 'transparent'
           ? undefined
@@ -236,6 +246,7 @@ server.tool(
       const pngPath = writeTempPng(base64);
       return {
         content: [
+          ...paletteNotes,
           {
             type: 'image' as const,
             data: base64,
@@ -247,7 +258,7 @@ server.tool(
     }
 
     return {
-      content: [{ type: 'text' as const, text: svg }],
+      content: [...paletteNotes, { type: 'text' as const, text: svg }],
     };
   }
 );
@@ -506,7 +517,11 @@ server.tool(
     openWorldHint: true,
   },
   async ({ diagrams, theme, palette, include_source }) => {
-    const paletteConfig = getPalette(palette);
+    // Surface the palette fallback warning rather than dropping it (110.2 AC3).
+    const paletteNotes: string[] = [];
+    const paletteConfig = resolvePaletteOrFallback(palette, (m) =>
+      paletteNotes.push(m)
+    );
     const results = await Promise.all(
       diagrams.map(async (d) => {
         const { svg, error } = await tryRender(d.dgmo, theme, palette);
@@ -572,6 +587,9 @@ server.tool(
         failures
           .map((f) => `- ${f.title || 'untitled'}: ${f.error}`)
           .join('\n');
+    }
+    if (paletteNotes.length > 0) {
+      message += '\n\n' + paletteNotes.join('\n');
     }
 
     return {

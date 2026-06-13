@@ -161,6 +161,19 @@ describe('render_diagram', () => {
     });
     expect(text.toLowerCase()).toMatch(/error/);
   });
+
+  it('surfaces the palette fallback warning instead of dropping it (110.2 AC3)', async () => {
+    const { text, isError } = await call('render_diagram', {
+      dgmo: 'bar Revenue\n\nNorth 850\nSouth 620',
+      format: 'svg',
+      palette: 'totally-not-a-real-palette',
+    });
+    // Still renders (fallback to default), but the warning is now visible.
+    expect(isError).toBe(false);
+    expect(text).toMatch(/<svg/);
+    expect(text.toLowerCase()).toContain('not registered');
+    expect(text).toContain('slate');
+  });
 });
 
 describe('migrate_diagram', () => {
