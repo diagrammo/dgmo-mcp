@@ -18,6 +18,11 @@
 //                       plural-stemmed, non-contiguous) — rescues natural-
 //                       language paraphrases that miss every exact phrase.
 //   TIEBREAK            description-word overlap at 0.25x.
+//
+// The scorer is built by `createSuggester(triggers)` so a caller (the eval
+// harness's curation UI) can score a *live-edited* vocabulary without a
+// rebuild. The module-level exports (`suggestChartTypes`, `scoreChartType`) are
+// the instances bound to the committed `TRIGGERS`.
 
 import { chartTypes } from '@diagrammo/dgmo/internal';
 import { TRIGGERS } from './triggers.js';
@@ -29,7 +34,9 @@ interface RegistryType {
   readonly fallback?: boolean;
 }
 const REGISTRY: readonly RegistryType[] = chartTypes as readonly RegistryType[];
-const triggersFor = (id: string): readonly string[] => TRIGGERS[id] ?? [];
+
+/** The trigger vocabulary shape a suggester scores against. */
+export type TriggerMap = Record<string, readonly string[]>;
 
 const TYPOGRAPHIC_REPLACEMENTS: [RegExp, string][] = [
   [/[‘’]/g, "'"], // curly single quotes
@@ -92,70 +99,9 @@ function matchTokens(s: string): string[] {
   return normalize(s).map(stemPlural).filter((t) => !STOPWORDS.has(t));
 }
 
-// IDF: how many chart types use a token in any trigger. Distinctive tokens
-// ("sankey", "raci", "venn") weigh full; generic ones ("flow", "structure")
-// decay. Built once from the trigger vocabulary at module load.
-const triggerDocFreq = ((): Map<string, number> => {
-  const df = new Map<string, number>();
-  for (const type of REGISTRY) {
-    const seen = new Set<string>();
-    for (const trigger of triggersFor(type.id))
-      for (const tok of matchTokens(trigger)) seen.add(tok);
-    for (const tok of seen) df.set(tok, (df.get(tok) ?? 0) + 1);
-  }
-  return df;
-})();
-
-function tokenWeight(tok: string): number {
-  const d = triggerDocFreq.get(tok) ?? 1;
-  return d <= 2 ? 1 : 1 / Math.sqrt(d - 1);
-}
-
 /** Contiguous matches outrank loose token overlap (larger than any realistic
  *  overlap sum), so a real trigger phrase always wins. */
 export const CONTIGUITY_DOMINANCE = 100;
-
-export function scoreChartType(
-  prompt: string,
-  type: RegistryType
-): { score: number; matched: string[] } {
-  const promptTokensArr = normalize(prompt);
-  const promptMatchTokens = new Set(matchTokens(prompt));
-  const matched: string[] = [];
-  const triggers = triggersFor(type.id);
-
-  // PRIMARY: contiguous trigger-phrase matches (precise).
-  let contig = 0;
-  for (const trigger of triggers) {
-    const triggerTokens = normalize(trigger);
-    if (matchesContiguously(promptTokensArr, triggerTokens)) {
-      matched.push(trigger);
-      contig += triggerTokens.length;
-    }
-  }
-
-  // SECONDARY: IDF-weighted token-subset overlap (recall).
-  const triggerTokenUnion = new Set<string>();
-  for (const trigger of triggers) {
-    let hit = false;
-    for (const tok of matchTokens(trigger)) {
-      triggerTokenUnion.add(tok);
-      if (promptMatchTokens.has(tok)) hit = true;
-    }
-    if (hit && !matched.includes(trigger)) matched.push(trigger);
-  }
-  let idf = 0;
-  for (const tok of promptMatchTokens)
-    if (triggerTokenUnion.has(tok)) idf += tokenWeight(tok);
-
-  // TIEBREAK: description overlap (tokens not already credited).
-  const descTokens = new Set(matchTokens(type.description));
-  let desc = 0;
-  for (const tok of promptMatchTokens)
-    if (descTokens.has(tok) && !triggerTokenUnion.has(tok)) desc += 0.25;
-
-  return { score: contig * CONTIGUITY_DOMINANCE + idf + desc, matched };
-}
 
 /** A result below this floor means no real trigger phrase fired. */
 export const MIN_PRIMARY_SCORE = 1.0;
@@ -179,18 +125,109 @@ export interface SuggestionResult {
   readonly fellBack: boolean;
 }
 
-export function suggestChartTypes(prompt: string): SuggestionResult {
-  const scored: ChartTypeScore[] = [];
-  for (const type of REGISTRY) {
-    const { score, matched } = scoreChartType(prompt, type);
-    if (score > 0) scored.push({ type, score, matched });
+export interface Suggester {
+  scoreChartType(prompt: string, type: RegistryType): { score: number; matched: string[] };
+  suggestChartTypes(prompt: string): SuggestionResult;
+}
+
+/**
+ * Build a scorer bound to a specific trigger vocabulary. The IDF document
+ * frequency is computed once from `triggers` here, so passing a live-edited map
+ * scores exactly as a rebuilt engine would — no rebuild needed to preview edits.
+ */
+export function createSuggester(triggers: TriggerMap): Suggester {
+  const triggersFor = (id: string): readonly string[] => triggers[id] ?? [];
+
+  // IDF: how many chart types use a token in any trigger. Distinctive tokens
+  // ("sankey", "raci", "venn") weigh full; generic ones ("flow", "structure")
+  // decay. Built once from this vocabulary.
+  const triggerDocFreq = ((): Map<string, number> => {
+    const df = new Map<string, number>();
+    for (const type of REGISTRY) {
+      const seen = new Set<string>();
+      for (const trigger of triggersFor(type.id))
+        for (const tok of matchTokens(trigger)) seen.add(tok);
+      for (const tok of seen) df.set(tok, (df.get(tok) ?? 0) + 1);
+    }
+    return df;
+  })();
+
+  const tokenWeight = (tok: string): number => {
+    const d = triggerDocFreq.get(tok) ?? 1;
+    return d <= 2 ? 1 : 1 / Math.sqrt(d - 1);
+  };
+
+  function scoreChartType(
+    prompt: string,
+    type: RegistryType
+  ): { score: number; matched: string[] } {
+    const promptTokensArr = normalize(prompt);
+    const promptMatchTokens = new Set(matchTokens(prompt));
+    const matched: string[] = [];
+    const triggerList = triggersFor(type.id);
+
+    // PRIMARY: contiguous trigger-phrase matches (precise).
+    let contig = 0;
+    for (const trigger of triggerList) {
+      const triggerTokens = normalize(trigger);
+      if (matchesContiguously(promptTokensArr, triggerTokens)) {
+        matched.push(trigger);
+        contig += triggerTokens.length;
+      }
+    }
+
+    // SECONDARY: IDF-weighted token-subset overlap (recall).
+    const triggerTokenUnion = new Set<string>();
+    for (const trigger of triggerList) {
+      let hit = false;
+      for (const tok of matchTokens(trigger)) {
+        triggerTokenUnion.add(tok);
+        if (promptMatchTokens.has(tok)) hit = true;
+      }
+      if (hit && !matched.includes(trigger)) matched.push(trigger);
+    }
+    let idf = 0;
+    for (const tok of promptMatchTokens)
+      if (triggerTokenUnion.has(tok)) idf += tokenWeight(tok);
+
+    // TIEBREAK: description overlap (tokens not already credited).
+    const descTokens = new Set(matchTokens(type.description));
+    let desc = 0;
+    for (const tok of promptMatchTokens)
+      if (descTokens.has(tok) && !triggerTokenUnion.has(tok)) desc += 0.25;
+
+    return { score: contig * CONTIGUITY_DOMINANCE + idf + desc, matched };
   }
-  scored.sort((a, b) => b.score - a.score);
 
-  const fallback = REGISTRY.filter((c) => c.fallback);
-  const topScore = scored[0]?.score ?? 0;
-  const secondScore = scored[1]?.score ?? 0;
-  const fellBack = topScore < MIN_PRIMARY_SCORE;
+  function suggestChartTypes(prompt: string): SuggestionResult {
+    const scored: ChartTypeScore[] = [];
+    for (const type of REGISTRY) {
+      const { score, matched } = scoreChartType(prompt, type);
+      if (score > 0) scored.push({ type, score, matched });
+    }
+    scored.sort((a, b) => b.score - a.score);
 
-  return { ranked: scored, fallback, confidence: confidence(topScore, secondScore), fellBack };
+    const fallback = REGISTRY.filter((c) => c.fallback);
+    const topScore = scored[0]?.score ?? 0;
+    const secondScore = scored[1]?.score ?? 0;
+    const fellBack = topScore < MIN_PRIMARY_SCORE;
+
+    return { ranked: scored, fallback, confidence: confidence(topScore, secondScore), fellBack };
+  }
+
+  return { scoreChartType, suggestChartTypes };
+}
+
+// Default instances bound to the committed TRIGGERS vocabulary.
+const defaultSuggester = createSuggester(TRIGGERS);
+
+export function scoreChartType(
+  prompt: string,
+  type: RegistryType
+): { score: number; matched: string[] } {
+  return defaultSuggester.scoreChartType(prompt, type);
+}
+
+export function suggestChartTypes(prompt: string): SuggestionResult {
+  return defaultSuggester.suggestChartTypes(prompt);
 }
