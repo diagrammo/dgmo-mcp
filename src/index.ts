@@ -19,7 +19,7 @@ import {
   CHART_TYPE_DESCRIPTIONS,
   migrateContent,
   formatLineDiff,
-} from '@diagrammo/dgmo/internal';
+} from '@diagrammo/dgmo/advanced';
 // Public entry: the shared resolve·fallback·warn seam (Story 110.2). Imported
 // here so the MCP layer can surface the palette-fallback warning that render()
 // would otherwise swallow.

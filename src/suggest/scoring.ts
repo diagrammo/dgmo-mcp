@@ -24,7 +24,7 @@
 // rebuild. The module-level exports (`suggestChartTypes`, `scoreChartType`) are
 // the instances bound to the committed `TRIGGERS`.
 
-import { chartTypes } from '@diagrammo/dgmo/internal';
+import { chartTypes } from '@diagrammo/dgmo/advanced';
 import { TRIGGERS } from './triggers.js';
 
 /** The registry shape we depend on (dgmo owns this; triggers are local). */

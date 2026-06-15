@@ -1,0 +1,539 @@
+{
+  "arc": {
+    "phrases": [
+      "arc diagram",
+      "relationship chart",
+      "connection arcs",
+      "network arcs",
+      "curve",
+      "connect",
+      "link",
+      "associate",
+      "between"
+    ],
+    "concepts": []
+  },
+  "area": {
+    "phrases": [
+      "area chart",
+      "filled line",
+      "cumulative trend",
+      "how much"
+    ],
+    "concepts": []
+  },
+  "bar": {
+    "phrases": [
+      "bar chart",
+      "categorical comparison",
+      "bar graph",
+      "revenue by region",
+      "revenue by",
+      "quarterly revenue",
+      "quarterly sales",
+      "q1 q2 q3 q4"
+    ],
+    "concepts": []
+  },
+  "bar-stacked": {
+    "phrases": [
+      "stacked bar",
+      "stacked bar chart",
+      "multi-series bar",
+      "composite bar",
+      "total",
+      "value"
+    ],
+    "concepts": []
+  },
+  "boxes-and-lines": {
+    "phrases": [
+      "boxes and lines",
+      "boxes and arrows",
+      "nodes and edges",
+      "generic diagram",
+      "general-purpose network"
+    ],
+    "concepts": []
+  },
+  "c4": {
+    "phrases": [
+      "c4 diagram",
+      "system context",
+      "container diagram",
+      "component diagram",
+      "architecture overview",
+      "software architecture",
+      "microservices",
+      "microservice architecture"
+    ],
+    "concepts": []
+  },
+  "chord": {
+    "phrases": [
+      "chord diagram",
+      "relationship wheel",
+      "team connections",
+      "trade flows",
+      "links",
+      "connections",
+      "circle"
+    ],
+    "concepts": []
+  },
+  "class": {
+    "phrases": [
+      "uml class",
+      "class hierarchy",
+      "class diagram",
+      "inheritance tree",
+      "oop structure",
+      "inherit",
+      "encapsulate",
+      "polymorphism"
+    ],
+    "concepts": []
+  },
+  "cycle": {
+    "phrases": [
+      "pdca cycle",
+      "ooda loop",
+      "feedback loop",
+      "cyclical process",
+      "devops loop",
+      "continuous loop",
+      "cycle diagram"
+    ],
+    "concepts": []
+  },
+  "daci": {
+    "phrases": [
+      "daci",
+      "daci matrix",
+      "decision matrix",
+      "decision tracking",
+      "driver approver",
+      "who",
+      "person",
+      "role",
+      "decide",
+      "approve"
+    ],
+    "concepts": []
+  },
+  "doughnut": {
+    "phrases": [
+      "doughnut chart",
+      "donut chart",
+      "ring chart"
+    ],
+    "concepts": []
+  },
+  "er": {
+    "phrases": [
+      "database schema",
+      "er diagram",
+      "entity relationship",
+      "data model",
+      "tables and relationships",
+      "foreign keys"
+    ],
+    "concepts": []
+  },
+  "flowchart": {
+    "phrases": [
+      "flowchart",
+      "flow chart",
+      "decision tree",
+      "if-then diagram",
+      "process flow with decisions",
+      "process flow"
+    ],
+    "concepts": []
+  },
+  "function": {
+    "phrases": [
+      "function plot",
+      "mathematical plot",
+      "equation chart",
+      "graph y=f(x)",
+      "cartesian"
+    ],
+    "concepts": [
+      "trigonometry"
+    ]
+  },
+  "funnel": {
+    "phrases": [
+      "funnel",
+      "conversion funnel",
+      "sales funnel",
+      "user funnel",
+      "pipeline stages",
+      "drop-off funnel",
+      "sales pipeline",
+      "stage",
+      "step",
+      "drop off",
+      "convert",
+      "cta",
+      "fall off"
+    ],
+    "concepts": []
+  },
+  "gantt": {
+    "phrases": [
+      "gantt chart",
+      "project schedule",
+      "sprint plan",
+      "project timeline",
+      "project milestones"
+    ],
+    "concepts": []
+  },
+  "heatmap": {
+    "phrases": [
+      "heatmap",
+      "intensity matrix",
+      "activity heatmap",
+      "correlation matrix"
+    ],
+    "concepts": []
+  },
+  "infra": {
+    "phrases": [
+      "infrastructure diagram",
+      "traffic flow",
+      "request path",
+      "rps",
+      "capacity planning",
+      "network topology"
+    ],
+    "concepts": []
+  },
+  "journey-map": {
+    "phrases": [
+      "user journey",
+      "customer journey",
+      "customer experience",
+      "customer goes through",
+      "user goes through",
+      "customer path",
+      "customer touchpoints",
+      "cx flow",
+      "ux journey",
+      "onboarding flow",
+      "persona journey",
+      "empathy map",
+      "service blueprint"
+    ],
+    "concepts": []
+  },
+  "kanban": {
+    "phrases": [
+      "kanban board",
+      "task board",
+      "workflow columns",
+      "todo doing done",
+      "agile board"
+    ],
+    "concepts": []
+  },
+  "line": {
+    "phrases": [
+      "line chart",
+      "trend over time",
+      "time series",
+      "sales trend",
+      "sales over time"
+    ],
+    "concepts": []
+  },
+  "map": {
+    "phrases": [
+      "world map",
+      "us states map",
+      "choropleth map",
+      "geographic map",
+      "map of countries",
+      "map with cities",
+      "store locations",
+      "office locations",
+      "locations worldwide",
+      "located",
+      "worldwide",
+      "cruise",
+      "trip",
+      "shipping",
+      "sailing",
+      "state",
+      "country",
+      "nation",
+      "city",
+      "poi",
+      "location",
+      "where",
+      "port",
+      "airport",
+      "fly",
+      "visit"
+    ],
+    "concepts": [
+      "anything to do with locations"
+    ]
+  },
+  "mindmap": {
+    "phrases": [
+      "mind map",
+      "brainstorm diagram",
+      "concept map",
+      "idea tree",
+      "radial ideas",
+      "concept",
+      "hierarchy",
+      "taxonomy"
+    ],
+    "concepts": []
+  },
+  "multi-line": {
+    "phrases": [
+      "multi-line chart",
+      "multiple trends",
+      "multiple series over time"
+    ],
+    "concepts": []
+  },
+  "org": {
+    "phrases": [
+      "org chart",
+      "organization chart",
+      "reporting structure",
+      "hierarchy chart",
+      "team structure",
+      "reports to",
+      "who reports to"
+    ],
+    "concepts": []
+  },
+  "pert": {
+    "phrases": [
+      "pert chart",
+      "pert diagram",
+      "project network",
+      "critical path method",
+      "monte carlo schedule",
+      "schedule risk",
+      "estimate uncertainty",
+      "project simulation",
+      "task dependencies",
+      "task dependency network"
+    ],
+    "concepts": []
+  },
+  "pie": {
+    "phrases": [
+      "pie chart",
+      "part to whole",
+      "percentage breakdown",
+      "market share",
+      "most"
+    ],
+    "concepts": []
+  },
+  "polar-area": {
+    "phrases": [
+      "polar area",
+      "radial bar chart"
+    ],
+    "concepts": []
+  },
+  "pyramid": {
+    "phrases": [
+      "pyramid diagram",
+      "layered hierarchy",
+      "maslow hierarchy",
+      "dikw pyramid",
+      "layered model"
+    ],
+    "concepts": []
+  },
+  "quadrant": {
+    "phrases": [
+      "quadrant",
+      "2x2 matrix",
+      "priority matrix",
+      "quadrant chart",
+      "impact effort matrix",
+      "effort versus impact",
+      "positioning matrix",
+      "two-by-two"
+    ],
+    "concepts": []
+  },
+  "raci": {
+    "phrases": [
+      "raci",
+      "raci matrix",
+      "responsibility matrix",
+      "responsibility assignment",
+      "who does what",
+      "accountability matrix"
+    ],
+    "concepts": []
+  },
+  "radar": {
+    "phrases": [
+      "radar chart",
+      "spider chart",
+      "multi-dimensional metrics",
+      "team skills",
+      "skills comparison"
+    ],
+    "concepts": []
+  },
+  "rasci": {
+    "phrases": [
+      "rasci",
+      "rasci matrix",
+      "support roles matrix"
+    ],
+    "concepts": []
+  },
+  "ring": {
+    "phrases": [
+      "ring diagram",
+      "concentric rings",
+      "circle hierarchy",
+      "circles of influence",
+      "nested circles"
+    ],
+    "concepts": []
+  },
+  "sankey": {
+    "phrases": [
+      "sankey diagram",
+      "flow allocation",
+      "budget flow",
+      "energy flow",
+      "traffic allocation"
+    ],
+    "concepts": []
+  },
+  "scatter": {
+    "phrases": [
+      "scatter plot",
+      "correlation plot",
+      "bubble chart",
+      "2d data points",
+      "correlation between"
+    ],
+    "concepts": []
+  },
+  "sequence": {
+    "phrases": [
+      "message",
+      "request",
+      "response",
+      "interaction",
+      "flow",
+      "api",
+      "call",
+      "lifecycle",
+      "exchange",
+      "return",
+      "experience"
+    ],
+    "concepts": []
+  },
+  "sitemap": {
+    "phrases": [
+      "sitemap",
+      "site structure",
+      "page hierarchy",
+      "navigation structure",
+      "app navigation",
+      "website pages",
+      "site pages",
+      "api endpoints"
+    ],
+    "concepts": []
+  },
+  "slope": {
+    "phrases": [
+      "slope chart",
+      "before and after",
+      "two-period change",
+      "delta chart",
+      "shift comparison"
+    ],
+    "concepts": []
+  },
+  "state": {
+    "phrases": [
+      "state diagram",
+      "state machine",
+      "state transitions",
+      "lifecycle diagram",
+      "status transitions",
+      "order states",
+      "states from",
+      "order lifecycle"
+    ],
+    "concepts": []
+  },
+  "tech-radar": {
+    "phrases": [
+      "tech radar",
+      "technology radar",
+      "tech adoption",
+      "adopt trial assess hold",
+      "tech choices"
+    ],
+    "concepts": []
+  },
+  "timeline": {
+    "phrases": [
+      "event timeline",
+      "historical timeline",
+      "era chart",
+      "period chart",
+      "project history",
+      "timeline",
+      "milestone timeline",
+      "milestones",
+      "roadmap",
+      "product roadmap"
+    ],
+    "concepts": []
+  },
+  "venn": {
+    "phrases": [
+      "venn diagram",
+      "set overlap",
+      "intersection of",
+      "shared traits",
+      "overlapping circles"
+    ],
+    "concepts": []
+  },
+  "wireframe": {
+    "phrases": [
+      "wireframe",
+      "ui mockup",
+      "screen layout",
+      "page layout",
+      "low-fidelity mockup"
+    ],
+    "concepts": []
+  },
+  "wordcloud": {
+    "phrases": [
+      "word cloud",
+      "tag cloud",
+      "term frequency",
+      "keyword frequency",
+      "common words"
+    ],
+    "concepts": []
+  }
+}

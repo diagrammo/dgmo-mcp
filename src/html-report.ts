@@ -1,4 +1,4 @@
-import type { PaletteConfig } from '@diagrammo/dgmo/internal';
+import type { PaletteConfig } from '@diagrammo/dgmo/advanced';
 
 // ---------------------------------------------------------------------------
 // Types
