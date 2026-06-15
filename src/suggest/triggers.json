@@ -13,7 +13,8 @@
       "area chart",
       "filled line",
       "cumulative trend",
-      "how much"
+      "how much",
+      "cumulative"
     ],
     "concepts": []
   },
@@ -23,10 +24,17 @@
       "categorical comparison",
       "bar graph",
       "revenue by region",
-      "revenue by",
       "quarterly revenue",
       "quarterly sales",
-      "q1 q2 q3 q4"
+      "q1 q2 q3 q4",
+      "compare revenue",
+      "revenue across",
+      "votes for",
+      "per team",
+      "headcount by",
+      "average salary",
+      "top 10",
+      "sold the most"
     ],
     "concepts": []
   },
@@ -35,7 +43,8 @@
       "stacked bar",
       "stacked bar chart",
       "multi-series bar",
-      "composite bar"
+      "composite bar",
+      "stacked breakdown"
     ],
     "concepts": []
   },
@@ -45,7 +54,8 @@
       "boxes and arrows",
       "nodes and edges",
       "generic diagram",
-      "general-purpose network"
+      "general-purpose network",
+      "high level"
     ],
     "concepts": []
   },
@@ -85,10 +95,10 @@
   },
   "cycle": {
     "phrases": [
-      "cyclical process",
       "loop",
       "cycle",
-      "flywheel"
+      "flywheel",
+      "cyclical"
     ],
     "concepts": []
   },
@@ -128,7 +138,10 @@
       "decision tree",
       "if-then diagram",
       "process flow with decisions",
-      "process flow"
+      "process flow",
+      "steps to",
+      "end to end",
+      "ci pipeline"
     ],
     "concepts": []
   },
@@ -138,7 +151,9 @@
       "mathematical plot",
       "equation chart",
       "graph y=f(x)",
-      "cartesian"
+      "cartesian",
+      "y equals",
+      "x squared"
     ],
     "concepts": [
       "trigonometry"
@@ -152,7 +167,9 @@
       "user funnel",
       "pipeline stages",
       "drop-off funnel",
-      "sales pipeline"
+      "sales pipeline",
+      "qualified leads",
+      "closed deals"
     ],
     "concepts": []
   },
@@ -171,7 +188,10 @@
       "heatmap",
       "intensity matrix",
       "activity heatmap",
-      "correlation matrix"
+      "correlation matrix",
+      "distribution of",
+      "heat grid",
+      "busiest hours"
     ],
     "concepts": []
   },
@@ -183,7 +203,9 @@
       "rps",
       "capacity planning",
       "network topology",
-      "cloud"
+      "cloud",
+      "requests flow",
+      "message queue"
     ],
     "concepts": []
   },
@@ -192,16 +214,13 @@
       "user journey",
       "customer journey",
       "customer experience",
-      "customer goes through",
-      "user goes through",
       "customer path",
       "customer touchpoints",
       "cx flow",
       "ux journey",
       "onboarding flow",
       "persona journey",
-      "empathy map",
-      "service blueprint"
+      "empathy map"
     ],
     "concepts": []
   },
@@ -211,7 +230,8 @@
       "task board",
       "workflow columns",
       "todo doing done",
-      "agile board"
+      "agile board",
+      "backlog"
     ],
     "concepts": []
   },
@@ -224,7 +244,12 @@
       "sales over time",
       "monthly",
       "yearly",
-      "weekly"
+      "weekly",
+      "month over month",
+      "grew",
+      "growth of",
+      "changed since",
+      "price movement"
     ],
     "concepts": []
   },
@@ -244,7 +269,8 @@
       "cruise",
       "trip",
       "shipping",
-      "sailing"
+      "sailing",
+      "by us state"
     ],
     "concepts": [
       "anything to do with locations"
@@ -258,8 +284,8 @@
       "idea tree",
       "radial ideas",
       "concept",
-      "hierarchy",
-      "taxonomy"
+      "taxonomy",
+      "nested categories"
     ],
     "concepts": []
   },
@@ -267,7 +293,8 @@
     "phrases": [
       "multi-line chart",
       "multiple trends",
-      "multiple series over time"
+      "multiple series over time",
+      "by month"
     ],
     "concepts": []
   },
@@ -306,7 +333,12 @@
       "pie chart",
       "part to whole",
       "percentage breakdown",
-      "market share"
+      "market share",
+      "fraction of",
+      "percentage of",
+      "breakdown of",
+      "composition of",
+      "share each"
     ],
     "concepts": []
   },
@@ -325,7 +357,10 @@
       "dikw pyramid",
       "layered model",
       "level",
-      "pyramid"
+      "pyramid",
+      "tiers",
+      "hierarchy of evidence",
+      "self-actualization"
     ],
     "concepts": []
   },
@@ -337,7 +372,10 @@
       "quadrant chart",
       "impact effort matrix",
       "effort versus impact",
-      "positioning matrix"
+      "positioning matrix",
+      "effort against impact",
+      "against impact",
+      "risk versus reward"
     ],
     "concepts": []
   },
@@ -349,7 +387,10 @@
       "responsibility assignment",
       "who does what",
       "accountability matrix",
-      "accountable"
+      "accountable",
+      "who owns",
+      "who approves",
+      "who is informed"
     ],
     "concepts": []
   },
@@ -361,7 +402,12 @@
       "compare",
       "attribute",
       "comparing",
-      "comparison"
+      "comparison",
+      "across dimensions",
+      "dimensions",
+      "rate each",
+      "skill levels",
+      "competencies"
     ],
     "concepts": []
   },
@@ -378,7 +424,8 @@
       "concentric rings",
       "circle hierarchy",
       "circles of influence",
-      "nested circles"
+      "nested circles",
+      "concentric"
     ],
     "concepts": []
   },
@@ -388,7 +435,10 @@
       "flow allocation",
       "budget flow",
       "energy flow",
-      "traffic allocation"
+      "traffic allocation",
+      "flows from",
+      "splits into",
+      "comes from"
     ],
     "concepts": []
   },
@@ -399,7 +449,9 @@
       "bubble chart",
       "2d data points",
       "correlation between",
-      "plot"
+      "plot",
+      "height and weight",
+      "correlate"
     ],
     "concepts": []
   },
@@ -419,7 +471,8 @@
       "oauth flow",
       "request",
       "response",
-      "message"
+      "message",
+      "handshake"
     ],
     "concepts": []
   },
@@ -432,7 +485,8 @@
       "app navigation",
       "website pages",
       "site pages",
-      "api endpoints"
+      "api endpoints",
+      "folder structure"
     ],
     "concepts": []
   },
@@ -442,7 +496,8 @@
       "before and after",
       "two-period change",
       "delta chart",
-      "shift comparison"
+      "shift comparison",
+      "versus last year"
     ],
     "concepts": []
   },
@@ -480,7 +535,7 @@
       "milestone timeline",
       "milestones",
       "roadmap",
-      "product roadmap"
+      "key dates"
     ],
     "concepts": []
   },
@@ -490,7 +545,8 @@
       "set overlap",
       "intersection of",
       "shared traits",
-      "overlapping circles"
+      "overlapping circles",
+      "overlap between"
     ],
     "concepts": []
   },
@@ -510,7 +566,8 @@
       "tag cloud",
       "term frequency",
       "keyword frequency",
-      "common words"
+      "common words",
+      "frequent words"
     ],
     "concepts": []
   }
