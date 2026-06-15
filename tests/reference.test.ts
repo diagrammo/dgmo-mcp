@@ -15,7 +15,7 @@ import { describe, it, expect } from 'vitest';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { chartTypes } from '@diagrammo/dgmo/internal';
+import { chartTypes } from '@diagrammo/dgmo';
 import { extractSection, parseTypeAliases } from '../src/reference.js';
 
 const here = dirname(fileURLToPath(import.meta.url));

@@ -20,7 +20,7 @@ import { InMemoryTransport } from '@modelcontextprotocol/sdk/inMemory.js';
 import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
-import { chartTypes } from '@diagrammo/dgmo/internal';
+import { chartTypes } from '@diagrammo/dgmo';
 import { server } from '../src/index.js';
 
 const here = dirname(fileURLToPath(import.meta.url));

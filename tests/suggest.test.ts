@@ -8,7 +8,7 @@
 // ============================================================
 
 import { describe, it, expect } from 'vitest';
-import { chartTypes } from '@diagrammo/dgmo/internal';
+import { chartTypes } from '@diagrammo/dgmo';
 import {
   suggestChartTypes,
   scoreChartType,
