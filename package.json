@@ -47,6 +47,7 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "harness": "node tools/selection-harness/dump-registry.mjs && vite tools/selection-harness",
     "bundle": "bash scripts/bundle.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
@@ -78,6 +79,7 @@
     "tsup": "^8.5.1",
     "typescript": "^6.0.3",
     "typescript-eslint": "^8.60.1",
+    "vite": "^8.0.16",
     "vitest": "^4.1.8"
   },
   "files": [

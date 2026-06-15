@@ -1,0 +1,335 @@
+{
+  "_doc": "Selection-tuning corpus for the prompt → chart-type gate. Each case is a realistic plain-English diagram request + the chart-type id(s) any correct `suggest_chart_type` top-1 may land on (membership in `accept` counts). Seeded from dgmo/tests/fixtures/prompt-suite.json (36) + the 10 inline cases mirrored from suggest.test.ts = 46. `accept` ids must exist in @diagrammo/dgmo chartTypes. `baseline` = the top-1 pass-count the regression gate ratchets against (raise it as the harness fixes cases; never lower without re-baselining). `dgmoVersion` records the @diagrammo/dgmo the baseline was measured against — scores can shift when dgmo bumps. A case may carry `\"wontfix\": true` (+ optional `\"note\"`) to PARK it — a prompt we've decided not to solve as worded (too ambiguous / good-enough); parked cases are excluded from the active pass-count + baseline but kept here as documented known-limitations. Grow this aggressively via the harness's add-a-case control.",
+  "baseline": 70,
+  "dgmoVersion": "0.29.0",
+  "cases": [
+    {
+      "prompt": "show the steps of a user logging in via OAuth",
+      "accept": ["sequence"]
+    },
+    {
+      "prompt": "diagram the request flow from browser to API to database",
+      "accept": ["sequence", "c4", "infra"]
+    },
+    {
+      "prompt": "org chart for our company leadership",
+      "accept": ["org"]
+    },
+    {
+      "prompt": "database schema for users, posts, and comments",
+      "accept": ["er"]
+    },
+    {
+      "prompt": "kanban board for the current sprint",
+      "accept": ["kanban"]
+    },
+    {
+      "prompt": "gantt chart for the Q3 product launch",
+      "accept": ["gantt"]
+    },
+    {
+      "prompt": "flow chart for the checkout process with a payment decision",
+      "accept": ["flowchart"]
+    },
+    {
+      "prompt": "bar chart of revenue by region",
+      "accept": ["bar", "bar-stacked"]
+    },
+    {
+      "prompt": "line chart of monthly signups over the past year",
+      "accept": ["line", "multi-line"]
+    },
+    {
+      "prompt": "pie chart of market share by vendor",
+      "accept": ["pie", "doughnut"]
+    },
+    {
+      "prompt": "C4 container diagram of our microservices",
+      "accept": ["c4", "boxes-and-lines"]
+    },
+    {
+      "prompt": "infrastructure diagram: CDN, load balancer, three API nodes, a database",
+      "accept": ["infra"]
+    },
+    {
+      "prompt": "UML class diagram for the domain model",
+      "accept": ["class"]
+    },
+    {
+      "prompt": "mind map of feature ideas for v2",
+      "accept": ["mindmap"]
+    },
+    {
+      "prompt": "customer journey map for the free-trial onboarding",
+      "accept": ["journey-map"]
+    },
+    {
+      "prompt": "RACI matrix for the data-migration project",
+      "accept": ["raci", "rasci", "daci"]
+    },
+    {
+      "prompt": "state machine for an order lifecycle",
+      "accept": ["state"]
+    },
+    {
+      "prompt": "tech radar for our frontend tooling choices",
+      "accept": ["tech-radar"]
+    },
+    {
+      "prompt": "venn diagram of overlapping responsibilities across two teams",
+      "accept": ["venn"]
+    },
+    {
+      "prompt": "wireframe of the settings screen",
+      "accept": ["wireframe"]
+    },
+    {
+      "prompt": "sitemap of the marketing website",
+      "accept": ["sitemap"]
+    },
+    {
+      "prompt": "timeline of major company milestones",
+      "accept": ["timeline"]
+    },
+    {
+      "prompt": "pyramid of Maslow's hierarchy of needs",
+      "accept": ["pyramid"]
+    },
+    {
+      "prompt": "heatmap of website activity by hour and weekday",
+      "accept": ["heatmap"]
+    },
+    {
+      "prompt": "scatter plot of house price versus square footage",
+      "accept": ["scatter"]
+    },
+    {
+      "prompt": "sankey diagram of energy flow from sources to end uses",
+      "accept": ["sankey"]
+    },
+    {
+      "prompt": "cycle diagram of the PDCA improvement loop",
+      "accept": ["cycle"]
+    },
+    {
+      "prompt": "radar chart comparing three laptops on five attributes",
+      "accept": ["radar"]
+    },
+    {
+      "prompt": "funnel of the sales pipeline from lead to close",
+      "accept": ["funnel"]
+    },
+    {
+      "prompt": "2x2 quadrant of features by effort versus impact",
+      "accept": ["quadrant"]
+    },
+    {
+      "prompt": "boxes-and-lines architecture of the payment services",
+      "accept": ["boxes-and-lines", "c4"]
+    },
+    {
+      "prompt": "PERT chart of project task dependencies and critical path",
+      "accept": ["pert"]
+    },
+    {
+      "prompt": "arc diagram of co-authorship between researchers",
+      "accept": ["arc"]
+    },
+    {
+      "prompt": "word cloud of the most common survey responses",
+      "accept": ["wordcloud"]
+    },
+    {
+      "prompt": "ring chart of budget allocation across departments",
+      "accept": ["ring", "doughnut", "pie"]
+    },
+    {
+      "prompt": "chord diagram of trade flows between five countries",
+      "accept": ["chord"]
+    },
+    {
+      "prompt": "who reports to whom",
+      "accept": ["org"]
+    },
+    {
+      "prompt": "most common words in customer reviews",
+      "accept": ["wordcloud"]
+    },
+    {
+      "prompt": "the lifecycle of an order",
+      "accept": ["state"]
+    },
+    {
+      "prompt": "office locations worldwide of Chevron",
+      "accept": ["map"]
+    },
+    {
+      "prompt": "who is responsible for each task",
+      "accept": ["raci"]
+    },
+    {
+      "prompt": "database tables for a blog",
+      "accept": ["er"]
+    },
+    {
+      "prompt": "system architecture of our microservices",
+      "accept": ["c4", "infra", "boxes-and-lines"]
+    },
+    {
+      "prompt": "gantt chart for the Q3 launch",
+      "accept": ["gantt"]
+    },
+    {
+      "prompt": "layers of needs from basic to self-actualization",
+      "accept": ["pyramid"]
+    },
+    {
+      "prompt": "ring diagram of concentric rings",
+      "accept": ["ring"]
+    },
+    {
+      "prompt": "how a support ticket moves from open to in-progress to closed",
+      "accept": ["state"],
+      "wontfix": true,
+      "note": "too hard"
+    },
+    {
+      "prompt": "the stages a document goes through: draft, in review, published",
+      "accept": ["state"],
+      "wontfix": true,
+      "note": "too hard"
+    },
+    {
+      "prompt": "which team member is accountable for each deliverable",
+      "accept": ["raci", "rasci", "daci"]
+    },
+    {
+      "prompt": "how a user's request travels from the browser through our services to the database",
+      "accept": ["sequence", "c4", "infra"]
+    },
+    {
+      "prompt": "the back-and-forth messages between the client and the auth server during login",
+      "accept": ["sequence"]
+    },
+    {
+      "prompt": "where the marketing budget actually ends up across departments",
+      "accept": ["sankey", "pie"],
+      "wontfix": true,
+      "note": "too hard"
+    },
+    {
+      "prompt": "how energy moves from coal, gas, and solar into homes and industry",
+      "accept": ["sankey"],
+      "wontfix": true,
+      "note": "I don't like the prompt"
+    },
+    {
+      "prompt": "what work has to finish before the next phase can start",
+      "accept": ["pert", "flowchart"]
+    },
+    {
+      "prompt": "the order people get promoted up the company",
+      "accept": ["org"],
+      "wontfix": true,
+      "note": "bad prompt"
+    },
+    {
+      "prompt": "comparing two laptops across battery life, weight, and price",
+      "accept": ["radar"]
+    },
+    {
+      "prompt": "share of the market held by each phone maker",
+      "accept": ["pie", "doughnut"]
+    },
+    {
+      "prompt": "how visitors drop off between landing on the site and checking out",
+      "accept": ["funnel"]
+    },
+    {
+      "prompt": "the pages of our website and how they link together",
+      "accept": ["sitemap"]
+    },
+    {
+      "prompt": "a rough sketch of the login screen layout",
+      "accept": ["wireframe"]
+    },
+    {
+      "prompt": "the most frequent terms people used in the survey",
+      "accept": ["wordcloud"]
+    },
+    {
+      "prompt": "the tables in our database and how they relate",
+      "accept": ["er"]
+    },
+    {
+      "prompt": "the highs and lows a customer feels while signing up",
+      "accept": ["journey-map"]
+    },
+    {
+      "prompt": "rank technologies by whether we should adopt or avoid them",
+      "accept": ["tech-radar"]
+    },
+    {
+      "prompt": "what responsibilities the design team and the product team share",
+      "accept": ["venn"],
+      "wontfix": true,
+      "note": "meh"
+    },
+    {
+      "prompt": "plot student height against weight",
+      "accept": ["scatter"]
+    },
+    {
+      "prompt": "monthly active users since launch",
+      "accept": ["line", "multi-line"]
+    },
+    {
+      "prompt": "revenue for each region side by side",
+      "accept": ["bar", "bar-stacked"]
+    },
+    {
+      "prompt": "the repeating loop of plan, build, measure, and learn",
+      "accept": ["cycle"]
+    },
+    {
+      "prompt": "columns of work: todo, doing, and done",
+      "accept": ["kanban"]
+    },
+    {
+      "prompt": "the moving parts of our cloud setup and how they connect",
+      "accept": ["infra", "c4", "boxes-and-lines"]
+    },
+    {
+      "prompt": "the schedule for the launch with each task's start and end dates",
+      "accept": ["gantt"],
+      "wontfix": true,
+      "note": "pert is a good choice too"
+    },
+    {
+      "prompt": "the central idea with related thoughts branching out from it",
+      "accept": ["mindmap"]
+    },
+    {
+      "prompt": "levels of the food chain from producers up to apex predators",
+      "accept": ["pyramid"]
+    },
+    {
+      "prompt": "the classes in our codebase and what inherits from what",
+      "accept": ["class"]
+    },
+    {
+      "prompt": "place our features on effort versus value",
+      "accept": ["quadrant"]
+    },
+    {
+      "prompt": "co-authorship connections between researchers",
+      "accept": ["arc"],
+      "wontfix": true,
+      "note": "they're similar"
+    },
+    {
+      "prompt": "a US map shaded by sales per state",
+      "accept": ["map"]
+    }
+  ]
+}

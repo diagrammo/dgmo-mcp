@@ -48,7 +48,8 @@ const TYPOGRAPHIC_REPLACEMENTS: [RegExp, string][] = [
 /** Normalize a string to lowercase ASCII-ish tokens for matching. */
 export function normalize(s: string): string[] {
   let out = s.normalize('NFKD').toLowerCase();
-  for (const [re, repl] of TYPOGRAPHIC_REPLACEMENTS) out = out.replace(re, repl);
+  for (const [re, repl] of TYPOGRAPHIC_REPLACEMENTS)
+    out = out.replace(re, repl);
   return out.split(/[^a-z0-9]+/).filter(Boolean);
 }
 
@@ -68,35 +69,105 @@ export function matchesContiguously(
   return false;
 }
 
+/** The three already-computed score components, surfaced so a UI can explain
+ *  *why* a type scored: contiguous-phrase, IDF token-overlap, description. */
+export interface ScoreBreakdown {
+  readonly contig: number;
+  readonly idf: number;
+  readonly desc: number;
+}
+
 export interface ChartTypeScore {
   readonly type: RegistryType;
   readonly score: number;
   readonly matched: string[];
+  readonly breakdown?: ScoreBreakdown;
 }
 
 // Generic English function words + generic chart vocabulary, stripped before
 // token-overlap matching ("chart"/"diagram" match nothing — every type is one).
 const STOPWORDS = new Set([
-  'of', 'the', 'a', 'an', 'our', 'their', 'your', 'my', 'with', 'and', 'to',
-  'for', 'in', 'on', 'by', 'from', 'how', 'what', 'show', 'me', 'us', 'we', 'i',
-  'is', 'are', 'do', 'does', 'each', 'between', 'across', 'over', 'per', 'that',
-  'this', 'they', 'them', 'take', 'through', 'works', 'work', 'about', 'into',
-  'as', 'it', 'its', 'chart', 'diagram', 'graph', 'plot', 'view', 'display',
-  'visualize', 'yesterday', 'using', 'need', 'want', 'use', 'create', 'make',
-  'give', 'help',
+  'of',
+  'the',
+  'a',
+  'an',
+  'our',
+  'their',
+  'your',
+  'my',
+  'with',
+  'and',
+  'to',
+  'for',
+  'in',
+  'on',
+  'by',
+  'from',
+  'how',
+  'what',
+  'show',
+  'me',
+  'us',
+  'we',
+  'i',
+  'is',
+  'are',
+  'do',
+  'does',
+  'each',
+  'between',
+  'across',
+  'over',
+  'per',
+  'that',
+  'this',
+  'they',
+  'them',
+  'take',
+  'through',
+  'works',
+  'work',
+  'about',
+  'into',
+  'as',
+  'it',
+  'its',
+  'chart',
+  'diagram',
+  'graph',
+  'plot',
+  'view',
+  'display',
+  'visualize',
+  'yesterday',
+  'using',
+  'need',
+  'want',
+  'use',
+  'create',
+  'make',
+  'give',
+  'help',
 ]);
 
 /** Conservative plural stemmer (plurals only — NOT -ing/-ed). */
 function stemPlural(t: string): string {
   if (t.length > 4 && t.endsWith('ies')) return t.slice(0, -3) + 'y';
-  if (t.length > 3 && t.endsWith('es') && !t.endsWith('sses')) return t.slice(0, -2);
-  if (t.length > 3 && t.endsWith('s') && !t.endsWith('ss')) return t.slice(0, -1);
+  // "-es" plural ONLY after a sibilant (boxes→box, watches→watch, dishes→dish,
+  // buzzes→buzz, classes→class). For everything else ending in "es" the 'e' is
+  // part of the stem (moves, states, names, files, phases, cases) → fall through
+  // to the plain "-s" rule below so they stem to move/state/name/… not mov/stat.
+  if (t.length > 4 && /(x|z|ch|sh|ss)es$/.test(t)) return t.slice(0, -2);
+  if (t.length > 3 && t.endsWith('s') && !t.endsWith('ss'))
+    return t.slice(0, -1);
   return t;
 }
 
 /** Tokens for overlap matching: normalized, plural-stemmed, stopword-stripped. */
 function matchTokens(s: string): string[] {
-  return normalize(s).map(stemPlural).filter((t) => !STOPWORDS.has(t));
+  return normalize(s)
+    .map(stemPlural)
+    .filter((t) => !STOPWORDS.has(t));
 }
 
 /** Contiguous matches outrank loose token overlap (larger than any realistic
@@ -126,7 +197,10 @@ export interface SuggestionResult {
 }
 
 export interface Suggester {
-  scoreChartType(prompt: string, type: RegistryType): { score: number; matched: string[] };
+  scoreChartType(
+    prompt: string,
+    type: RegistryType
+  ): { score: number; matched: string[]; breakdown: ScoreBreakdown };
   suggestChartTypes(prompt: string): SuggestionResult;
 }
 
@@ -160,7 +234,7 @@ export function createSuggester(triggers: TriggerMap): Suggester {
   function scoreChartType(
     prompt: string,
     type: RegistryType
-  ): { score: number; matched: string[] } {
+  ): { score: number; matched: string[]; breakdown: ScoreBreakdown } {
     const promptTokensArr = normalize(prompt);
     const promptMatchTokens = new Set(matchTokens(prompt));
     const matched: string[] = [];
@@ -196,14 +270,19 @@ export function createSuggester(triggers: TriggerMap): Suggester {
     for (const tok of promptMatchTokens)
       if (descTokens.has(tok) && !triggerTokenUnion.has(tok)) desc += 0.25;
 
-    return { score: contig * CONTIGUITY_DOMINANCE + idf + desc, matched };
+    const contigScore = contig * CONTIGUITY_DOMINANCE;
+    return {
+      score: contigScore + idf + desc,
+      matched,
+      breakdown: { contig: contigScore, idf, desc },
+    };
   }
 
   function suggestChartTypes(prompt: string): SuggestionResult {
     const scored: ChartTypeScore[] = [];
     for (const type of REGISTRY) {
-      const { score, matched } = scoreChartType(prompt, type);
-      if (score > 0) scored.push({ type, score, matched });
+      const { score, matched, breakdown } = scoreChartType(prompt, type);
+      if (score > 0) scored.push({ type, score, matched, breakdown });
     }
     scored.sort((a, b) => b.score - a.score);
 
@@ -212,7 +291,12 @@ export function createSuggester(triggers: TriggerMap): Suggester {
     const secondScore = scored[1]?.score ?? 0;
     const fellBack = topScore < MIN_PRIMARY_SCORE;
 
-    return { ranked: scored, fallback, confidence: confidence(topScore, secondScore), fellBack };
+    return {
+      ranked: scored,
+      fallback,
+      confidence: confidence(topScore, secondScore),
+      fellBack,
+    };
   }
 
   return { scoreChartType, suggestChartTypes };
@@ -224,7 +308,7 @@ const defaultSuggester = createSuggester(TRIGGERS);
 export function scoreChartType(
   prompt: string,
   type: RegistryType
-): { score: number; matched: string[] } {
+): { score: number; matched: string[]; breakdown: ScoreBreakdown } {
   return defaultSuggester.scoreChartType(prompt, type);
 }
 
