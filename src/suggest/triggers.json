@@ -85,13 +85,10 @@
   },
   "cycle": {
     "phrases": [
-      "pdca cycle",
-      "ooda loop",
-      "feedback loop",
       "cyclical process",
-      "devops loop",
-      "continuous loop",
-      "cycle diagram"
+      "loop",
+      "cycle",
+      "flywheel"
     ],
     "concepts": []
   },
@@ -185,7 +182,8 @@
       "request path",
       "rps",
       "capacity planning",
-      "network topology"
+      "network topology",
+      "cloud"
     ],
     "concepts": []
   },
@@ -223,7 +221,10 @@
       "trend over time",
       "time series",
       "sales trend",
-      "sales over time"
+      "sales over time",
+      "monthly",
+      "yearly",
+      "weekly"
     ],
     "concepts": []
   },
@@ -293,7 +294,10 @@
       "estimate uncertainty",
       "project simulation",
       "task dependencies",
-      "task dependency network"
+      "task dependency network",
+      "finish",
+      "start",
+      "milestone"
     ],
     "concepts": []
   },
@@ -319,7 +323,9 @@
       "layered hierarchy",
       "maslow hierarchy",
       "dikw pyramid",
-      "layered model"
+      "layered model",
+      "level",
+      "pyramid"
     ],
     "concepts": []
   },
@@ -342,7 +348,8 @@
       "responsibility matrix",
       "responsibility assignment",
       "who does what",
-      "accountability matrix"
+      "accountability matrix",
+      "accountable"
     ],
     "concepts": []
   },
@@ -351,16 +358,17 @@
       "radar chart",
       "spider chart",
       "multi-dimensional metrics",
-      "team skills",
-      "skills comparison"
+      "compare",
+      "attribute",
+      "comparing",
+      "comparison"
     ],
     "concepts": []
   },
   "rasci": {
     "phrases": [
       "rasci",
-      "rasci matrix",
-      "support roles matrix"
+      "rasci matrix"
     ],
     "concepts": []
   },
@@ -390,7 +398,8 @@
       "correlation plot",
       "bubble chart",
       "2d data points",
-      "correlation between"
+      "correlation between",
+      "plot"
     ],
     "concepts": []
   },
@@ -407,7 +416,10 @@
       "logging in",
       "request flow",
       "oauth",
-      "oauth flow"
+      "oauth flow",
+      "request",
+      "response",
+      "message"
     ],
     "concepts": []
   },
@@ -441,9 +453,9 @@
       "state transitions",
       "lifecycle diagram",
       "status transitions",
-      "order states",
       "states from",
-      "order lifecycle"
+      "stage",
+      "lifecycle"
     ],
     "concepts": []
   },

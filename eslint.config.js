@@ -42,5 +42,23 @@ export default tseslint.config(
   {
     files: ['**/*.config.ts', '**/*.config.mjs', '**/*.config.js'],
     ...tseslint.configs.disableTypeChecked,
+  },
+  // The selection-harness is browser dev tooling (not in the TS project, not
+  // shipped) — lint it without type-aware rules and with browser/node globals.
+  {
+    files: ['tools/**/*.ts'],
+    extends: [tseslint.configs.disableTypeChecked],
+    languageOptions: {
+      parserOptions: { projectService: false, project: false },
+      globals: {
+        document: 'readonly',
+        window: 'readonly',
+        fetch: 'readonly',
+        CSS: 'readonly',
+        console: 'readonly',
+        structuredClone: 'readonly',
+      },
+    },
+    rules: { 'no-undef': 'off' },
   }
 );

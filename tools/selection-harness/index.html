@@ -1,0 +1,329 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Selection-Tuning Harness · dgmo-mcp</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #181b22;
+        --line: #2a2f3a;
+        --fg: #d8dee9;
+        --muted: #8a93a6;
+        --good: #5fb37a;
+        --bad: #d9656a;
+        --warn: #d8a23a;
+        --accent: #5b8bd6;
+        --chip: #232834;
+      }
+      * {
+        box-sizing: border-box;
+      }
+      body {
+        margin: 0;
+        font:
+          13px/1.45 ui-monospace,
+          SFMono-Regular,
+          Menlo,
+          monospace;
+        background: var(--bg);
+        color: var(--fg);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex: none;
+      }
+      header h1 {
+        font-size: 13px;
+        margin: 0;
+        font-weight: 600;
+      }
+      header .summary {
+        color: var(--muted);
+      }
+      header .summary b {
+        color: var(--fg);
+      }
+      header .delta {
+        margin-left: auto;
+        display: flex;
+        gap: 12px;
+        align-items: center;
+      }
+      .fixed {
+        color: var(--good);
+      }
+      .regressed {
+        color: var(--bad);
+      }
+      .none {
+        color: var(--muted);
+      }
+      button {
+        font: inherit;
+        background: var(--chip);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px 9px;
+        cursor: pointer;
+      }
+      button:hover {
+        border-color: var(--accent);
+      }
+      button:disabled {
+        opacity: 0.4;
+        cursor: default;
+      }
+      button:disabled:hover {
+        border-color: var(--line);
+      }
+      button.primary {
+        background: var(--accent);
+        border-color: var(--accent);
+        color: #0b0d11;
+        font-weight: 600;
+      }
+      .edit-flash {
+        flex: none;
+        padding: 6px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        font-size: 12px;
+      }
+      .edit-flash:empty {
+        display: none;
+      }
+      main {
+        display: flex;
+        flex: 1;
+        min-height: 0;
+      }
+      .pane {
+        overflow: auto;
+        padding: 12px 16px;
+      }
+      #cases {
+        flex: 1;
+        border-right: 1px solid var(--line);
+      }
+      #editors {
+        width: 38%;
+        min-width: 380px;
+      }
+      h2 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin: 0 0 8px;
+      }
+      .case {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 11px;
+        margin-bottom: 10px;
+        background: var(--panel);
+      }
+      .case.fail {
+        cursor: pointer;
+      }
+      .case.fail:hover {
+        border-color: var(--muted);
+      }
+      .case.fail.focused {
+        border-color: var(--accent);
+        box-shadow: inset 2px 0 0 var(--accent);
+      }
+      .case.fail.dimmed {
+        opacity: 0.4;
+      }
+      .case.fail.dimmed:hover {
+        opacity: 0.7;
+      }
+      .case.pass {
+        opacity: 0.55;
+      }
+      .case.parked {
+        opacity: 0.5;
+        border-style: dashed;
+      }
+      .case-head {
+        display: flex;
+        align-items: flex-start;
+        justify-content: space-between;
+        gap: 8px;
+      }
+      .case-btns {
+        flex: none;
+        display: flex;
+        gap: 6px;
+      }
+      .case-action {
+        flex: none;
+        font-size: 11px;
+        padding: 1px 7px;
+        color: var(--muted);
+      }
+      .case.editing {
+        border-color: var(--accent);
+      }
+      .edit-input {
+        display: block;
+        width: 100%;
+        font: inherit;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 4px 7px;
+        margin-bottom: 6px;
+      }
+      .edit-input:focus {
+        outline: none;
+        border-color: var(--accent);
+      }
+      .case-action:hover {
+        color: var(--fg);
+        border-color: var(--warn);
+      }
+      .focus-banner {
+        border-color: var(--accent);
+      }
+      .case .prompt {
+        font-weight: 600;
+      }
+      .case .accept {
+        color: var(--muted);
+      }
+      .case .row {
+        margin-top: 6px;
+      }
+      .case .label {
+        display: inline-block;
+        width: 92px;
+        color: var(--muted);
+      }
+      .miss .id {
+        color: var(--good);
+      }
+      .match .id {
+        color: var(--bad);
+      }
+      .brk {
+        color: var(--muted);
+      }
+      .phrase {
+        display: inline-block;
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        padding: 0 7px;
+        margin: 2px 3px 0 0;
+        cursor: pointer;
+      }
+      .phrase:hover {
+        border-color: var(--bad);
+      }
+      .phrase.single {
+        border-color: var(--warn);
+        color: var(--warn);
+      }
+      .phrase.single::after {
+        content: ' ⚠';
+      }
+      .editor {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-bottom: 10px;
+        background: var(--panel);
+      }
+      .editor .head {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+      }
+      .editor .head b {
+        color: var(--accent);
+      }
+      .editor .head b.match {
+        color: var(--bad);
+      }
+      .editor .head b.miss {
+        color: var(--good);
+      }
+      .editor input[type='text'] {
+        font: inherit;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px 6px;
+      }
+      .editor .add {
+        display: flex;
+        gap: 6px;
+        margin-top: 6px;
+      }
+      .regressed-list {
+        color: var(--bad);
+        margin-top: 4px;
+      }
+      select {
+        font: inherit;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px;
+      }
+      .hint {
+        color: var(--muted);
+      }
+      .saved {
+        color: var(--good);
+      }
+      .show-passing {
+        color: var(--muted);
+        cursor: pointer;
+        user-select: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+      }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>selection-tuning</h1>
+      <div class="summary" id="summary">loading…</div>
+      <label class="show-passing"
+        ><input type="checkbox" id="show-passing" /> show passing</label
+      >
+      <div class="delta">
+        <span id="delta" class="none">no edits</span>
+        <button id="add-case">+ case</button>
+        <button id="undo" disabled>Undo</button>
+        <button id="save" class="primary">Save</button>
+        <span id="save-status"></span>
+      </div>
+    </header>
+    <div id="edit-flash" class="edit-flash"></div>
+    <main>
+      <section class="pane" id="cases"></section>
+      <aside class="pane" id="editors"></aside>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>
