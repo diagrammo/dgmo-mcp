@@ -6,7 +6,8 @@
       "connection arcs",
       "network arcs"
     ],
-    "concepts": []
+    "concepts": [],
+    "prior": 5
   },
   "area": {
     "phrases": [
@@ -208,7 +209,8 @@
       "requests flow",
       "message queue"
     ],
-    "concepts": []
+    "concepts": [],
+    "prior": 5
   },
   "journey-map": {
     "phrases": [
