@@ -98,6 +98,24 @@ describe('selection accuracy — baseline ratchet', () => {
 
     expect(passCount, detail).toBeGreaterThanOrEqual(corpus.baseline);
   });
+
+  // ADVISORY (never gated): the "primary hit-rate" — how often the shipped
+  // scorer lands the CANONICAL answer (accept[0]), not merely an acceptable one.
+  // Membership-based pass-count can mask quality drift (the scorer picks an
+  // acceptable-but-worse type); this surfaces it. Reported via console; the only
+  // assertion is the trivially-true invariant so the line always prints in CI.
+  it('reports primary (canonical accept[0]) hit-rate — advisory, not gated', () => {
+    const active = activeCases(corpus);
+    const primaryHits = active.filter((c) => top1(c.prompt) === c.accept[0]).length;
+    const pct = ((primaryHits / active.length) * 100).toFixed(1);
+    // eslint-disable-next-line no-console
+    console.log(
+      `[advisory] primary hit-rate ${primaryHits}/${active.length} (${pct}%) — ` +
+        `scorer landed the canonical accept[0]. Membership pass-count is the gate; ` +
+        `this is quality signal only.`
+    );
+    expect(primaryHits).toBeGreaterThanOrEqual(0);
+  });
 });
 
 describe('diffRun — net-delta logic (AC11)', () => {
