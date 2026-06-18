@@ -4,14 +4,25 @@
 // lets you edit per-type phrases with an instant whole-corpus re-score, guards
 // against whack-a-mole via a net-delta vs the on-load baseline, and saves edits
 // back to triggers.json + the corpus. See tech-spec-selection-tuning-harness.md.
-import { createSuggester } from '../../src/suggest/scoring.js';
-import { diffRun, passingPrompts, type Corpus } from './diff-run';
+import {
+  createSuggester,
+  PRIOR_MAX,
+  type PriorMap,
+} from '../../src/suggest/scoring.js';
+import {
+  diffRun,
+  passingPrompts,
+  type Corpus,
+  type SuggesterState,
+} from './diff-run';
 import { chartTypes } from '@diagrammo/dgmo/internal';
 
 type Phrases = string[];
 interface TriggerEntry {
   phrases: Phrases;
   concepts: string[];
+  /** Popularity prior 0–PRIOR_MAX (absent/0 = no bias). */
+  prior?: number;
 }
 type TriggerData = Record<string, TriggerEntry>;
 type RegistryType = { id: string; description: string; fallback?: boolean };
@@ -35,7 +46,7 @@ let corpus: Corpus & { cases: Case[] } = {
   dgmoVersion: '',
   cases: [],
 };
-let baselinePhrases: Record<string, string[]> = {};
+let baselineState: SuggesterState = { map: {}, priors: {} };
 // Failing-only by default; the header toggle reveals the passing list.
 let showPassing = false;
 // When set, that case's types sort to the top of the editors pane and get
@@ -54,6 +65,20 @@ function phrasesMap(): Record<string, string[]> {
   for (const [id, entry] of Object.entries(triggers))
     m[id] = entry.phrases.slice();
   return m;
+}
+
+/** Popularity priors derived from the working triggers — only non-zero. */
+function priorsMap(): PriorMap {
+  const m: PriorMap = {};
+  for (const [id, entry] of Object.entries(triggers))
+    if (entry.prior && entry.prior > 0) m[id] = entry.prior;
+  return m;
+}
+
+/** The full scorer state (phrases + priors). Builds fresh objects each call, so
+ *  capturing it before a mutation yields an independent net-delta snapshot. */
+function currentState(): SuggesterState {
+  return { map: phrasesMap(), priors: priorsMap() };
 }
 
 // Undo stack: a snapshot of the full trigger map is pushed BEFORE every phrase
@@ -95,12 +120,13 @@ interface Scored {
     id: string;
     score: number;
     matched: string[];
-    breakdown?: { contig: number; idf: number; desc: number };
+    breakdown?: { contig: number; idf: number; desc: number; prior?: number };
   }[];
 }
 
 function scoreAll(): Scored[] {
-  const suggester = createSuggester(phrasesMap());
+  const s = currentState();
+  const suggester = createSuggester(s.map, s.priors);
   return corpus.cases.map((c) => {
     const result = suggester.suggestChartTypes(c.prompt);
     const ranked = result.ranked.map((r) => ({
@@ -128,11 +154,12 @@ function scoreLine(
 ): {
   score: number;
   matched: string[];
-  breakdown?: { contig: number; idf: number; desc: number };
+  breakdown?: { contig: number; idf: number; desc: number; prior?: number };
 } {
   const type = byId.get(id);
   if (!type) return { score: 0, matched: [] };
-  return createSuggester(phrasesMap()).scoreChartType(prompt, type);
+  const s = currentState();
+  return createSuggester(s.map, s.priors).scoreChartType(prompt, type);
 }
 
 function phraseChips(id: string): string {
@@ -159,8 +186,8 @@ function firedPhrases(matched: string[]): string {
 
 /** Set the flash strip to describe what one phrase edit did to matching:
  *  re-score the whole corpus before→after this single change. */
-function describeEdit(label: string, before: Record<string, string[]>): void {
-  const after = phrasesMap();
+function describeEdit(label: string, before: SuggesterState): void {
+  const after = currentState();
   const d = diffRun(before, after, corpus);
   const passNow = passingPrompts(after, corpus).size;
   const activeTotal = corpus.cases.filter((c) => !c.wontfix).length;
@@ -224,7 +251,7 @@ function render(): void {
     : 'Undo';
 
   // Net delta vs on-load/last-saved baseline.
-  const delta = diffRun(baselinePhrases, phrasesMap(), corpus);
+  const delta = diffRun(baselineState, currentState(), corpus);
   const deltaEl = document.getElementById('delta')!;
   if (!delta.fixed.length && !delta.regressed.length) {
     deltaEl.className = 'none';
@@ -379,8 +406,14 @@ function renderEditors(
         const desc = byId.get(id)?.description ?? '';
         // false-match → red, false-miss → green (matches the case rows).
         const roleCls = roleById[id] ?? '';
+        const prior = triggers[id]?.prior ?? 0;
+        const priorCtl =
+          `<span class="prior${prior > 0 ? ' on' : ''}" title="popularity prior (0–${PRIOR_MAX}): when a prompt is ambiguous, how typically a user means this type. Breaks ambiguous cases; never overrides a real phrase match.">` +
+          `prior <button data-prior-id="${esc(id)}" data-prior-delta="-1" ${prior <= 0 ? 'disabled' : ''}>−</button>` +
+          `<b>${prior}</b>` +
+          `<button data-prior-id="${esc(id)}" data-prior-delta="1" ${prior >= PRIOR_MAX ? 'disabled' : ''}>+</button></span>`;
         return (
-          `<div class="editor"><div class="head"><b class="${roleCls}">${esc(id)}</b> <span class="hint">${esc(desc)}</span></div>` +
+          `<div class="editor"><div class="head"><b class="${roleCls}">${esc(id)}</b> <span class="hint">${esc(desc)}</span>${priorCtl}</div>` +
           `<div>${phraseChips(id)}</div>` +
           `<div class="add"><input type="text" data-add-id="${esc(id)}" placeholder="add phrase…" />` +
           `<button data-add-btn="${esc(id)}">add</button></div></div>`
@@ -396,11 +429,26 @@ document.addEventListener('click', (e) => {
   const rmId = t.getAttribute('data-rm-id');
   if (rmId && t.hasAttribute('data-rm-phrase')) {
     const phrase = t.getAttribute('data-rm-phrase')!;
-    const before = phrasesMap();
+    const before = currentState();
     pushUndo();
     triggers[rmId].phrases = triggers[rmId].phrases.filter((p) => p !== phrase);
     describeEdit(`− ${rmId} “${phrase}”`, before);
     refocusAddId = rmId; // stay anchored in this editor after the rebuild
+    render();
+    return;
+  }
+  const priorId = t.getAttribute('data-prior-id');
+  if (priorId && t.hasAttribute('data-prior-delta')) {
+    const delta = Number(t.getAttribute('data-prior-delta'));
+    const cur = triggers[priorId]?.prior ?? 0;
+    const next = Math.max(0, Math.min(cur + delta, PRIOR_MAX));
+    if (next === cur) return;
+    const before = currentState();
+    pushUndo();
+    if (!triggers[priorId])
+      triggers[priorId] = { phrases: [], concepts: [] };
+    triggers[priorId].prior = next;
+    describeEdit(`prior ${priorId} ${cur}→${next}`, before);
     render();
     return;
   }
@@ -435,7 +483,8 @@ document.addEventListener('click', (e) => {
       // baseline (a floor on active passes) must drop by 1 to stay achievable —
       // otherwise baseline can exceed the active-case count and redden the gate
       // unfixably.
-      const top1 = createSuggester(phrasesMap()).suggestChartTypes(c.prompt)
+      const s = currentState();
+      const top1 = createSuggester(s.map, s.priors).suggestChartTypes(c.prompt)
         .ranked[0]?.type.id;
       const wasPassing = !!top1 && c.accept.includes(top1);
       c.wontfix = true;
@@ -520,7 +569,7 @@ function addPhraseFromInput(id: string): void {
     render();
     return;
   }
-  const before = phrasesMap();
+  const before = currentState();
   pushUndo();
   if (!triggers[id]) triggers[id] = { phrases: [], concepts: [] };
   triggers[id].phrases.push(phrase);
@@ -588,7 +637,7 @@ document.getElementById('save')!.addEventListener('click', async () => {
     // Ratchet the committed baseline UP to the current ACTIVE pass-count so
     // saving a win locks it into the CI gate. Never lower it (a temporary
     // regression must not weaken the gate); parked cases are excluded.
-    const passCount = passingPrompts(phrasesMap(), corpus).size;
+    const passCount = passingPrompts(currentState(), corpus).size;
     corpus.baseline = Math.max(corpus.baseline, passCount);
     const res = await fetch('/save', {
       method: 'POST',
@@ -600,7 +649,7 @@ document.getElementById('save')!.addEventListener('click', async () => {
     // F5: post-save baseline = the values we just persisted. The dev server has
     // the source JSON import-cached, so rather than reload we adopt current
     // state as the new baseline — net-delta resets to "no edits".
-    baselinePhrases = phrasesMap();
+    baselineState = currentState();
     undoStack.length = 0; // saved state is the new floor — nothing to undo back past
     lastEditMsg = `<span class="saved">✓ saved to disk — baseline ${corpus.baseline}. Run \`pnpm test\` to verify the gate, \`pnpm build\` to apply to the live tool.</span>`;
     status.textContent = '✓ saved';
@@ -612,6 +661,53 @@ document.getElementById('save')!.addEventListener('click', async () => {
   }
 });
 
+// "Run test" / "Build" — fire the post-save terminal steps from the page via
+// the dev-server /run endpoint. Test = verify the CI gate (read-only); Build =
+// recompile dist so saved edits reach the live MCP tool. Both stream their tail
+// of output into the status line so you see pass/fail without the terminal.
+function wireRun(btnId: string, cmd: 'test' | 'build', label: string): void {
+  const btn = document.getElementById(btnId) as HTMLButtonElement;
+  btn.addEventListener('click', async () => {
+    const status = document.getElementById('save-status')!;
+    const both = ['run-test', 'run-build'].map(
+      (id) => document.getElementById(id) as HTMLButtonElement
+    );
+    both.forEach((b) => (b.disabled = true));
+    status.textContent = `${label}…`;
+    status.className = 'hint';
+    try {
+      const res = await fetch('/run', {
+        method: 'POST',
+        headers: { 'content-type': 'application/json' },
+        body: JSON.stringify({ cmd }),
+      });
+      const json = (await res.json()) as {
+        ok: boolean;
+        code?: number;
+        output?: string;
+        error?: string;
+      };
+      if (json.error) throw new Error(json.error);
+      const done =
+        cmd === 'test'
+          ? '✓ test passed — gate green'
+          : '✓ build done — live MCP tool updated';
+      status.textContent = json.ok
+        ? done
+        : `✗ ${label} failed (exit ${json.code}) — see console`;
+      status.className = json.ok ? 'saved' : 'regressed';
+      if (!json.ok) console.error(`[${cmd}]\n${json.output}`);
+    } catch (err) {
+      status.textContent = '✗ ' + String(err);
+      status.className = 'regressed';
+    } finally {
+      both.forEach((b) => (b.disabled = false));
+    }
+  });
+}
+wireRun('run-test', 'test', 'test');
+wireRun('run-build', 'build', 'build');
+
 /** Load vocab + corpus fresh from the dev server, then render. */
 async function init(): Promise<void> {
   const res = await fetch('/data');
@@ -621,7 +717,7 @@ async function init(): Promise<void> {
   };
   triggers = data.triggers;
   corpus = data.corpus;
-  baselinePhrases = phrasesMap();
+  baselineState = currentState();
   render();
 }
 

@@ -6,7 +6,38 @@ import type { Plugin } from 'vite';
 import { writeFileSync, readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
+import { execFile } from 'node:child_process';
 import { judgeAll } from './judge-engine';
+
+const REPO_ROOT = path.join(
+  path.dirname(fileURLToPath(import.meta.url)),
+  '../..'
+);
+
+/** Run a whitelisted pnpm script in the dgmo-mcp repo root and resolve its
+ *  combined output + exit code. Whitelisted (`test`/`build`) so the dev-only
+ *  endpoint can never run arbitrary commands. */
+function runPnpm(
+  cmd: 'test' | 'build'
+): Promise<{ code: number; output: string }> {
+  return new Promise((resolve) => {
+    execFile(
+      'pnpm',
+      [cmd],
+      { cwd: REPO_ROOT, timeout: 300_000, maxBuffer: 8 << 20 },
+      (err, stdout, stderr) => {
+        const output = `${stdout || ''}${stderr || ''}`.trim();
+        const code =
+          err && typeof (err as { code?: unknown }).code === 'number'
+            ? ((err as { code: number }).code)
+            : err
+              ? 1
+              : 0;
+        resolve({ code, output });
+      }
+    );
+  });
+}
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const TRIGGERS_PATH = path.join(here, '../../src/suggest/triggers.json');
@@ -75,7 +106,7 @@ function validateTriggers(t: unknown): void {
   for (const [id, entry] of Object.entries(t)) {
     if (!isObject(entry))
       throw new Error(`triggers["${id}"] must be an object`);
-    const { phrases, concepts } = entry as Record<string, unknown>;
+    const { phrases, concepts, prior } = entry as Record<string, unknown>;
     if (!Array.isArray(phrases) || !phrases.every((p) => typeof p === 'string'))
       throw new Error(`triggers["${id}"].phrases must be string[]`);
     if (
@@ -85,6 +116,11 @@ function validateTriggers(t: unknown): void {
       throw new Error(
         `triggers["${id}"].concepts must be string[] (preserve it)`
       );
+    if (
+      prior !== undefined &&
+      (typeof prior !== 'number' || !Number.isInteger(prior) || prior < 0)
+    )
+      throw new Error(`triggers["${id}"].prior must be a non-negative integer`);
   }
 }
 
@@ -195,6 +231,30 @@ export function savePlugin(): Plugin {
             res.statusCode = 200;
             res.setHeader('content-type', 'application/json');
             res.end(JSON.stringify({ ok: true, dgmo }));
+          } catch (err) {
+            res.statusCode = 400;
+            res.setHeader('content-type', 'application/json');
+            res.end(JSON.stringify({ ok: false, error: String(err) }));
+          }
+        });
+      });
+
+      // Run `pnpm test` (verify the gate) or `pnpm build` (apply edits to the
+      // live MCP tool's dist) from the page, so the post-save terminal steps are
+      // one click. Whitelisted command only; never runs arbitrary input.
+      server.middlewares.use('/run', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        let body = '';
+        req.on('data', (c) => (body += c));
+        req.on('end', async () => {
+          try {
+            const { cmd } = JSON.parse(body) as { cmd?: string };
+            if (cmd !== 'test' && cmd !== 'build')
+              throw new Error("cmd must be 'test' or 'build'");
+            const { code, output } = await runPnpm(cmd);
+            res.statusCode = 200;
+            res.setHeader('content-type', 'application/json');
+            res.end(JSON.stringify({ ok: code === 0, code, output }));
           } catch (err) {
             res.statusCode = 400;
             res.setHeader('content-type', 'application/json');

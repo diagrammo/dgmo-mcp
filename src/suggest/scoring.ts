@@ -25,7 +25,7 @@
 // the instances bound to the committed `TRIGGERS`.
 
 import { chartTypes } from '@diagrammo/dgmo/advanced';
-import { TRIGGERS } from './triggers.js';
+import { TRIGGERS, PRIORS } from './triggers.js';
 
 /** The registry shape we depend on (dgmo owns this; triggers are local). */
 interface RegistryType {
@@ -37,6 +37,10 @@ const REGISTRY: readonly RegistryType[] = chartTypes as readonly RegistryType[];
 
 /** The trigger vocabulary shape a suggester scores against. */
 export type TriggerMap = Record<string, readonly string[]>;
+
+/** Per-type popularity prior: "when a prompt is ambiguous, how typically does a
+ *  user mean THIS chart?" 0 = no bias (default). A small integer (0–PRIOR_MAX). */
+export type PriorMap = Record<string, number>;
 
 const TYPOGRAPHIC_REPLACEMENTS: [RegExp, string][] = [
   [/[‘’]/g, "'"], // curly single quotes
@@ -75,6 +79,9 @@ export interface ScoreBreakdown {
   readonly contig: number;
   readonly idf: number;
   readonly desc: number;
+  /** Popularity-prior contribution (0 unless the type has a prior AND match
+   *  signal). `score = contig + idf + desc + prior`; match = score - prior. */
+  readonly prior: number;
 }
 
 export interface ChartTypeScore {
@@ -174,6 +181,16 @@ function matchTokens(s: string): string[] {
  *  overlap sum), so a real trigger phrase always wins. */
 export const CONTIGUITY_DOMINANCE = 100;
 
+/** Popularity-prior calibration. A type's prior contributes `prior * PRIOR_SCALE`
+ *  to its score, but ONLY when the type already has match signal (so a prior can
+ *  never resurrect a no-match type or fake a confident suggestion). PRIOR_MAX *
+ *  PRIOR_SCALE is held strictly BELOW CONTIGUITY_DOMINANCE (100), so a genuine
+ *  contiguous trigger-phrase match for the "right" type always beats any prior —
+ *  the prior only decides the ambiguous middle, where types separate on the
+ *  single-digit idf/desc terms. Crank these to make priors stronger. */
+export const PRIOR_MAX = 10;
+export const PRIOR_SCALE = 9; // PRIOR_MAX * PRIOR_SCALE = 90 < 100
+
 /** A result below this floor means no real trigger phrase fired. */
 export const MIN_PRIMARY_SCORE = 1.0;
 /** Min absolute score gap before a match is non-ambiguous. */
@@ -209,8 +226,14 @@ export interface Suggester {
  * frequency is computed once from `triggers` here, so passing a live-edited map
  * scores exactly as a rebuilt engine would — no rebuild needed to preview edits.
  */
-export function createSuggester(triggers: TriggerMap): Suggester {
+export function createSuggester(
+  triggers: TriggerMap,
+  priors: PriorMap = {}
+): Suggester {
   const triggersFor = (id: string): readonly string[] => triggers[id] ?? [];
+  /** Clamped prior contribution for a type, before the match-signal gate. */
+  const priorBonus = (id: string): number =>
+    Math.max(0, Math.min(priors[id] ?? 0, PRIOR_MAX)) * PRIOR_SCALE;
 
   // IDF: how many chart types use a token in any trigger. Distinctive tokens
   // ("sankey", "raci", "venn") weigh full; generic ones ("flow", "structure")
@@ -271,10 +294,15 @@ export function createSuggester(triggers: TriggerMap): Suggester {
       if (descTokens.has(tok) && !triggerTokenUnion.has(tok)) desc += 0.25;
 
     const contigScore = contig * CONTIGUITY_DOMINANCE;
+    const match = contigScore + idf + desc;
+    // Popularity prior: applied ONLY to types that already have match signal, so
+    // it tilts the ambiguous middle toward the typically-wanted type without ever
+    // resurrecting a no-match type. Bounded < CONTIGUITY_DOMINANCE (see above).
+    const prior = match > 0 ? priorBonus(type.id) : 0;
     return {
-      score: contigScore + idf + desc,
+      score: match + prior,
       matched,
-      breakdown: { contig: contigScore, idf, desc },
+      breakdown: { contig: contigScore, idf, desc, prior },
     };
   }
 
@@ -289,7 +317,10 @@ export function createSuggester(triggers: TriggerMap): Suggester {
     const fallback = REGISTRY.filter((c) => c.fallback);
     const topScore = scored[0]?.score ?? 0;
     const secondScore = scored[1]?.score ?? 0;
-    const fellBack = topScore < MIN_PRIMARY_SCORE;
+    // fellBack keys off MATCH strength (prior stripped) — a popularity prior must
+    // never make a no-real-match prompt look like a confident suggestion.
+    const topMatch = topScore - (scored[0]?.breakdown?.prior ?? 0);
+    const fellBack = topMatch < MIN_PRIMARY_SCORE;
 
     return {
       ranked: scored,
@@ -302,8 +333,8 @@ export function createSuggester(triggers: TriggerMap): Suggester {
   return { scoreChartType, suggestChartTypes };
 }
 
-// Default instances bound to the committed TRIGGERS vocabulary.
-const defaultSuggester = createSuggester(TRIGGERS);
+// Default instances bound to the committed TRIGGERS vocabulary + PRIORS.
+const defaultSuggester = createSuggester(TRIGGERS, PRIORS);
 
 export function scoreChartType(
   prompt: string,

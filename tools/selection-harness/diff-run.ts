@@ -4,7 +4,19 @@
 // the test imports it, and bundles cleanly in the browser. The only import is
 // the (browser-aliasable) scorer.
 
-import { createSuggester, type TriggerMap } from '../../src/suggest/scoring.js';
+import {
+  createSuggester,
+  type TriggerMap,
+  type PriorMap,
+} from '../../src/suggest/scoring.js';
+
+/** A scorer's full tunable state: the phrase vocabulary + popularity priors.
+ *  Net-delta compares two of these, so a prior change registers as an edit
+ *  exactly like a phrase change. `priors` optional (absent = no bias). */
+export interface SuggesterState {
+  readonly map: TriggerMap;
+  readonly priors?: PriorMap;
+}
 
 export interface CorpusCase {
   readonly prompt: string;
@@ -29,9 +41,12 @@ export interface Corpus {
 }
 
 /** The ACTIVE prompts whose top-1 suggestion lands in `accept`, scored against
- *  `map`. Parked (won't-fix) cases are ignored. */
-export function passingPrompts(map: TriggerMap, corpus: Corpus): Set<string> {
-  const suggester = createSuggester(map);
+ *  `state` (phrases + priors). Parked (won't-fix) cases are ignored. */
+export function passingPrompts(
+  state: SuggesterState,
+  corpus: Corpus
+): Set<string> {
+  const suggester = createSuggester(state.map, state.priors);
   const pass = new Set<string>();
   for (const c of activeCases(corpus)) {
     const top1 = suggester.suggestChartTypes(c.prompt).ranked[0]?.type.id;
@@ -46,18 +61,18 @@ export interface DiffResult {
 }
 
 /**
- * The net effect of swapping vocabulary `mapA` → `mapB` over `corpus`:
- * `fixed` = cases that started failing and now pass; `regressed` = the reverse.
- * This is the anti-whack-a-mole guard — every edit is judged on its delta, not
- * just whether it fixed the case you were looking at.
+ * The net effect of swapping scorer state `a` → `b` (phrases AND/OR priors) over
+ * `corpus`: `fixed` = cases that started failing and now pass; `regressed` = the
+ * reverse. This is the anti-whack-a-mole guard — every edit (phrase or prior) is
+ * judged on its delta, not just whether it fixed the case you were looking at.
  */
 export function diffRun(
-  mapA: TriggerMap,
-  mapB: TriggerMap,
+  a: SuggesterState,
+  b: SuggesterState,
   corpus: Corpus
 ): DiffResult {
-  const before = passingPrompts(mapA, corpus);
-  const after = passingPrompts(mapB, corpus);
+  const before = passingPrompts(a, corpus);
+  const after = passingPrompts(b, corpus);
   const fixed: string[] = [];
   const regressed: string[] = [];
   for (const c of activeCases(corpus)) {

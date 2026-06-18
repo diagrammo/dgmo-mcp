@@ -108,7 +108,7 @@ describe('selection accuracy — baseline ratchet', () => {
     const active = activeCases(corpus);
     const primaryHits = active.filter((c) => top1(c.prompt) === c.accept[0]).length;
     const pct = ((primaryHits / active.length) * 100).toFixed(1);
-    // eslint-disable-next-line no-console
+     
     console.log(
       `[advisory] primary hit-rate ${primaryHits}/${active.length} (${pct}%) — ` +
         `scorer landed the canonical accept[0]. Membership pass-count is the gate; ` +
@@ -133,10 +133,24 @@ describe('diffRun — net-delta logic (AC11)', () => {
     const mapA = { org: ['zzz'], state: ['xxx'] }; // zzz passes, qqq fails
     const mapB = { org: ['xxx'], state: ['qqq'] }; // zzz fails (regressed), qqq passes (fixed)
 
-    expect(diffRun(mapA, mapB, tiny)).toEqual({
+    expect(diffRun({ map: mapA }, { map: mapB }, tiny)).toEqual({
       fixed: ['qqq'],
       regressed: ['zzz'],
     });
+  });
+
+  it('a prior change alone (same phrases) registers as a net-delta', () => {
+    // Both types fire on the same prompt via identical phrases; the prior breaks
+    // the tie. Flipping which type carries the prior flips the winner.
+    const tiny: Corpus = {
+      baseline: 0,
+      dgmoVersion: 'test',
+      cases: [{ prompt: 'zzz', accept: ['org'] }],
+    };
+    const map = { org: ['zzz'], state: ['zzz'] };
+    const a = { map, priors: { state: 5 } }; // state wins → org fails
+    const b = { map, priors: { org: 5 } }; // org wins → org passes
+    expect(diffRun(a, b, tiny)).toEqual({ fixed: ['zzz'], regressed: [] });
   });
 });
 
