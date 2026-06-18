@@ -257,9 +257,6 @@
     "phrases": [
       "world map",
       "us states map",
-      "choropleth map",
-      "geographic map",
-      "map of countries",
       "map with cities",
       "store locations",
       "office locations",
@@ -270,7 +267,8 @@
       "trip",
       "shipping",
       "sailing",
-      "by us state"
+      "by us state",
+      "by country"
     ],
     "concepts": [
       "anything to do with locations"
@@ -472,7 +470,8 @@
       "request",
       "response",
       "message",
-      "handshake"
+      "handshake",
+      "services talk to"
     ],
     "concepts": []
   },

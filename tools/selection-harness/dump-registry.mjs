@@ -1,12 +1,12 @@
 // Dump the chart-type REGISTRY from the installed @diagrammo/dgmo into a small
 // browser-safe registry.json that registry-shim.ts re-exports. Node CAN import
-// the internal barrel (only the browser bundle can't), so this runs from the
+// the advanced barrel (only the browser bundle can't), so this runs from the
 // dgmo-mcp package root before vite starts. Re-runs every `pnpm harness` so the
 // snapshot tracks the installed library and never drifts.
 import { writeFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
-import { chartTypes } from '@diagrammo/dgmo/internal';
+import { chartTypes } from '@diagrammo/dgmo/advanced';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const slim = chartTypes.map((c) => ({

@@ -1,0 +1,216 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Selection-Judge (LLM) · dgmo-mcp</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #181b22;
+        --line: #2a2f3a;
+        --fg: #d8dee9;
+        --muted: #8a93a6;
+        --good: #5fb37a;
+        --bad: #d9656a;
+        --warn: #d8a23a;
+        --accent: #5b8bd6;
+        --chip: #232834;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 13px/1.45 ui-monospace, SFMono-Regular, Menlo, monospace;
+        background: var(--bg);
+        color: var(--fg);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        display: flex;
+        align-items: center;
+        gap: 16px;
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex: none;
+      }
+      header h1 { font-size: 13px; margin: 0; font-weight: 600; }
+      header a { color: var(--accent); text-decoration: none; }
+      header a:hover { text-decoration: underline; }
+      .summary { color: var(--muted); }
+      .summary b { color: var(--fg); }
+      .controls { margin-left: auto; display: flex; gap: 10px; align-items: center; }
+      .fixed { color: var(--good); }
+      .regressed { color: var(--bad); }
+      .warn { color: var(--warn); }
+      .hint { color: var(--muted); }
+      .saved { color: var(--good); }
+      button {
+        font: inherit;
+        background: var(--chip);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 3px 9px;
+        cursor: pointer;
+      }
+      button:hover { border-color: var(--accent); }
+      button:disabled { opacity: 0.4; cursor: default; }
+      button.primary { background: var(--accent); border-color: var(--accent); color: #0b0d11; font-weight: 600; }
+      .filters {
+        display: flex;
+        gap: 6px;
+        align-items: center;
+        padding: 6px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex: none;
+      }
+      .chip {
+        font-size: 11px;
+        padding: 2px 9px;
+        border: 1px solid var(--line);
+        border-radius: 10px;
+        color: var(--muted);
+        cursor: pointer;
+        user-select: none;
+      }
+      .chip:hover { border-color: var(--accent); }
+      .chip.active { background: var(--accent); border-color: var(--accent); color: #0b0d11; }
+      main { display: flex; flex: 1; min-height: 0; }
+      .pane { overflow: auto; padding: 12px 16px; }
+      #results { flex: 1; border-right: 1px solid var(--line); }
+      #editors { width: 38%; min-width: 380px; }
+      h2 {
+        font-size: 12px;
+        text-transform: uppercase;
+        letter-spacing: 0.06em;
+        color: var(--muted);
+        margin: 0 0 8px;
+      }
+      .case {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 9px 11px;
+        margin-bottom: 10px;
+        background: var(--panel);
+      }
+      .case.fail { border-color: var(--bad); box-shadow: inset 2px 0 0 var(--bad); }
+      .case.disagree { border-color: var(--warn); box-shadow: inset 2px 0 0 var(--warn); }
+      .case.dirty { border-style: dashed; border-color: var(--warn); opacity: 0.8; }
+      .case.pass { opacity: 0.6; }
+      .case.pending { opacity: 0.6; border-style: dashed; }
+      .case[data-prompt] { cursor: pointer; }
+      .case.selected { border-color: var(--accent); box-shadow: inset 2px 0 0 var(--accent); opacity: 1; }
+      .case.dimmed { opacity: 0.4; }
+      .case.dimmed:hover { opacity: 0.7; }
+      .case.editing { border-color: var(--accent); cursor: default; }
+      .case-head { display: flex; align-items: center; gap: 8px; }
+      .case-head .prompt { flex: 1; }
+      .case-btns { flex: none; display: flex; gap: 6px; }
+      .case-action {
+        font-size: 11px;
+        padding: 1px 7px;
+        color: var(--muted);
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        cursor: pointer;
+      }
+      .case-action:hover { color: var(--fg); border-color: var(--warn); }
+      .case-action.accept-pick { color: var(--good); }
+      .case-action.accept-pick:hover { border-color: var(--good); }
+      .edit-input {
+        display: block;
+        width: 100%;
+        font: inherit;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 4px 7px;
+        margin-bottom: 6px;
+      }
+      .edit-input:focus { outline: none; border-color: var(--accent); }
+      .badge {
+        flex: none;
+        font-size: 10px;
+        text-transform: uppercase;
+        letter-spacing: 0.05em;
+        padding: 1px 6px;
+        border-radius: 8px;
+        border: 1px solid var(--line);
+      }
+      .badge.dirty { color: var(--warn); border-color: var(--warn); }
+      .badge.new { color: var(--muted); }
+      .case .prompt { font-weight: 600; }
+      .case .accept { color: var(--muted); }
+      .case .row { margin-top: 5px; display: flex; gap: 10px; align-items: baseline; }
+      .case .label { flex: none; width: 112px; color: var(--muted); }
+      .case .row .id,
+      .case .row .hint,
+      .case .row .warn { min-width: 0; }
+      .id { font-weight: 600; }
+      .id.good { color: var(--good); }
+      .id.bad { color: var(--bad); }
+      .editor {
+        border: 1px solid var(--line);
+        border-radius: 6px;
+        padding: 8px 10px;
+        margin-bottom: 8px;
+        background: var(--panel);
+      }
+      .editor.edited { border-color: var(--warn); }
+      .editor.relevant { box-shadow: inset 2px 0 0 var(--accent); }
+      .focus-banner { border-color: var(--accent); }
+      .focus-banner button {
+        font: inherit;
+        font-size: 11px;
+        padding: 1px 7px;
+        background: var(--chip);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        color: var(--fg);
+        cursor: pointer;
+      }
+      .editor .head { display: flex; align-items: center; gap: 6px; margin-bottom: 5px; }
+      .editor .head b { color: var(--accent); }
+      .editor .head b.match { color: var(--bad); }
+      .editor .head b.miss { color: var(--good); }
+      .editor textarea {
+        width: 100%;
+        font: inherit;
+        resize: vertical;
+        background: var(--bg);
+        color: var(--fg);
+        border: 1px solid var(--line);
+        border-radius: 4px;
+        padding: 4px 7px;
+      }
+      .editor textarea:focus { outline: none; border-color: var(--accent); }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>selection-judge</h1>
+      <a href="./index.html" title="deterministic phrase tuning">‹ triggers</a>
+      <div class="summary" id="summary">loading…</div>
+      <div class="controls">
+        <span id="status" class="hint"></span>
+        <button id="run-sample">Run sample (25)</button>
+        <button id="run-stale" disabled>Run stale (0)</button>
+        <button id="run-all" class="primary">Run all</button>
+        <button id="save">Save descriptions</button>
+        <span id="save-status"></span>
+      </div>
+    </header>
+    <div id="filters" class="filters"></div>
+    <main>
+      <section class="pane" id="results"></section>
+      <aside class="pane" id="editors"></aside>
+    </main>
+    <script type="module" src="./judge.ts"></script>
+  </body>
+</html>
