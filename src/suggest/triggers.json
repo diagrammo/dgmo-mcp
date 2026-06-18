@@ -35,7 +35,13 @@
       "headcount by",
       "average salary",
       "top 10",
-      "sold the most"
+      "sold the most",
+      "for each category",
+      "by category",
+      "across products",
+      "compare across",
+      "values for each",
+      "count by"
     ],
     "concepts": []
   },
@@ -252,7 +258,13 @@
       "grew",
       "growth of",
       "changed since",
-      "price movement"
+      "price movement",
+      "over time",
+      "over the past",
+      "over the last",
+      "daily",
+      "per day",
+      "throughout the year"
     ],
     "concepts": []
   },
@@ -401,10 +413,8 @@
       "radar chart",
       "spider chart",
       "multi-dimensional metrics",
-      "compare",
-      "attribute",
+      "compare on attributes",
       "comparing",
-      "comparison",
       "across dimensions",
       "dimensions",
       "rate each",
