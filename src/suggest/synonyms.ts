@@ -8,7 +8,7 @@
 // miss — killing the noise. Membership here is a product decision, not a claim
 // the renderers are identical.
 export const SYNONYM_GROUPS: readonly (readonly string[])[] = [
-  ['pie', 'doughnut', 'ring'], // part-to-whole circular; pie is canonical
+  ['pie', 'doughnut'], // same part-to-whole chart, hole or no hole; pie canonical
   ['arc', 'chord'], // connection / relationship arcs; arc is canonical
 ];
 

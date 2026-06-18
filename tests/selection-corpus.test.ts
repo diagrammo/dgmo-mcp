@@ -164,9 +164,9 @@ describe('diffRun — net-delta logic (AC11)', () => {
 describe('synonym groups — opinionated equivalence', () => {
   it('treats within-group types as interchangeable, across-group as distinct', () => {
     expect(sameSelectionGroup('pie', 'doughnut')).toBe(true);
-    expect(sameSelectionGroup('pie', 'ring')).toBe(true);
     expect(sameSelectionGroup('arc', 'chord')).toBe(true);
     expect(sameSelectionGroup('pie', 'pie')).toBe(true);
+    expect(sameSelectionGroup('pie', 'ring')).toBe(false); // ring is a distinct chart
     expect(sameSelectionGroup('pie', 'bar')).toBe(false);
     expect(sameSelectionGroup('arc', 'pie')).toBe(false);
   });
