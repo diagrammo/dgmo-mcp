@@ -9,6 +9,7 @@ import {
   type TriggerMap,
   type PriorMap,
 } from '../../src/suggest/scoring.js';
+import { accepts } from '../../src/suggest/synonyms.js';
 
 /** A scorer's full tunable state: the phrase vocabulary + popularity priors.
  *  Net-delta compares two of these, so a prior change registers as an edit
@@ -50,7 +51,7 @@ export function passingPrompts(
   const pass = new Set<string>();
   for (const c of activeCases(corpus)) {
     const top1 = suggester.suggestChartTypes(c.prompt).ranked[0]?.type.id;
-    if (top1 && c.accept.includes(top1)) pass.add(c.prompt);
+    if (accepts(c.accept, top1)) pass.add(c.prompt);
   }
   return pass;
 }

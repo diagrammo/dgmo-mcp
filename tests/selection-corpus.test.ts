@@ -17,6 +17,11 @@ import path from 'node:path';
 import { chartTypes } from '@diagrammo/dgmo';
 import { suggestChartTypes } from '../src/suggest/scoring';
 import {
+  accepts,
+  sameSelectionGroup,
+  SYNONYM_GROUPS,
+} from '../src/suggest/synonyms';
+import {
   diffRun,
   activeCases,
   type Corpus,
@@ -82,10 +87,7 @@ describe('selection accuracy — baseline ratchet', () => {
     // documented known-limitations (still id-validated below).
     const active = activeCases(corpus);
     const parked = corpus.cases.length - active.length;
-    const failing = active.filter((c) => {
-      const got = top1(c.prompt);
-      return !(got && c.accept.includes(got));
-    });
+    const failing = active.filter((c) => !accepts(c.accept, top1(c.prompt)));
     const passCount = active.length - failing.length;
 
     const detail =
@@ -106,7 +108,12 @@ describe('selection accuracy — baseline ratchet', () => {
   // assertion is the trivially-true invariant so the line always prints in CI.
   it('reports primary (canonical accept[0]) hit-rate — advisory, not gated', () => {
     const active = activeCases(corpus);
-    const primaryHits = active.filter((c) => top1(c.prompt) === c.accept[0]).length;
+    // Synonym-aware: landing a sibling of the canonical (pie≈doughnut≈ring,
+    // arc≈chord) counts as primary — within-group differences aren't a miss.
+    const primaryHits = active.filter((c) => {
+      const got = top1(c.prompt);
+      return !!got && sameSelectionGroup(c.accept[0], got);
+    }).length;
     const pct = ((primaryHits / active.length) * 100).toFixed(1);
      
     console.log(
@@ -151,6 +158,30 @@ describe('diffRun — net-delta logic (AC11)', () => {
     const a = { map, priors: { state: 5 } }; // state wins → org fails
     const b = { map, priors: { org: 5 } }; // org wins → org passes
     expect(diffRun(a, b, tiny)).toEqual({ fixed: ['zzz'], regressed: [] });
+  });
+});
+
+describe('synonym groups — opinionated equivalence', () => {
+  it('treats within-group types as interchangeable, across-group as distinct', () => {
+    expect(sameSelectionGroup('pie', 'doughnut')).toBe(true);
+    expect(sameSelectionGroup('pie', 'ring')).toBe(true);
+    expect(sameSelectionGroup('arc', 'chord')).toBe(true);
+    expect(sameSelectionGroup('pie', 'pie')).toBe(true);
+    expect(sameSelectionGroup('pie', 'bar')).toBe(false);
+    expect(sameSelectionGroup('arc', 'pie')).toBe(false);
+  });
+
+  it('accepts a pick that is a synonym of any listed accept id', () => {
+    expect(accepts(['pie'], 'doughnut')).toBe(true); // honor the policy
+    expect(accepts(['arc'], 'chord')).toBe(true);
+    expect(accepts(['bar'], 'doughnut')).toBe(false);
+    expect(accepts(['pie'], undefined)).toBe(false);
+  });
+
+  it('every synonym-group id is a real chart type', () => {
+    // imported lazily to keep the group list as the single source of truth
+    const bad = SYNONYM_GROUPS.flat().filter((id) => !validIds.has(id));
+    expect(bad, `unknown synonym ids: ${bad.join(', ')}`).toEqual([]);
   });
 });
 

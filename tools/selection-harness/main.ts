@@ -15,6 +15,7 @@ import {
   type Corpus,
   type SuggesterState,
 } from './diff-run';
+import { accepts } from '../../src/suggest/synonyms.js';
 import { chartTypes } from '@diagrammo/dgmo/internal';
 
 type Phrases = string[];
@@ -140,7 +141,7 @@ function scoreAll(): Scored[] {
       prompt: c.prompt,
       accept: c.accept,
       top1,
-      pass: !!top1 && c.accept.includes(top1),
+      pass: accepts(c.accept, top1),
       wontfix: c.wontfix,
       note: c.note,
       ranked,
@@ -486,7 +487,7 @@ document.addEventListener('click', (e) => {
       const s = currentState();
       const top1 = createSuggester(s.map, s.priors).suggestChartTypes(c.prompt)
         .ranked[0]?.type.id;
-      const wasPassing = !!top1 && c.accept.includes(top1);
+      const wasPassing = accepts(c.accept, top1);
       c.wontfix = true;
       if (note.trim()) c.note = note.trim();
       else delete c.note;
