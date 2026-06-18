@@ -408,7 +408,7 @@ function renderEditors(
         const roleCls = roleById[id] ?? '';
         const prior = triggers[id]?.prior ?? 0;
         const priorCtl =
-          `<span class="prior${prior > 0 ? ' on' : ''}" title="popularity prior (0–${PRIOR_MAX}): when a prompt is ambiguous, how typically a user means this type. Breaks ambiguous cases; never overrides a real phrase match.">` +
+          `<span class="prior${prior > 0 ? ' on' : ''}" title="popularity prior (0–${PRIOR_MAX}): when two chart types score near-tied, prefer the one users more typically mean. A tie-breaker only — never overrides real idf/desc/phrase separation.">` +
           `prior <button data-prior-id="${esc(id)}" data-prior-delta="-1" ${prior <= 0 ? 'disabled' : ''}>−</button>` +
           `<b>${prior}</b>` +
           `<button data-prior-id="${esc(id)}" data-prior-delta="1" ${prior >= PRIOR_MAX ? 'disabled' : ''}>+</button></span>`;

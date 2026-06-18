@@ -181,15 +181,18 @@ function matchTokens(s: string): string[] {
  *  overlap sum), so a real trigger phrase always wins. */
 export const CONTIGUITY_DOMINANCE = 100;
 
-/** Popularity-prior calibration. A type's prior contributes `prior * PRIOR_SCALE`
- *  to its score, but ONLY when the type already has match signal (so a prior can
- *  never resurrect a no-match type or fake a confident suggestion). PRIOR_MAX *
- *  PRIOR_SCALE is held strictly BELOW CONTIGUITY_DOMINANCE (100), so a genuine
- *  contiguous trigger-phrase match for the "right" type always beats any prior —
- *  the prior only decides the ambiguous middle, where types separate on the
- *  single-digit idf/desc terms. Crank these to make priors stronger. */
+/** Popularity-prior calibration — a TIE-BREAKER, not a thumb on the scale. A
+ *  type's prior contributes `prior * PRIOR_SCALE` to its score, but ONLY when the
+ *  type already has match signal (so a prior never resurrects a no-match type or
+ *  fakes a confident suggestion). The max contribution (PRIOR_MAX * PRIOR_SCALE)
+ *  is the TIE-BREAK MARGIN: a prior can only re-order candidates whose match
+ *  scores fall within that margin of each other. It's held ≤ 1 — below a single
+ *  distinctive idf token (~1) and far below a contiguous phrase match (100) — so
+ *  genuine signal always wins and the prior only settles near-ties. Raise
+ *  PRIOR_SCALE to widen the margin (make priors break wider gaps); lower it to
+ *  approach a pure exact-tie break. */
 export const PRIOR_MAX = 10;
-export const PRIOR_SCALE = 9; // PRIOR_MAX * PRIOR_SCALE = 90 < 100
+export const PRIOR_SCALE = 0.1; // margin = PRIOR_MAX * PRIOR_SCALE = 1.0
 
 /** A result below this floor means no real trigger phrase fired. */
 export const MIN_PRIMARY_SCORE = 1.0;
@@ -295,9 +298,10 @@ export function createSuggester(
 
     const contigScore = contig * CONTIGUITY_DOMINANCE;
     const match = contigScore + idf + desc;
-    // Popularity prior: applied ONLY to types that already have match signal, so
-    // it tilts the ambiguous middle toward the typically-wanted type without ever
-    // resurrecting a no-match type. Bounded < CONTIGUITY_DOMINANCE (see above).
+    // Popularity prior: a near-tie BREAKER, applied ONLY to types that already
+    // have match signal. Its max (the tie-break margin, ≤ 1) is below a single
+    // idf token, so it settles candidates that match scores leave near-tied
+    // without overriding any real idf/desc/contiguity separation (see above).
     const prior = match > 0 ? priorBonus(type.id) : 0;
     return {
       score: match + prior,
