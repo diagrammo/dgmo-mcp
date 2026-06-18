@@ -6,7 +6,8 @@
       "connection arcs",
       "network arcs"
     ],
-    "concepts": []
+    "concepts": [],
+    "prior": 5
   },
   "area": {
     "phrases": [
@@ -34,7 +35,13 @@
       "headcount by",
       "average salary",
       "top 10",
-      "sold the most"
+      "sold the most",
+      "for each category",
+      "by category",
+      "across products",
+      "compare across",
+      "values for each",
+      "count by"
     ],
     "concepts": []
   },
@@ -55,7 +62,8 @@
       "nodes and edges",
       "generic diagram",
       "general-purpose network",
-      "high level"
+      "high level",
+      "connect"
     ],
     "concepts": []
   },
@@ -207,7 +215,8 @@
       "requests flow",
       "message queue"
     ],
-    "concepts": []
+    "concepts": [],
+    "prior": 5
   },
   "journey-map": {
     "phrases": [
@@ -249,7 +258,13 @@
       "grew",
       "growth of",
       "changed since",
-      "price movement"
+      "price movement",
+      "over time",
+      "over the past",
+      "over the last",
+      "daily",
+      "per day",
+      "throughout the year"
     ],
     "concepts": []
   },
@@ -257,9 +272,6 @@
     "phrases": [
       "world map",
       "us states map",
-      "choropleth map",
-      "geographic map",
-      "map of countries",
       "map with cities",
       "store locations",
       "office locations",
@@ -270,7 +282,8 @@
       "trip",
       "shipping",
       "sailing",
-      "by us state"
+      "by us state",
+      "by country"
     ],
     "concepts": [
       "anything to do with locations"
@@ -340,7 +353,8 @@
       "composition of",
       "share each"
     ],
-    "concepts": []
+    "concepts": [],
+    "prior": 5
   },
   "polar-area": {
     "phrases": [
@@ -399,10 +413,8 @@
       "radar chart",
       "spider chart",
       "multi-dimensional metrics",
-      "compare",
-      "attribute",
+      "compare on attributes",
       "comparing",
-      "comparison",
       "across dimensions",
       "dimensions",
       "rate each",
@@ -472,7 +484,8 @@
       "request",
       "response",
       "message",
-      "handshake"
+      "handshake",
+      "services talk to"
     ],
     "concepts": []
   },

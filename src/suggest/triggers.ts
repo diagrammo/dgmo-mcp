@@ -8,6 +8,8 @@
 //   • concepts — plain-language authoring hints ("trigonometry", "venues") that
 //                an LLM-in-the-loop expander turns INTO phrases; the scorer
 //                itself never reads concepts (they only produce phrases).
+//   • prior    — optional popularity bias (0–10): how typically a user means
+//                this type when the prompt is ambiguous. Absent = 0 = no bias.
 //
 // Keyed by id; validated against @diagrammo/dgmo chartTypes by suggest.test.ts.
 import data from './triggers.json';
@@ -15,12 +17,22 @@ import data from './triggers.json';
 export interface TriggerEntry {
   readonly phrases: readonly string[];
   readonly concepts: readonly string[];
+  /** Popularity prior (0–10): how typically a user means THIS type when a prompt
+   *  is ambiguous. Optional; absent = 0 = no bias. See PRIOR_SCALE in scoring. */
+  readonly prior?: number;
 }
 
-/** Full per-type authoring data (phrases + concept hints). */
+/** Full per-type authoring data (phrases + concept hints + optional prior). */
 export const TRIGGER_DATA = data as Record<string, TriggerEntry>;
 
 /** The phrase vocabulary the scorer consumes — `{ id: [phrases] }`. */
 export const TRIGGERS: Record<string, readonly string[]> = Object.fromEntries(
   Object.entries(TRIGGER_DATA).map(([id, entry]) => [id, entry.phrases])
+);
+
+/** The popularity priors the scorer consumes — `{ id: prior }` (only non-zero). */
+export const PRIORS: Record<string, number> = Object.fromEntries(
+  Object.entries(TRIGGER_DATA)
+    .map(([id, entry]) => [id, entry.prior ?? 0] as const)
+    .filter(([, p]) => p > 0)
 );

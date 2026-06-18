@@ -263,6 +263,37 @@
       .editor .head b.miss {
         color: var(--good);
       }
+      .editor .head .hint {
+        flex: 1;
+        min-width: 0;
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+      }
+      .editor .head .prior {
+        margin-left: auto;
+        flex: none;
+        display: inline-flex;
+        align-items: center;
+        gap: 4px;
+        font-size: 11px;
+        color: var(--muted, #888);
+        opacity: 0.55;
+      }
+      .editor .head .prior.on {
+        opacity: 1;
+        color: var(--accent);
+      }
+      .editor .head .prior b {
+        color: inherit;
+        min-width: 10px;
+        text-align: center;
+      }
+      .editor .head .prior button {
+        padding: 0 6px;
+        line-height: 1.4;
+        font: inherit;
+      }
       .editor input[type='text'] {
         font: inherit;
         background: var(--bg);
@@ -307,6 +338,7 @@
   <body>
     <header>
       <h1>selection-tuning</h1>
+      <a href="./judge.html" style="color: var(--accent); text-decoration: none">judge (LLM) ›</a>
       <div class="summary" id="summary">loading…</div>
       <label class="show-passing"
         ><input type="checkbox" id="show-passing" /> show passing</label
@@ -316,6 +348,8 @@
         <button id="add-case">+ case</button>
         <button id="undo" disabled>Undo</button>
         <button id="save" class="primary">Save</button>
+        <button id="run-test" title="pnpm test — verify the gate (read-only, no tokens)">Run test</button>
+        <button id="run-build" title="pnpm build — apply saved edits to the live MCP tool">Build</button>
         <span id="save-status"></span>
       </div>
     </header>
