@@ -43,7 +43,8 @@
       "values for each",
       "count by"
     ],
-    "concepts": []
+    "concepts": [],
+    "prior": 1
   },
   "bar-stacked": {
     "phrases": [
