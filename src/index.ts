@@ -18,6 +18,7 @@ import {
   CHART_TYPE_DESCRIPTIONS,
   migrateContent,
   formatLineDiff,
+  INVALID_COLOR_CODE,
 } from '@diagrammo/dgmo/advanced';
 // Render-to-raster path, single-sourced in ./render-helpers so the dev-only
 // guidance studio can reuse the EXACT same pipeline (it dynamic-imports the
@@ -35,7 +36,7 @@ import type { ChartTypeScore } from './suggest/scoring.js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
 import { openInBrowser } from './open-browser.js';
-import { extractSection } from './reference.js';
+import { extractSection, extractColorRule } from './reference.js';
 import { version as PACKAGE_VERSION } from '../package.json';
 
 // ---------------------------------------------------------------------------
@@ -81,6 +82,20 @@ function resolveLanguageReference(): string {
 }
 
 // Per-type reference slicing lives in ./reference.ts (pure + unit-tested).
+
+/**
+ * Slice a chart type's reference block and prepend the universal color rule.
+ * Per-type slices omit the ANTIPATTERNS core, so without this the model never
+ * sees the closed 11-name palette / no-hex / no-CSS-color contract when it
+ * fetches (or is handed) a single type. Returns null when the type has no
+ * documented block.
+ */
+function sliceWithColorRule(content: string, chartType: string): string | null {
+  const section = extractSection(content, chartType);
+  if (!section) return null;
+  const colorRule = extractColorRule(content);
+  return colorRule ? `${colorRule}\n\n---\n\n${section}` : section;
+}
 
 /** Write HTML to a temp file and return the path. */
 function writeTempHtml(html: string, prefix: string): string {
@@ -396,7 +411,7 @@ server.tool(
     }
 
     if (chart_type) {
-      const section = extractSection(content, chart_type);
+      const section = sliceWithColorRule(content, chart_type);
       if (!section) {
         return {
           content: [
@@ -653,8 +668,12 @@ server.tool(
   async ({ dgmo }) => {
     const chartType = parseDgmoChartType(dgmo);
     const { diagnostics } = parseDgmo(dgmo);
-    const errors = diagnostics.filter((d) => d.severity === 'error');
-    const warnings = diagnostics.filter((d) => d.severity === 'warning');
+    // Invalid colors (hex/CSS) are blocking here even when the library classed
+    // them a warning — named palette colors are mandatory (see render gate).
+    const isBlocking = (d: (typeof diagnostics)[number]) =>
+      d.severity === 'error' || d.code === INVALID_COLOR_CODE;
+    const errors = diagnostics.filter(isBlocking);
+    const warnings = diagnostics.filter((d) => !isBlocking(d));
 
     if (errors.length === 0 && warnings.length === 0) {
       const typeLabel = chartType ? `${chartType} diagram` : 'diagram';
@@ -765,7 +784,7 @@ server.tool(
     // separate get_language_reference round-trip it might skip.
     if (!fellBack && ranked.length > 0) {
       try {
-        const section = extractSection(
+        const section = sliceWithColorRule(
           resolveLanguageReference(),
           ranked[0].type.id
         );

@@ -16,7 +16,11 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { chartTypes } from '@diagrammo/dgmo';
-import { extractSection, parseTypeAliases } from '../src/reference.js';
+import {
+  extractSection,
+  parseTypeAliases,
+  extractColorRule,
+} from '../src/reference.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
 
@@ -97,6 +101,47 @@ describe('extractSection (anchor-based slicer)', () => {
 
   it('returns null for an id with neither marker nor alias', () => {
     expect(extractSection(FIXTURE, 'nonexistent')).toBeNull();
+  });
+});
+
+describe('extractColorRule', () => {
+  it('extracts the text between the COLORS markers', () => {
+    const md = `pre\n<!-- COLORS start -->\nonly 11 colors\n<!-- COLORS end -->\npost`;
+    expect(extractColorRule(md)).toBe('only 11 colors');
+  });
+
+  it('returns null when the markers are absent', () => {
+    expect(extractColorRule('no markers here')).toBeNull();
+  });
+});
+
+describe('color rule rides every per-type slice (closed-set contract)', () => {
+  const ref = workspaceReference();
+  const anchored = ref != null && /<!--\s*TYPE:/.test(ref);
+
+  it('the real reference defines the COLORS block with the closed 11-name list', () => {
+    if (!anchored) return;
+    const rule = extractColorRule(ref as string);
+    expect(rule).toBeTruthy();
+    for (const name of [
+      'red',
+      'orange',
+      'yellow',
+      'green',
+      'blue',
+      'purple',
+      'teal',
+      'cyan',
+      'gray',
+      'black',
+      'white',
+    ]) {
+      expect(rule).toContain(`\`${name}\``);
+    }
+    // explicitly names CSS colors as INVALID so the model stops emitting them
+    expect(rule).toMatch(/crimson/);
+    expect(rule).toMatch(/royalblue/);
+    expect(rule).toMatch(/hex/i);
   });
 });
 

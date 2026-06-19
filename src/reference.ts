@@ -29,6 +29,21 @@ export function parseTypeAliases(markdown: string): Map<string, string> {
 }
 
 /**
+ * Extract the universal color rule (the closed 11-name palette + the explicit
+ * "no hex / no CSS color names" guidance) from the language reference. It lives
+ * between `<!-- COLORS start -->` / `<!-- COLORS end -->` inside the
+ * ANTIPATTERNS block. Returned so per-type slices — which omit the ANTIPATTERNS
+ * core — can still carry the color contract for EVERY chart type. Returns null
+ * if the markers are absent (older bundled reference).
+ */
+export function extractColorRule(markdown: string): string | null {
+  const m = markdown.match(
+    /<!--\s*COLORS start\s*-->([\s\S]*?)<!--\s*COLORS end\s*-->/
+  );
+  return m ? m[1].trim() : null;
+}
+
+/**
  * Slice the per-type block for `chartType`, resolving aliases first. A block
  * runs from its `<!-- TYPE:<id> -->` marker to the next TYPE marker or the next
  * `^## ` (H2) heading, whichever comes first. Returns null when no anchor

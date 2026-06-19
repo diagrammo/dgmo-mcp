@@ -9,7 +9,12 @@
 // plain Node, not an esbuild config bundle or the browser; F13).
 // ============================================================
 
-import { render, parseDgmo, formatDgmoError } from '@diagrammo/dgmo/advanced';
+import {
+  render,
+  parseDgmo,
+  formatDgmoError,
+  INVALID_COLOR_CODE,
+} from '@diagrammo/dgmo/advanced';
 import { Resvg } from '@resvg/resvg-js';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -77,12 +82,18 @@ export async function renderPipeline(
   opts: { theme: 'light' | 'dark' | 'transparent'; palette: string }
 ): Promise<RenderPipelineResult> {
   const { diagnostics } = parseDgmo(dgmo);
-  const errors = diagnostics.filter((d) => d.severity === 'error');
-  if (errors.length > 0) {
+  // Hard gate: block on any error AND on any invalid-color diagnostic, even
+  // when the parser classed it a warning (CSS color names like `crimson` are
+  // warnings in the library so the app/CLI degrade gracefully, but the MCP
+  // refuses them so the authoring LLM is forced to use a named palette color).
+  const blocking = diagnostics.filter(
+    (d) => d.severity === 'error' || d.code === INVALID_COLOR_CODE
+  );
+  if (blocking.length > 0) {
     return {
       svg: null,
       diagnostics,
-      error: errors.map(formatDgmoError).join('\n'),
+      error: blocking.map(formatDgmoError).join('\n'),
     };
   }
   try {
