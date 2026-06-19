@@ -4,12 +4,11 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { exec } from 'node:child_process';
-import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import {
-  render,
   parseDgmo,
   parseDgmoChartType,
   formatDgmoError,
@@ -20,6 +19,11 @@ import {
   migrateContent,
   formatLineDiff,
 } from '@diagrammo/dgmo/advanced';
+// Render-to-raster path, single-sourced in ./render-helpers so the dev-only
+// guidance studio can reuse the EXACT same pipeline (it dynamic-imports the
+// built helper). Re-exported below to preserve the prior public surface.
+import { svgToPngBase64, renderPipeline } from './render-helpers.js';
+export { renderPipeline } from './render-helpers.js';
 // Public entry: the shared resolve·fallback·warn seam (Story 110.2). Imported
 // here so the MCP layer can surface the palette-fallback warning that render()
 // would otherwise swallow.
@@ -28,7 +32,6 @@ import { resolvePaletteOrFallback } from '@diagrammo/dgmo';
 // AI-authoring functionality only this MCP server (and the eval harness) needs.
 import { suggestChartTypes } from './suggest/scoring.js';
 import type { ChartTypeScore } from './suggest/scoring.js';
-import { Resvg } from '@resvg/resvg-js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
 import { openInBrowser } from './open-browser.js';
@@ -54,50 +57,6 @@ const chartTypeIdSchema = z.string().refine(
 // ---------------------------------------------------------------------------
 // Helpers
 // ---------------------------------------------------------------------------
-
-const DEFAULT_FONT_NAME = 'Inter';
-
-/**
- * dgmo bundles Inter TTFs under its `fonts/` directory (see dgmo/src/cli.ts
- * for the same pattern). Resolving them through `require.resolve` ensures
- * we pick up the bundled copy whether @diagrammo/dgmo is installed from npm
- * or linked from the local workspace.
- *
- * Falls back to system fonts if the TTFs aren't found (e.g. in an odd
- * install layout) — resvg will then use whatever sans-serif it finds.
- */
-function resolveBundledFonts(): string[] {
-  try {
-    const dgmoMain = require.resolve('@diagrammo/dgmo');
-    const pkgRoot = dirname(dirname(dgmoMain));
-    const candidates = [
-      join(pkgRoot, 'fonts', 'Inter-Regular.ttf'),
-      join(pkgRoot, 'fonts', 'Inter-Bold.ttf'),
-    ];
-    return candidates.filter((f) => existsSync(f));
-  } catch {
-    return [];
-  }
-}
-
-const BUNDLED_FONT_FILES = resolveBundledFonts();
-
-function svgToPngBase64(svg: string, background?: string): string {
-  const resvg = new Resvg(svg, {
-    fitTo: { mode: 'zoom' as const, value: 2 },
-    ...(background ? { background } : {}),
-    font: {
-      loadSystemFonts: BUNDLED_FONT_FILES.length === 0,
-      ...(BUNDLED_FONT_FILES.length > 0
-        ? { fontFiles: BUNDLED_FONT_FILES }
-        : {}),
-      defaultFontFamily: DEFAULT_FONT_NAME,
-      sansSerifFamily: DEFAULT_FONT_NAME,
-    },
-  });
-  const rendered = resvg.render();
-  return Buffer.from(rendered.asPng()).toString('base64');
-}
 
 function resolveLanguageReference(): string {
   // Try 1: resolve from @diagrammo/dgmo package (works when docs/ is published)
@@ -135,51 +94,6 @@ function writeTempPng(base64: string): string {
   const filePath = join(tmpdir(), `dgmo-render-${randomUUID()}.png`);
   writeFileSync(filePath, Buffer.from(base64, 'base64'));
   return filePath;
-}
-
-// ---------------------------------------------------------------------------
-// Render pipeline — the one parse → validate → render → normalize path behind
-// every tool (Story 110.3). Tools differ only in how they present the result.
-// Palette resolution + its fallback warning stay tool-level (Story 110.2): they
-// are a per-request concern, not per-diagram.
-// ---------------------------------------------------------------------------
-
-type RenderDiagnostics = ReturnType<typeof parseDgmo>['diagnostics'];
-
-/** Discriminated on `error`: a null error guarantees a non-null svg. */
-type RenderPipelineResult =
-  | { svg: string; diagnostics: RenderDiagnostics; error: null }
-  | { svg: null; diagnostics: RenderDiagnostics; error: string };
-
-export async function renderPipeline(
-  dgmo: string,
-  opts: { theme: 'light' | 'dark' | 'transparent'; palette: string }
-): Promise<RenderPipelineResult> {
-  const { diagnostics } = parseDgmo(dgmo);
-  const errors = diagnostics.filter((d) => d.severity === 'error');
-  if (errors.length > 0) {
-    return {
-      svg: null,
-      diagnostics,
-      error: errors.map(formatDgmoError).join('\n'),
-    };
-  }
-  try {
-    const { svg } = await render(dgmo, {
-      theme: opts.theme,
-      palette: opts.palette,
-    });
-    if (!svg) {
-      return { svg: null, diagnostics, error: 'Render returned empty SVG.' };
-    }
-    return { svg, diagnostics, error: null };
-  } catch (err) {
-    return {
-      svg: null,
-      diagnostics,
-      error: err instanceof Error ? err.message : String(err),
-    };
-  }
 }
 
 // ---------------------------------------------------------------------------

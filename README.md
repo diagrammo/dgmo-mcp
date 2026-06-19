@@ -124,6 +124,32 @@ All rendering is **local**. Your diagram markup and the images it produces never
 your machine, except when you explicitly call `share_diagram` (which encodes the diagram
 into a diagrammo.app URL). See the [privacy terms](https://diagrammo.app/terms#mcp-privacy).
 
+## Dev hub (AI-tuning tools)
+
+```bash
+pnpm hub
+```
+
+One command, one server, one browser tab. The hub opens a tabbed shell over the
+three AI-tuning dev tools — switch between them with the top tabs, no separate
+ports or commands to remember:
+
+- **Trigger tuning** — edit the phrase/concept vocabulary that drives
+  `suggest_chart_type`, score prompts live, save back to `triggers.json`.
+- **LLM judge** — judge chart-type descriptions against prompts with `claude -p`.
+- **Guidance studio** — author the per-type **styling guidance** the server
+  delivers (the `<!-- TIPS -->` blocks in dgmo's `language-reference.md`, sliced
+  into `get_language_reference`): pick a type, edit how the AI is told to style
+  it, run a prompt against a committed dataset fixture (so inputs never move
+  between runs), and see the generated DGMO + rendered image side by side. The
+  picker doubles as a coverage bar; "Compare 3×" renders no-guidance vs your
+  tips for a by-eye check; Save validates and writes back to
+  `language-reference.md`.
+
+These tools are dev-only and never bundled into the published server. (The
+standalone `pnpm harness` and `pnpm studio` scripts still run a single tool each
+if you ever want one in isolation.)
+
 ## Contributing & releases
 
 Development setup and the release workflow live in [CONTRIBUTING.md](./CONTRIBUTING.md).

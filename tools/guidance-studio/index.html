@@ -1,0 +1,118 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>Guidance Studio · dgmo-mcp</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #181b22;
+        --line: #2a2f3a;
+        --fg: #d8dee9;
+        --muted: #8a93a6;
+        --good: #5fb37a;
+        --bad: #d9656a;
+        --warn: #d8a23a;
+        --accent: #5b8bd6;
+        --chip: #232834;
+      }
+      * { box-sizing: border-box; }
+      body {
+        margin: 0;
+        font: 13px/1.5 ui-sans-serif, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        height: 100vh;
+        display: flex;
+        flex-direction: column;
+      }
+      header {
+        padding: 10px 16px;
+        border-bottom: 1px solid var(--line);
+        background: var(--panel);
+        flex: none;
+      }
+      header h1 { font-size: 14px; margin: 0 0 2px; font-weight: 600; }
+      header .mission { color: var(--muted); font-size: 12px; }
+      main {
+        flex: 1;
+        min-height: 0;
+        display: grid;
+        grid-template-columns: 230px 1fr;
+      }
+      .picker {
+        border-right: 1px solid var(--line);
+        overflow-y: auto;
+        background: var(--panel);
+        padding: 8px;
+      }
+      .picker .count { color: var(--muted); font-size: 11px; padding: 4px 6px 8px; }
+      .picker button {
+        display: flex; align-items: center; gap: 8px;
+        width: 100%; text-align: left;
+        background: none; border: none; color: var(--fg);
+        padding: 5px 6px; border-radius: 5px; cursor: pointer;
+        font: inherit;
+      }
+      .picker button:hover { background: var(--chip); }
+      .picker button.active { background: var(--accent); color: #fff; }
+      .dot { width: 8px; height: 8px; border-radius: 50%; flex: none; }
+      .dot.has { background: var(--good); }
+      .dot.empty { background: var(--line); border: 1px solid var(--muted); }
+      .work { overflow-y: auto; padding: 16px; }
+      .empty-state { color: var(--muted); max-width: 540px; line-height: 1.6; }
+      section { margin-bottom: 18px; }
+      label.fld { display: block; color: var(--muted); font-size: 11px; margin-bottom: 4px; text-transform: uppercase; letter-spacing: .04em; }
+      textarea, input, select {
+        width: 100%; background: var(--bg); color: var(--fg);
+        border: 1px solid var(--line); border-radius: 5px; padding: 8px;
+        font: 12px/1.5 ui-monospace, Menlo, monospace;
+      }
+      textarea#tips { min-height: 96px; resize: vertical; }
+      .row { display: flex; gap: 10px; align-items: center; }
+      .row > * { flex: 1; }
+      .row > .narrow { flex: none; }
+      button.btn {
+        background: var(--accent); color: #fff; border: none;
+        border-radius: 5px; padding: 8px 16px; cursor: pointer; font: inherit; font-weight: 600;
+      }
+      button.btn.ghost { background: var(--chip); color: var(--fg); }
+      button.btn:disabled { opacity: .5; cursor: default; }
+      .unsaved { color: var(--warn); font-size: 11px; margin-left: 8px; }
+      .saved-ok { color: var(--good); font-size: 11px; margin-left: 8px; }
+      .saved-bad { color: var(--bad); font-size: 11px; margin-left: 8px; }
+      .result { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; }
+      .result .img { background: #fff; border-radius: 6px; min-height: 200px; display: flex; align-items: center; justify-content: center; }
+      .result .img img { max-width: 100%; max-height: 420px; }
+      pre {
+        background: var(--bg); border: 1px solid var(--line); border-radius: 6px;
+        padding: 10px; overflow: auto; max-height: 420px;
+        font: 11px/1.45 ui-monospace, Menlo, monospace; white-space: pre-wrap; word-break: break-word;
+      }
+      .diag { color: var(--bad); }
+      .checklist { list-style: none; padding: 0; margin: 6px 0 0; }
+      .checklist li { padding: 3px 0; cursor: pointer; }
+      .checklist input { width: auto; margin-right: 8px; }
+      details summary { cursor: pointer; color: var(--muted); margin: 6px 0; }
+      .grid3 { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
+      .grid3 .img { background: #fff; border-radius: 6px; min-height: 110px; display: flex; align-items: center; justify-content: center; }
+      .grid3 .img img { max-width: 100%; max-height: 150px; }
+      .arm-title { color: var(--muted); font-size: 11px; margin: 10px 0 4px; }
+      .spinner { color: var(--muted); font-size: 11px; }
+    </style>
+  </head>
+  <body>
+    <header>
+      <h1>Guidance Studio</h1>
+      <div class="mission" id="mission">
+        Edit how the AI is told to style a diagram type, then run a prompt to see the effect.
+      </div>
+    </header>
+    <main>
+      <nav class="picker" id="picker"></nav>
+      <div class="work" id="work"></div>
+    </main>
+    <script type="module" src="./main.ts"></script>
+  </body>
+</html>

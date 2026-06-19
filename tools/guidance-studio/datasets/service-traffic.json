@@ -1,0 +1,43 @@
+{
+  "id": "service-traffic",
+  "label": "Service-to-service traffic (req/s)",
+  "suitsTypes": [
+    "sankey",
+    "chord"
+  ],
+  "data": {
+    "unit": "requests/sec",
+    "flows": [
+      {
+        "from": "Gateway",
+        "to": "Auth",
+        "value": 1200
+      },
+      {
+        "from": "Gateway",
+        "to": "Catalog",
+        "value": 900
+      },
+      {
+        "from": "Gateway",
+        "to": "Cart",
+        "value": 600
+      },
+      {
+        "from": "Cart",
+        "to": "Payments",
+        "value": 320
+      },
+      {
+        "from": "Catalog",
+        "to": "Search",
+        "value": 540
+      },
+      {
+        "from": "Auth",
+        "to": "Users",
+        "value": 1100
+      }
+    ]
+  }
+}

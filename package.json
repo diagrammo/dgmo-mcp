@@ -42,12 +42,14 @@
     }
   },
   "scripts": {
-    "build": "tsup src/index.ts src/suggest/scoring.ts --format cjs,esm --dts",
-    "dev": "tsup src/index.ts src/suggest/scoring.ts --format cjs,esm --dts --watch",
+    "build": "tsup src/index.ts src/suggest/scoring.ts src/render-helpers.ts --format cjs,esm --dts",
+    "dev": "tsup src/index.ts src/suggest/scoring.ts src/render-helpers.ts --format cjs,esm --dts --watch",
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
+    "hub": "pnpm build && node tools/selection-harness/dump-registry.mjs && node tools/guidance-studio/dump-registry.mjs && vite tools",
     "harness": "node tools/selection-harness/dump-registry.mjs && vite tools/selection-harness",
+    "studio": "pnpm build && node tools/guidance-studio/dump-registry.mjs && vite tools/guidance-studio",
     "bundle": "bash scripts/bundle.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",

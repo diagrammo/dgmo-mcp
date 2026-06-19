@@ -1,0 +1,46 @@
+{
+  "id": "org-roster",
+  "label": "Engineering org roster",
+  "suitsTypes": [
+    "org"
+  ],
+  "data": {
+    "people": [
+      {
+        "name": "Dana Ruiz",
+        "title": "VP Engineering",
+        "reportsTo": null
+      },
+      {
+        "name": "Sam Okafor",
+        "title": "Dir. Platform",
+        "reportsTo": "Dana Ruiz"
+      },
+      {
+        "name": "Priya Nair",
+        "title": "Dir. Product Eng",
+        "reportsTo": "Dana Ruiz"
+      },
+      {
+        "name": "Leo Park",
+        "title": "EM, Infra",
+        "reportsTo": "Sam Okafor"
+      },
+      {
+        "name": "Mara Cohen",
+        "title": "EM, Data",
+        "reportsTo": "Sam Okafor"
+      },
+      {
+        "name": "Tariq Bell",
+        "title": "EM, Web",
+        "reportsTo": "Priya Nair"
+      },
+      {
+        "name": "Iris Vance",
+        "title": "EM, Mobile",
+        "reportsTo": "Priya Nair"
+      }
+    ]
+  }
+}

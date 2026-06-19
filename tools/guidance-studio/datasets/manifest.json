@@ -1,0 +1,62 @@
+[
+  {
+    "id": "sales-by-quarter-region",
+    "label": "Quarterly sales by region ($K)",
+    "suitsTypes": [
+      "bar",
+      "line"
+    ]
+  },
+  {
+    "id": "survey-funnel",
+    "label": "Signup funnel (visitors → paid)",
+    "suitsTypes": [
+      "funnel",
+      "pie"
+    ]
+  },
+  {
+    "id": "org-roster",
+    "label": "Engineering org roster",
+    "suitsTypes": [
+      "org"
+    ]
+  },
+  {
+    "id": "project-tasks",
+    "label": "Launch project tasks (timeline)",
+    "suitsTypes": [
+      "gantt"
+    ]
+  },
+  {
+    "id": "flight-routes",
+    "label": "Hub flight routes (airports)",
+    "suitsTypes": [
+      "map"
+    ]
+  },
+  {
+    "id": "tech-skills",
+    "label": "Team skills matrix (0–5)",
+    "suitsTypes": [
+      "heatmap",
+      "tech-radar"
+    ]
+  },
+  {
+    "id": "service-traffic",
+    "label": "Service-to-service traffic (req/s)",
+    "suitsTypes": [
+      "sankey",
+      "chord"
+    ]
+  },
+  {
+    "id": "release-milestones",
+    "label": "Product release milestones",
+    "suitsTypes": [
+      "timeline"
+    ]
+  }
+]

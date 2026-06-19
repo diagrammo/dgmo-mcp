@@ -1,0 +1,32 @@
+{
+  "id": "survey-funnel",
+  "label": "Signup funnel (visitors → paid)",
+  "suitsTypes": [
+    "funnel",
+    "pie"
+  ],
+  "data": {
+    "stages": [
+      {
+        "name": "Visited site",
+        "count": 48000
+      },
+      {
+        "name": "Signed up",
+        "count": 12400
+      },
+      {
+        "name": "Activated",
+        "count": 6100
+      },
+      {
+        "name": "Subscribed",
+        "count": 2300
+      },
+      {
+        "name": "Paid annual",
+        "count": 940
+      }
+    ]
+  }
+}

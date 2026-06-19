@@ -1,0 +1,179 @@
+{
+  "types": [
+    {
+      "id": "sequence",
+      "description": "Message / interaction flows",
+      "hasTips": true
+    },
+    {
+      "id": "infra",
+      "description": "Infrastructure traffic flow with RPS computation",
+      "hasTips": false
+    },
+    {
+      "id": "flowchart",
+      "description": "Decision trees and process flows",
+      "hasTips": true
+    },
+    {
+      "id": "state",
+      "description": "State machine / lifecycle transitions",
+      "hasTips": true
+    },
+    {
+      "id": "org",
+      "description": "Reporting hierarchy",
+      "hasTips": true
+    },
+    {
+      "id": "c4",
+      "description": "System architecture (context, container, component, deployment)",
+      "hasTips": true
+    },
+    {
+      "id": "er",
+      "description": "Database schemas and relationships",
+      "hasTips": true
+    },
+    {
+      "id": "class",
+      "description": "UML class hierarchies",
+      "hasTips": true
+    },
+    {
+      "id": "kanban",
+      "description": "Task board columns",
+      "hasTips": true
+    },
+    {
+      "id": "sitemap",
+      "description": "Site / app navigation structure",
+      "hasTips": false
+    },
+    {
+      "id": "gantt",
+      "description": "Project scheduling with task dependencies and milestones",
+      "hasTips": true
+    },
+    {
+      "id": "pert",
+      "description": "Project network with three-point estimates, critical path, and uncertainty (Beta-PERT, Monte Carlo)",
+      "hasTips": false
+    },
+    {
+      "id": "boxes-and-lines",
+      "description": "General-purpose node-edge diagrams with groups and tags",
+      "hasTips": false
+    },
+    {
+      "id": "timeline",
+      "description": "Events, eras, and date ranges",
+      "hasTips": true
+    },
+    {
+      "id": "bar",
+      "description": "Categorical comparisons",
+      "hasTips": true
+    },
+    {
+      "id": "scatter",
+      "description": "2D data points or bubble chart",
+      "hasTips": true
+    },
+    {
+      "id": "heatmap",
+      "description": "Matrix intensity visualization",
+      "hasTips": false
+    },
+    {
+      "id": "function",
+      "description": "Mathematical expressions",
+      "hasTips": false
+    },
+    {
+      "id": "sankey",
+      "description": "Flow / allocation visualization",
+      "hasTips": false
+    },
+    {
+      "id": "chord",
+      "description": "Circular flow relationships",
+      "hasTips": false
+    },
+    {
+      "id": "funnel",
+      "description": "Conversion pipeline",
+      "hasTips": true
+    },
+    {
+      "id": "slope",
+      "description": "Change between two periods",
+      "hasTips": false
+    },
+    {
+      "id": "wordcloud",
+      "description": "Term frequency visualization",
+      "hasTips": false
+    },
+    {
+      "id": "arc",
+      "description": "Network relationships",
+      "hasTips": false
+    },
+    {
+      "id": "venn",
+      "description": "Set overlaps",
+      "hasTips": false
+    },
+    {
+      "id": "quadrant",
+      "description": "2x2 positioning matrix",
+      "hasTips": false
+    },
+    {
+      "id": "mindmap",
+      "description": "Radial hierarchy of ideas branching from a central topic",
+      "hasTips": true
+    },
+    {
+      "id": "wireframe",
+      "description": "Low-fidelity UI layout with panels, controls, and annotations",
+      "hasTips": false
+    },
+    {
+      "id": "tech-radar",
+      "description": "Technology adoption quadrants (adopt/trial/assess/hold)",
+      "hasTips": false
+    },
+    {
+      "id": "cycle",
+      "description": "Cyclical process visualization (PDCA, OODA, DevOps loops)",
+      "hasTips": false
+    },
+    {
+      "id": "journey-map",
+      "description": "User experience flow with emotion scores, phases, and annotations",
+      "hasTips": false
+    },
+    {
+      "id": "pyramid",
+      "description": "Stacked hierarchy of layers with descriptions (Maslow, DIKW)",
+      "hasTips": false
+    },
+    {
+      "id": "ring",
+      "description": "Concentric rings showing nested or hierarchical categories (read core-out)",
+      "hasTips": false
+    },
+    {
+      "id": "raci",
+      "description": "Tasks × roles responsibility matrix with constraint linting",
+      "hasTips": false
+    },
+    {
+      "id": "map",
+      "description": "Geographic concept map: highlight/score regions, drop points of interest, connect with routes or edges",
+      "hasTips": true
+    }
+  ]
+}

@@ -1,0 +1,37 @@
+{
+  "id": "project-tasks",
+  "label": "Launch project tasks (timeline)",
+  "suitsTypes": [
+    "gantt"
+  ],
+  "data": {
+    "start": "2026-01-05",
+    "tasks": [
+      {
+        "name": "Discovery",
+        "start": "2026-01-05",
+        "durationDays": 10
+      },
+      {
+        "name": "Design",
+        "start": "2026-01-19",
+        "durationDays": 14
+      },
+      {
+        "name": "Build",
+        "start": "2026-02-02",
+        "durationDays": 28
+      },
+      {
+        "name": "QA",
+        "start": "2026-03-02",
+        "durationDays": 12
+      },
+      {
+        "name": "Launch",
+        "start": "2026-03-16",
+        "durationDays": 5
+      }
+    ]
+  }
+}

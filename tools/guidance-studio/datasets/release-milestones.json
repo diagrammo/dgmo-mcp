@@ -1,0 +1,31 @@
+{
+  "id": "release-milestones",
+  "label": "Product release milestones",
+  "suitsTypes": [
+    "timeline"
+  ],
+  "data": {
+    "milestones": [
+      {
+        "date": "2026-02",
+        "label": "Beta opens"
+      },
+      {
+        "date": "2026-04",
+        "label": "Public launch"
+      },
+      {
+        "date": "2026-07",
+        "label": "Mobile app"
+      },
+      {
+        "date": "2026-10",
+        "label": "Enterprise tier"
+      },
+      {
+        "date": "2027-01",
+        "label": "Marketplace"
+      }
+    ]
+  }
+}

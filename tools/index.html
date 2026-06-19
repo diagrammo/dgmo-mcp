@@ -1,0 +1,103 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1" />
+    <title>dgmo-mcp dev hub</title>
+    <style>
+      :root {
+        --bg: #0f1115;
+        --panel: #181b22;
+        --line: #2a2f3a;
+        --fg: #d8dee9;
+        --muted: #8a93a6;
+        --accent: #5b8bd6;
+      }
+      * { box-sizing: border-box; }
+      html, body { margin: 0; height: 100%; }
+      body {
+        font: 13px/1.45 ui-sans-serif, system-ui, sans-serif;
+        background: var(--bg);
+        color: var(--fg);
+        display: flex;
+        flex-direction: column;
+        height: 100vh;
+      }
+      nav {
+        flex: none;
+        display: flex;
+        align-items: center;
+        gap: 4px;
+        padding: 8px 14px;
+        background: var(--panel);
+        border-bottom: 1px solid var(--line);
+      }
+      nav .brand {
+        font-weight: 700;
+        margin-right: 14px;
+        letter-spacing: 0.02em;
+      }
+      nav .brand small { color: var(--muted); font-weight: 400; margin-left: 6px; }
+      nav button {
+        background: none;
+        border: 1px solid transparent;
+        color: var(--muted);
+        padding: 6px 14px;
+        border-radius: 6px;
+        cursor: pointer;
+        font: inherit;
+      }
+      nav button:hover { color: var(--fg); background: #20242e; }
+      nav button.active {
+        color: #fff;
+        background: var(--accent);
+      }
+      nav .hint { margin-left: auto; color: var(--muted); font-size: 11px; }
+      .frames { flex: 1; min-height: 0; position: relative; }
+      iframe {
+        position: absolute;
+        inset: 0;
+        width: 100%;
+        height: 100%;
+        border: 0;
+        background: var(--bg);
+      }
+    </style>
+  </head>
+  <body>
+    <nav>
+      <span class="brand">dgmo-mcp <small>dev hub</small></span>
+      <button data-tab="trigger" data-src="/selection-harness/index.html">Trigger tuning</button>
+      <button data-tab="judge" data-src="/selection-harness/judge.html">LLM judge</button>
+      <button data-tab="guidance" data-src="/guidance-studio/index.html">Guidance studio</button>
+      <span class="hint">one server · one port · switch with the tabs</span>
+    </nav>
+    <div class="frames" id="frames"></div>
+    <script>
+      // One iframe per tool, lazy-loaded on first activation and then kept alive
+      // (shown/hidden, never re-src'd) — so switching tabs never reloads a tool
+      // or throws away its in-page state (a run result, an edit in progress).
+      const buttons = [...document.querySelectorAll('nav button')];
+      const host = document.getElementById('frames');
+      const frames = {};
+      function show(tab) {
+        const btn = buttons.find((b) => b.dataset.tab === tab) || buttons[0];
+        tab = btn.dataset.tab;
+        buttons.forEach((b) => b.classList.toggle('active', b === btn));
+        if (!frames[tab]) {
+          const f = document.createElement('iframe');
+          f.title = btn.textContent;
+          f.src = btn.dataset.src; // load once, lazily
+          host.appendChild(f);
+          frames[tab] = f;
+        }
+        for (const [t, f] of Object.entries(frames))
+          f.style.display = t === tab ? 'block' : 'none';
+        if (location.hash !== '#' + tab)
+          history.replaceState(null, '', '#' + tab);
+      }
+      buttons.forEach((b) => (b.onclick = () => show(b.dataset.tab)));
+      show((location.hash || '#trigger').slice(1));
+    </script>
+  </body>
+</html>

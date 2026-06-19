@@ -1,0 +1,54 @@
+{
+  "id": "tech-skills",
+  "label": "Team skills matrix (0–5)",
+  "suitsTypes": [
+    "heatmap",
+    "tech-radar"
+  ],
+  "data": {
+    "scale": "0 (none) – 5 (expert)",
+    "people": [
+      "Dana",
+      "Sam",
+      "Priya",
+      "Leo"
+    ],
+    "skills": [
+      "TypeScript",
+      "Rust",
+      "SQL",
+      "Design",
+      "Ops"
+    ],
+    "scores": [
+      [
+        5,
+        2,
+        4,
+        3,
+        2
+      ],
+      [
+        4,
+        5,
+        3,
+        1,
+        5
+      ],
+      [
+        4,
+        1,
+        3,
+        5,
+        2
+      ],
+      [
+        3,
+        4,
+        5,
+        2,
+        4
+      ]
+    ]
+  }
+}

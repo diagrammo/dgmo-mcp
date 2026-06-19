@@ -1,0 +1,43 @@
+{
+  "id": "sales-by-quarter-region",
+  "label": "Quarterly sales by region ($K)",
+  "suitsTypes": [
+    "bar",
+    "line"
+  ],
+  "data": {
+    "unit": "USD thousands",
+    "quarters": [
+      "Q1",
+      "Q2",
+      "Q3",
+      "Q4"
+    ],
+    "regions": {
+      "North America": [
+        820,
+        910,
+        870,
+        1040
+      ],
+      "Europe": [
+        610,
+        645,
+        700,
+        760
+      ],
+      "Asia Pacific": [
+        430,
+        520,
+        640,
+        810
+      ],
+      "Latin America": [
+        180,
+        205,
+        240,
+        300
+      ]
+    }
+  }
+}

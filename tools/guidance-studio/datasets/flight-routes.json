@@ -1,0 +1,42 @@
+{
+  "id": "flight-routes",
+  "label": "Hub flight routes (airports)",
+  "suitsTypes": [
+    "map"
+  ],
+  "data": {
+    "hub": "JFK",
+    "routes": [
+      {
+        "from": "JFK",
+        "to": "LAX",
+        "label": "daily"
+      },
+      {
+        "from": "JFK",
+        "to": "LHR",
+        "label": "daily"
+      },
+      {
+        "from": "JFK",
+        "to": "ORD",
+        "label": "daily"
+      },
+      {
+        "from": "JFK",
+        "to": "MIA",
+        "label": "daily"
+      },
+      {
+        "from": "JFK",
+        "to": "SFO",
+        "label": "2x daily"
+      },
+      {
+        "from": "JFK",
+        "to": "CDG",
+        "label": "daily"
+      }
+    ]
+  }
+}

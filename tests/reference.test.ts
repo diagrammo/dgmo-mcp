@@ -140,3 +140,28 @@ describe('integration — all 45 chart-type ids resolve against the real referen
     });
   }
 });
+
+// AC11: authored TIPS reach the per-type MCP slice automatically — the slice is
+// inclusive of the TYPE marker, so no MCP code change is needed. This asserts the
+// delivery channel for the seed tranche; aliased ids (line→bar) inherit it.
+describe('per-type TIPS ride along the MCP slice (AC11)', () => {
+  const ref = workspaceReference();
+  const anchored = ref != null && /<!--\s*TYPE:/.test(ref);
+  // A few seed types known to be authored in this spec + an alias (pie→bar).
+  const seededWithTips = ['flowchart', 'map', 'bar', 'sequence', 'gantt'];
+
+  for (const id of seededWithTips) {
+    it(`get_language_reference slice for ${id} includes its TIPS block`, () => {
+      if (!anchored) return;
+      const block = extractSection(ref as string, id) ?? '';
+      expect(block).toMatch(/<!--\s*TIPS start\s*-->/);
+      expect(block).toMatch(/<!--\s*TIPS end\s*-->/);
+    });
+  }
+
+  it('an aliased id (pie→bar) inherits the parent block TIPS', () => {
+    if (!anchored) return;
+    const block = extractSection(ref as string, 'pie') ?? '';
+    expect(block).toMatch(/<!--\s*TIPS start\s*-->/);
+  });
+});
