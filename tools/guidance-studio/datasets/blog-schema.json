@@ -1,0 +1,113 @@
+{
+  "id": "blog-schema",
+  "label": "Blog database schema",
+  "suitsTypes": [
+    "er",
+    "class"
+  ],
+  "data": {
+    "entities": [
+      {
+        "name": "User",
+        "columns": [
+          {
+            "name": "id",
+            "type": "int",
+            "key": "pk"
+          },
+          {
+            "name": "email",
+            "type": "text"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "Post",
+        "columns": [
+          {
+            "name": "id",
+            "type": "int",
+            "key": "pk"
+          },
+          {
+            "name": "author_id",
+            "type": "int",
+            "key": "fk"
+          },
+          {
+            "name": "title",
+            "type": "text"
+          },
+          {
+            "name": "body",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "Comment",
+        "columns": [
+          {
+            "name": "id",
+            "type": "int",
+            "key": "pk"
+          },
+          {
+            "name": "post_id",
+            "type": "int",
+            "key": "fk"
+          },
+          {
+            "name": "user_id",
+            "type": "int",
+            "key": "fk"
+          },
+          {
+            "name": "body",
+            "type": "text"
+          }
+        ]
+      },
+      {
+        "name": "Tag",
+        "columns": [
+          {
+            "name": "id",
+            "type": "int",
+            "key": "pk"
+          },
+          {
+            "name": "name",
+            "type": "text"
+          }
+        ]
+      }
+    ],
+    "relationships": [
+      {
+        "from": "User",
+        "to": "Post",
+        "kind": "one-to-many"
+      },
+      {
+        "from": "Post",
+        "to": "Comment",
+        "kind": "one-to-many"
+      },
+      {
+        "from": "User",
+        "to": "Comment",
+        "kind": "one-to-many"
+      },
+      {
+        "from": "Post",
+        "to": "Tag",
+        "kind": "many-to-many"
+      }
+    ]
+  }
+}

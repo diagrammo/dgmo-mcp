@@ -1,0 +1,50 @@
+{
+  "id": "api-infra-traffic",
+  "label": "API infrastructure traffic (req/s)",
+  "suitsTypes": [
+    "infra"
+  ],
+  "data": {
+    "unit": "requests/sec",
+    "nodes": [
+      "CDN",
+      "Gateway",
+      "Auth",
+      "Catalog",
+      "Orders",
+      "Postgres"
+    ],
+    "flows": [
+      {
+        "from": "CDN",
+        "to": "Gateway",
+        "rps": 2000
+      },
+      {
+        "from": "Gateway",
+        "to": "Auth",
+        "rps": 1200
+      },
+      {
+        "from": "Gateway",
+        "to": "Catalog",
+        "rps": 900
+      },
+      {
+        "from": "Gateway",
+        "to": "Orders",
+        "rps": 600
+      },
+      {
+        "from": "Orders",
+        "to": "Postgres",
+        "rps": 450
+      },
+      {
+        "from": "Catalog",
+        "to": "Postgres",
+        "rps": 700
+      }
+    ]
+  }
+}

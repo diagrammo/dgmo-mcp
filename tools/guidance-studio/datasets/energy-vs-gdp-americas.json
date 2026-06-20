@@ -1,0 +1,112 @@
+{
+  "id": "energy-vs-gdp-americas",
+  "label": "Energy use vs GDP per capita (Americas)",
+  "suitsTypes": [
+    "scatter",
+    "quadrant"
+  ],
+  "data": {
+    "xUnit": "GDP per capita (USD)",
+    "yUnit": "Electricity use per capita (kWh/yr)",
+    "regions": {
+      "North America": [
+        {
+          "country": "United States",
+          "gdp": 76300,
+          "energy": 12700
+        },
+        {
+          "country": "Canada",
+          "gdp": 53400,
+          "energy": 14400
+        },
+        {
+          "country": "Mexico",
+          "gdp": 11500,
+          "energy": 2300
+        }
+      ],
+      "Central America": [
+        {
+          "country": "Panama",
+          "gdp": 17900,
+          "energy": 2350
+        },
+        {
+          "country": "Costa Rica",
+          "gdp": 13400,
+          "energy": 2050
+        },
+        {
+          "country": "Guatemala",
+          "gdp": 5400,
+          "energy": 650
+        },
+        {
+          "country": "Honduras",
+          "gdp": 3050,
+          "energy": 900
+        }
+      ],
+      "Caribbean": [
+        {
+          "country": "Trinidad & Tobago",
+          "gdp": 18400,
+          "energy": 6400
+        },
+        {
+          "country": "Dominican Republic",
+          "gdp": 10100,
+          "energy": 1750
+        },
+        {
+          "country": "Jamaica",
+          "gdp": 6050,
+          "energy": 1250
+        }
+      ],
+      "South America": [
+        {
+          "country": "Uruguay",
+          "gdp": 17000,
+          "energy": 3050
+        },
+        {
+          "country": "Chile",
+          "gdp": 16500,
+          "energy": 3900
+        },
+        {
+          "country": "Argentina",
+          "gdp": 13000,
+          "energy": 3200
+        },
+        {
+          "country": "Brazil",
+          "gdp": 8900,
+          "energy": 2750
+        },
+        {
+          "country": "Peru",
+          "gdp": 7100,
+          "energy": 1450
+        },
+        {
+          "country": "Colombia",
+          "gdp": 6650,
+          "energy": 1350
+        },
+        {
+          "country": "Paraguay",
+          "gdp": 6000,
+          "energy": 1650
+        },
+        {
+          "country": "Bolivia",
+          "gdp": 3600,
+          "energy": 850
+        }
+      ]
+    }
+  }
+}

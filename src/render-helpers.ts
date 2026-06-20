@@ -12,9 +12,11 @@
 import {
   render,
   parseDgmo,
+  parseDgmoChartType,
   formatDgmoError,
   INVALID_COLOR_CODE,
 } from '@diagrammo/dgmo/advanced';
+import { validateFlowchartStructure } from './flowchart-structure.js';
 import { Resvg } from '@resvg/resvg-js';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
@@ -82,6 +84,12 @@ export async function renderPipeline(
   opts: { theme: 'light' | 'dark' | 'transparent'; palette: string }
 ): Promise<RenderPipelineResult> {
   const { diagnostics } = parseDgmo(dgmo);
+  // Flowcharts get an extra structural gate (orphan nodes, one-way decisions);
+  // these are warnings in the library but the MCP refuses them so the authoring
+  // LLM is forced to produce a valid flow.
+  if (parseDgmoChartType(dgmo) === 'flowchart') {
+    diagnostics.push(...validateFlowchartStructure(dgmo));
+  }
   // Hard gate: block on any error AND on any invalid-color diagnostic, even
   // when the parser classed it a warning (CSS color names like `crimson` are
   // warnings in the library so the app/CLI degrade gracefully, but the MCP

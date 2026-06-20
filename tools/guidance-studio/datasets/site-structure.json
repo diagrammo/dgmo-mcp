@@ -1,0 +1,48 @@
+{
+  "id": "site-structure",
+  "label": "Marketing site structure",
+  "suitsTypes": [
+    "sitemap"
+  ],
+  "data": {
+    "root": "Home",
+    "pages": [
+      {
+        "name": "Home",
+        "parent": null
+      },
+      {
+        "name": "Products",
+        "parent": "Home"
+      },
+      {
+        "name": "Product Detail",
+        "parent": "Products"
+      },
+      {
+        "name": "Pricing",
+        "parent": "Home"
+      },
+      {
+        "name": "Docs",
+        "parent": "Home"
+      },
+      {
+        "name": "Guides",
+        "parent": "Docs"
+      },
+      {
+        "name": "API Reference",
+        "parent": "Docs"
+      },
+      {
+        "name": "Blog",
+        "parent": "Home"
+      },
+      {
+        "name": "Contact",
+        "parent": "Home"
+      }
+    ]
+  }
+}

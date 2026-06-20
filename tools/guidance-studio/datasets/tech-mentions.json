@@ -1,0 +1,59 @@
+{
+  "id": "tech-mentions",
+  "label": "Technology mentions (weights)",
+  "suitsTypes": [
+    "wordcloud"
+  ],
+  "data": {
+    "terms": [
+      {
+        "text": "TypeScript",
+        "weight": 95
+      },
+      {
+        "text": "AI",
+        "weight": 88
+      },
+      {
+        "text": "React",
+        "weight": 80
+      },
+      {
+        "text": "Rust",
+        "weight": 70
+      },
+      {
+        "text": "Postgres",
+        "weight": 60
+      },
+      {
+        "text": "Docker",
+        "weight": 55
+      },
+      {
+        "text": "Kubernetes",
+        "weight": 52
+      },
+      {
+        "text": "GraphQL",
+        "weight": 40
+      },
+      {
+        "text": "Vite",
+        "weight": 35
+      },
+      {
+        "text": "Edge",
+        "weight": 33
+      },
+      {
+        "text": "WASM",
+        "weight": 30
+      },
+      {
+        "text": "Tauri",
+        "weight": 28
+      }
+    ]
+  }
+}

@@ -2,13 +2,13 @@
   "types": [
     {
       "id": "sequence",
-      "description": "Message / interaction flows",
+      "description": "Message request and response interaction flows",
       "hasTips": true
     },
     {
       "id": "infra",
       "description": "Infrastructure traffic flow with RPS computation",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "flowchart",
@@ -48,7 +48,7 @@
     {
       "id": "sitemap",
       "description": "Site / app navigation structure",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "gantt",
@@ -58,12 +58,12 @@
     {
       "id": "pert",
       "description": "Project network with three-point estimates, critical path, and uncertainty (Beta-PERT, Monte Carlo)",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "boxes-and-lines",
       "description": "General-purpose node-edge diagrams with groups and tags",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "timeline",
@@ -72,7 +72,7 @@
     },
     {
       "id": "bar",
-      "description": "Categorical comparisons",
+      "description": "Categorical comparisons for 3 - 5 figures",
       "hasTips": true
     },
     {
@@ -83,22 +83,22 @@
     {
       "id": "heatmap",
       "description": "Matrix intensity visualization",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "function",
       "description": "Mathematical expressions",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "sankey",
       "description": "Flow / allocation visualization",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "chord",
       "description": "Circular flow relationships",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "funnel",
@@ -107,28 +107,28 @@
     },
     {
       "id": "slope",
-      "description": "Change between two periods",
-      "hasTips": false
+      "description": "Change between 2 time periods",
+      "hasTips": true
     },
     {
       "id": "wordcloud",
       "description": "Term frequency visualization",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "arc",
       "description": "Network relationships",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "venn",
       "description": "Set overlaps",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "quadrant",
       "description": "2x2 positioning matrix",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "mindmap",
@@ -138,37 +138,37 @@
     {
       "id": "wireframe",
       "description": "Low-fidelity UI layout with panels, controls, and annotations",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "tech-radar",
       "description": "Technology adoption quadrants (adopt/trial/assess/hold)",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "cycle",
       "description": "Cyclical process visualization (PDCA, OODA, DevOps loops)",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "journey-map",
       "description": "User experience flow with emotion scores, phases, and annotations",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "pyramid",
       "description": "Stacked hierarchy of layers with descriptions (Maslow, DIKW)",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "ring",
       "description": "Concentric rings showing nested or hierarchical categories (read core-out)",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "raci",
       "description": "Tasks × roles responsibility matrix with constraint linting",
-      "hasTips": false
+      "hasTips": true
     },
     {
       "id": "map",

@@ -1,0 +1,44 @@
+{
+  "id": "product-ideas",
+  "label": "Product idea map",
+  "suitsTypes": [
+    "mindmap"
+  ],
+  "data": {
+    "central": "Mobile App v2",
+    "branches": [
+      {
+        "name": "Onboarding",
+        "children": [
+          "Guided tour",
+          "Sample data",
+          "Checklist"
+        ]
+      },
+      {
+        "name": "Performance",
+        "children": [
+          "Lazy load",
+          "Caching",
+          "Smaller bundle"
+        ]
+      },
+      {
+        "name": "Collaboration",
+        "children": [
+          "Comments",
+          "Sharing",
+          "Presence"
+        ]
+      },
+      {
+        "name": "Monetization",
+        "children": [
+          "Pro tier",
+          "Team plan",
+          "Usage limits"
+        ]
+      }
+    ]
+  }
+}

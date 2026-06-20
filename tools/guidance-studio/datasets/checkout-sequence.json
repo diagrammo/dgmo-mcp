@@ -1,0 +1,47 @@
+{
+  "id": "checkout-sequence",
+  "label": "Checkout message flow",
+  "suitsTypes": [
+    "sequence"
+  ],
+  "data": {
+    "participants": [
+      "User",
+      "Web App",
+      "Payment API",
+      "Bank"
+    ],
+    "messages": [
+      {
+        "from": "User",
+        "to": "Web App",
+        "text": "Place order"
+      },
+      {
+        "from": "Web App",
+        "to": "Payment API",
+        "text": "Charge $42.00"
+      },
+      {
+        "from": "Payment API",
+        "to": "Bank",
+        "text": "Authorize"
+      },
+      {
+        "from": "Bank",
+        "to": "Payment API",
+        "text": "Approved"
+      },
+      {
+        "from": "Payment API",
+        "to": "Web App",
+        "text": "Payment ok"
+      },
+      {
+        "from": "Web App",
+        "to": "User",
+        "text": "Order confirmed"
+      }
+    ]
+  }
+}

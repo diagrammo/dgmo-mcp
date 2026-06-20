@@ -1,0 +1,50 @@
+{
+  "id": "order-lifecycle",
+  "label": "Order lifecycle (states)",
+  "suitsTypes": [
+    "state"
+  ],
+  "data": {
+    "initial": "Cart",
+    "states": [
+      "Cart",
+      "Pending Payment",
+      "Paid",
+      "Shipped",
+      "Delivered",
+      "Cancelled"
+    ],
+    "transitions": [
+      {
+        "from": "Cart",
+        "to": "Pending Payment",
+        "on": "checkout"
+      },
+      {
+        "from": "Pending Payment",
+        "to": "Paid",
+        "on": "payment ok"
+      },
+      {
+        "from": "Pending Payment",
+        "to": "Cancelled",
+        "on": "payment failed"
+      },
+      {
+        "from": "Paid",
+        "to": "Shipped",
+        "on": "fulfilled"
+      },
+      {
+        "from": "Shipped",
+        "to": "Delivered",
+        "on": "received"
+      },
+      {
+        "from": "Paid",
+        "to": "Cancelled",
+        "on": "refunded"
+      }
+    ]
+  }
+}

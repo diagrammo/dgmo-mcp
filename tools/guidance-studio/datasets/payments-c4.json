@@ -1,0 +1,59 @@
+{
+  "id": "payments-c4",
+  "label": "Payments platform (C4)",
+  "suitsTypes": [
+    "c4"
+  ],
+  "data": {
+    "system": "Payments Platform",
+    "actors": [
+      "Customer",
+      "Merchant"
+    ],
+    "containers": [
+      {
+        "name": "Web Checkout",
+        "tech": "React"
+      },
+      {
+        "name": "Payments API",
+        "tech": "Node"
+      },
+      {
+        "name": "Ledger",
+        "tech": "Postgres"
+      },
+      {
+        "name": "Fraud Service",
+        "tech": "Python"
+      }
+    ],
+    "relationships": [
+      {
+        "from": "Customer",
+        "to": "Web Checkout",
+        "label": "pays via"
+      },
+      {
+        "from": "Web Checkout",
+        "to": "Payments API",
+        "label": "POST charge"
+      },
+      {
+        "from": "Payments API",
+        "to": "Ledger",
+        "label": "records"
+      },
+      {
+        "from": "Payments API",
+        "to": "Fraud Service",
+        "label": "screens"
+      },
+      {
+        "from": "Merchant",
+        "to": "Payments API",
+        "label": "reconciles"
+      }
+    ]
+  }
+}

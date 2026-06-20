@@ -1,0 +1,54 @@
+{
+  "id": "audience-overlap",
+  "label": "Audience set overlaps",
+  "suitsTypes": [
+    "venn"
+  ],
+  "data": {
+    "sets": [
+      {
+        "name": "Newsletter",
+        "size": 5200
+      },
+      {
+        "name": "App Users",
+        "size": 8100
+      },
+      {
+        "name": "Paid",
+        "size": 1900
+      }
+    ],
+    "intersections": [
+      {
+        "sets": [
+          "Newsletter",
+          "App Users"
+        ],
+        "size": 2400
+      },
+      {
+        "sets": [
+          "App Users",
+          "Paid"
+        ],
+        "size": 1200
+      },
+      {
+        "sets": [
+          "Newsletter",
+          "Paid"
+        ],
+        "size": 800
+      },
+      {
+        "sets": [
+          "Newsletter",
+          "App Users",
+          "Paid"
+        ],
+        "size": 500
+      }
+    ]
+  }
+}

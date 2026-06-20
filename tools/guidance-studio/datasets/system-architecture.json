@@ -1,0 +1,44 @@
+{
+  "id": "system-architecture",
+  "label": "Web system architecture",
+  "suitsTypes": [
+    "boxes-and-lines"
+  ],
+  "data": {
+    "boxes": [
+      "Browser",
+      "Load Balancer",
+      "Web Server",
+      "App Server",
+      "Cache",
+      "Database",
+      "Object Store"
+    ],
+    "links": [
+      {
+        "from": "Browser",
+        "to": "Load Balancer"
+      },
+      {
+        "from": "Load Balancer",
+        "to": "Web Server"
+      },
+      {
+        "from": "Web Server",
+        "to": "App Server"
+      },
+      {
+        "from": "App Server",
+        "to": "Cache"
+      },
+      {
+        "from": "App Server",
+        "to": "Database"
+      },
+      {
+        "from": "App Server",
+        "to": "Object Store"
+      }
+    ]
+  }
+}
