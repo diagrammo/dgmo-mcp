@@ -3,7 +3,8 @@
   "label": "Signup funnel (visitors → paid)",
   "suitsTypes": [
     "funnel",
-    "pie"
+    "pie",
+    "pyramid"
   ],
   "data": {
     "stages": [

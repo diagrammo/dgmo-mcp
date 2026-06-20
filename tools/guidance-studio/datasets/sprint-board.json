@@ -1,0 +1,45 @@
+{
+  "id": "sprint-board",
+  "label": "Sprint board (kanban)",
+  "suitsTypes": [
+    "kanban"
+  ],
+  "data": {
+    "columns": [
+      "Backlog",
+      "In Progress",
+      "Review",
+      "Done"
+    ],
+    "cards": [
+      {
+        "title": "Login API",
+        "column": "In Progress",
+        "assignee": "Sam"
+      },
+      {
+        "title": "Password reset",
+        "column": "Backlog"
+      },
+      {
+        "title": "Dark mode",
+        "column": "Review",
+        "assignee": "Priya"
+      },
+      {
+        "title": "Onboarding flow",
+        "column": "In Progress",
+        "assignee": "Leo"
+      },
+      {
+        "title": "Billing page",
+        "column": "Done",
+        "assignee": "Mara"
+      },
+      {
+        "title": "Search v2",
+        "column": "Backlog"
+      }
+    ]
+  }
+}

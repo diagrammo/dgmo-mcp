@@ -12,7 +12,8 @@
     "label": "Signup funnel (visitors → paid)",
     "suitsTypes": [
       "funnel",
-      "pie"
+      "pie",
+      "pyramid"
     ]
   },
   {
@@ -26,7 +27,8 @@
     "id": "project-tasks",
     "label": "Launch project tasks (timeline)",
     "suitsTypes": [
-      "gantt"
+      "gantt",
+      "pert"
     ]
   },
   {
@@ -49,7 +51,16 @@
     "label": "Service-to-service traffic (req/s)",
     "suitsTypes": [
       "sankey",
-      "chord"
+      "chord",
+      "arc"
+    ]
+  },
+  {
+    "id": "energy-vs-gdp-americas",
+    "label": "Energy use vs GDP per capita (Americas)",
+    "suitsTypes": [
+      "scatter",
+      "quadrant"
     ]
   },
   {
@@ -57,6 +68,119 @@
     "label": "Product release milestones",
     "suitsTypes": [
       "timeline"
+    ]
+  },
+  {
+    "id": "checkout-sequence",
+    "label": "Checkout message flow",
+    "suitsTypes": [
+      "sequence"
+    ]
+  },
+  {
+    "id": "api-infra-traffic",
+    "label": "API infrastructure traffic (req/s)",
+    "suitsTypes": [
+      "infra"
+    ]
+  },
+  {
+    "id": "order-lifecycle",
+    "label": "Order lifecycle (states)",
+    "suitsTypes": [
+      "state"
+    ]
+  },
+  {
+    "id": "payments-c4",
+    "label": "Payments platform (C4)",
+    "suitsTypes": [
+      "c4"
+    ]
+  },
+  {
+    "id": "blog-schema",
+    "label": "Blog database schema",
+    "suitsTypes": [
+      "er",
+      "class"
+    ]
+  },
+  {
+    "id": "sprint-board",
+    "label": "Sprint board (kanban)",
+    "suitsTypes": [
+      "kanban"
+    ]
+  },
+  {
+    "id": "site-structure",
+    "label": "Marketing site structure",
+    "suitsTypes": [
+      "sitemap"
+    ]
+  },
+  {
+    "id": "system-architecture",
+    "label": "Web system architecture",
+    "suitsTypes": [
+      "boxes-and-lines"
+    ]
+  },
+  {
+    "id": "market-share-shift",
+    "label": "Market share shift (2 periods)",
+    "suitsTypes": [
+      "slope"
+    ]
+  },
+  {
+    "id": "tech-mentions",
+    "label": "Technology mentions (weights)",
+    "suitsTypes": [
+      "wordcloud"
+    ]
+  },
+  {
+    "id": "audience-overlap",
+    "label": "Audience set overlaps",
+    "suitsTypes": [
+      "venn"
+    ]
+  },
+  {
+    "id": "product-ideas",
+    "label": "Product idea map",
+    "suitsTypes": [
+      "mindmap"
+    ]
+  },
+  {
+    "id": "improvement-cycle",
+    "label": "Continuous improvement cycle",
+    "suitsTypes": [
+      "cycle"
+    ]
+  },
+  {
+    "id": "onboarding-journey",
+    "label": "User onboarding journey",
+    "suitsTypes": [
+      "journey-map"
+    ]
+  },
+  {
+    "id": "budget-breakdown",
+    "label": "Department budget breakdown",
+    "suitsTypes": [
+      "ring"
+    ]
+  },
+  {
+    "id": "raci-matrix",
+    "label": "Project RACI matrix",
+    "suitsTypes": [
+      "raci"
     ]
   }
 ]

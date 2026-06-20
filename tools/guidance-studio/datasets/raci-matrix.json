@@ -1,0 +1,53 @@
+{
+  "id": "raci-matrix",
+  "label": "Project RACI matrix",
+  "suitsTypes": [
+    "raci"
+  ],
+  "data": {
+    "legend": "R responsible, A accountable, C consulted, I informed",
+    "roles": [
+      "PM",
+      "Eng Lead",
+      "Designer",
+      "QA"
+    ],
+    "tasks": [
+      {
+        "task": "Define requirements",
+        "PM": "A",
+        "Eng Lead": "C",
+        "Designer": "C",
+        "QA": "I"
+      },
+      {
+        "task": "Build feature",
+        "PM": "I",
+        "Eng Lead": "R",
+        "Designer": "C",
+        "QA": "I"
+      },
+      {
+        "task": "Design UI",
+        "PM": "C",
+        "Eng Lead": "I",
+        "Designer": "R",
+        "QA": "I"
+      },
+      {
+        "task": "Test release",
+        "PM": "I",
+        "Eng Lead": "C",
+        "Designer": "I",
+        "QA": "R"
+      },
+      {
+        "task": "Approve launch",
+        "PM": "A",
+        "Eng Lead": "C",
+        "Designer": "I",
+        "QA": "C"
+      }
+    ]
+  }
+}

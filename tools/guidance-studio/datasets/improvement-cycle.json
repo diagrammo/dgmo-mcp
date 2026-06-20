@@ -1,0 +1,27 @@
+{
+  "id": "improvement-cycle",
+  "label": "Continuous improvement cycle",
+  "suitsTypes": [
+    "cycle"
+  ],
+  "data": {
+    "stages": [
+      {
+        "name": "Plan",
+        "note": "Define goal & metric"
+      },
+      {
+        "name": "Do",
+        "note": "Run the experiment"
+      },
+      {
+        "name": "Check",
+        "note": "Measure results"
+      },
+      {
+        "name": "Act",
+        "note": "Adopt or adjust"
+      }
+    ]
+  }
+}

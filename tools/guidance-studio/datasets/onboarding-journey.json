@@ -1,0 +1,38 @@
+{
+  "id": "onboarding-journey",
+  "label": "User onboarding journey",
+  "suitsTypes": [
+    "journey-map"
+  ],
+  "data": {
+    "persona": "New user",
+    "sentimentScale": "1 (frustrated) – 5 (delighted)",
+    "stages": [
+      {
+        "stage": "Discover",
+        "action": "Finds the app",
+        "sentiment": 3
+      },
+      {
+        "stage": "Sign up",
+        "action": "Creates account",
+        "sentiment": 4
+      },
+      {
+        "stage": "Setup",
+        "action": "Imports data",
+        "sentiment": 2
+      },
+      {
+        "stage": "First value",
+        "action": "Builds first diagram",
+        "sentiment": 5
+      },
+      {
+        "stage": "Habit",
+        "action": "Returns weekly",
+        "sentiment": 4
+      }
+    ]
+  }
+}

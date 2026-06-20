@@ -25,6 +25,7 @@ import {
 // built helper). Re-exported below to preserve the prior public surface.
 import { svgToPngBase64, renderPipeline } from './render-helpers.js';
 export { renderPipeline } from './render-helpers.js';
+import { validateFlowchartStructure } from './flowchart-structure.js';
 // Public entry: the shared resolve·fallback·warn seam (Story 110.2). Imported
 // here so the MCP layer can surface the palette-fallback warning that render()
 // would otherwise swallow.
@@ -668,6 +669,11 @@ server.tool(
   async ({ dgmo }) => {
     const chartType = parseDgmoChartType(dgmo);
     const { diagnostics } = parseDgmo(dgmo);
+    // Flowcharts get an extra structural gate (orphan nodes, one-way decisions),
+    // mirroring the render gate so validate and render agree.
+    if (chartType === 'flowchart') {
+      diagnostics.push(...validateFlowchartStructure(dgmo));
+    }
     // Invalid colors (hex/CSS) are blocking here even when the library classed
     // them a warning — named palette colors are mandatory (see render gate).
     const isBlocking = (d: (typeof diagnostics)[number]) =>
