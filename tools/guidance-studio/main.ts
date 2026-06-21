@@ -48,6 +48,33 @@ function validationStatus(promptText: string): { glyph: string; label: string } 
   return { glyph: '✓', label: `validated${on} — parses, renders, intent good` };
 }
 
+// Pre-rendered gallery (built by build-gallery.mjs, served at /studio/gallery):
+// the persisted DGMO + render for every type × starter prompt, so a prompt can
+// be inspected WITHOUT a live `claude -p` run. Fetched once and cached.
+interface GalleryEntry {
+  idx: number;
+  prompt: string;
+  dgmo: string;
+  img: string | null;
+  valid: boolean;
+  intent: string;
+  render: string;
+  error: string | null;
+}
+let galleryCache: Record<string, GalleryEntry[]> | null = null;
+async function loadGallery(): Promise<Record<string, GalleryEntry[]>> {
+  if (galleryCache) return galleryCache;
+  try {
+    galleryCache = (await fetch('/studio/gallery').then((r) => r.json())) as Record<
+      string,
+      GalleryEntry[]
+    >;
+  } catch {
+    galleryCache = {};
+  }
+  return galleryCache ?? {};
+}
+
 interface TypeEntry {
   id: string;
   description: string;
@@ -265,71 +292,145 @@ async function selectType(id: string): Promise<void> {
   // Remembered prompt/dataset for this type (browser-local), if any.
   const pref = loadPrefs()[id] ?? {};
 
-  // --- prompt + dataset ---
+  // --- prompts ---
   const runSec = el('section');
-  runSec.appendChild(el('label', { className: 'fld' }, 'Prompt'));
+  runSec.appendChild(
+    el('label', { className: 'fld' }, 'Prompts — click one to view its saved DGMO + render')
+  );
 
   // Per-type prompt list ([0] dataset-grounded, rest self-contained scenarios).
-  const typePrompts: string[] =
-    defaultPrompts[id]?.length
-      ? defaultPrompts[id]
-      : [`Make a ${id} diagram of the sample data.`];
-  const startIdx = Math.min(
+  // Mutable copy so "+ Add prompt" can append without a reload.
+  const typePrompts: string[] = defaultPrompts[id]?.length
+    ? [...defaultPrompts[id]]
+    : [`Make a ${id} diagram of the sample data.`];
+  let activeIdx = Math.min(
     Math.max(pref.promptIdx ?? 0, 0),
     typePrompts.length - 1
   );
 
-  const truncate = (s: string, n: number): string =>
-    s.length > n ? s.slice(0, n - 1) + '…' : s;
-  const promptSelect = el('select', { id: 'prompt-select' }) as HTMLSelectElement;
-  typePrompts.forEach((p, i) => {
-    // Prefix each option with its persisted validation glyph so the studio
-    // surfaces the validation effort right in the picker.
-    const { glyph } = validationStatus(p);
-    promptSelect.appendChild(
-      el('option', {
-        value: String(i),
-        textContent: `${glyph} ${i + 1}. ${truncate(p, 78)}`,
-      })
-    );
-  });
-  promptSelect.value = String(startIdx);
-  runSec.appendChild(promptSelect);
-
+  // Editable copy of the active prompt — what Run/Compare actually send (lets
+  // you tweak a prompt before a live run without disturbing the saved list).
   const prompt = el('input', {
     id: 'prompt',
-    value: pref.prompt ?? typePrompts[startIdx],
+    value: pref.prompt ?? typePrompts[activeIdx],
   }) as HTMLInputElement;
-  // Per-prompt validation status (persisted in prompt-validation.json) shown
-  // under the input; refreshes as the prompt text changes (an edit → unvalidated).
-  const validNote = el('div', {
-    id: 'prompt-validation',
-    className: 'count',
-    style: 'padding:4px 2px 0',
-  });
+
+  // Clickable prompt list (replaces the old <select>). Each row shows its
+  // persisted validation glyph; clicking shows that prompt's saved gallery.
+  const promptList = el('div', { className: 'prompt-list', id: 'prompt-list' });
+  runSec.appendChild(promptList);
+
+  // Per-prompt validation status (persisted) shown under the edit box; refreshes
+  // as the edited prompt text changes (an edit → unvalidated).
+  const validNote = el('div', { className: 'count', id: 'prompt-validation', style: 'padding:4px 2px 0' });
   const refreshValidNote = (): void => {
     const { glyph, label } = validationStatus(prompt.value);
     validNote.textContent = `${glyph} ${label}`;
     validNote.style.color =
-      glyph === '✓'
-        ? 'var(--ok, #3a9)'
-        : glyph === '•'
-          ? 'var(--muted, #888)'
-          : 'var(--warn)';
+      glyph === '✓' ? 'var(--good)' : glyph === '•' ? 'var(--muted)' : 'var(--warn)';
   };
+
+  function renderPromptList(): void {
+    promptList.innerHTML = '';
+    typePrompts.forEach((p, i) => {
+      const { glyph } = validationStatus(p);
+      const row = el('button', {
+        className: 'prompt-row' + (i === activeIdx ? ' active' : ''),
+        type: 'button',
+      });
+      row.appendChild(el('span', { className: 'pglyph' }, glyph));
+      row.appendChild(el('span', { className: 'pnum' }, `${i + 1}.`));
+      row.appendChild(el('span', {}, p));
+      row.onclick = () => selectPrompt(i);
+      promptList.appendChild(row);
+    });
+    // "+ Add prompt" affordance.
+    const add = el('button', {
+      className: 'prompt-row add',
+      type: 'button',
+    });
+    add.appendChild(el('span', { className: 'pglyph' }, '＋'));
+    add.appendChild(el('span', {}, 'Add a prompt for this type…'));
+    add.onclick = () => openAddPrompt();
+    promptList.appendChild(add);
+  }
+
+  // selectPrompt + showGallery + openAddPrompt are declared (hoisted) here but
+  // reference resultSec/updateStale defined below — only ever CALLED after the
+  // full section is built (initial call is at the end of selectType).
+  function selectPrompt(i: number): void {
+    activeIdx = i;
+    prompt.value = typePrompts[i];
+    savePref(id, { promptIdx: i, prompt: typePrompts[i] });
+    renderPromptList();
+    refreshValidNote();
+    void showGallery(i);
+    updateStale();
+  }
+
+  async function showGallery(i: number): Promise<void> {
+    const g = await loadGallery();
+    const entry = g[id]?.[i] ?? null;
+    renderGalleryEntry(resultSec, entry, typePrompts[i], id);
+  }
+
+  function openAddPrompt(): void {
+    const row = el('div', { className: 'row', style: 'margin:4px 0' });
+    const inp = el('input', {
+      placeholder: `New ${id} prompt — a natural instruction…`,
+    }) as HTMLInputElement;
+    const addBtn = el('button', {
+      className: 'btn narrow',
+      textContent: 'Add',
+    }) as HTMLButtonElement;
+    const cancel = el('button', {
+      className: 'btn ghost narrow',
+      textContent: 'Cancel',
+    }) as HTMLButtonElement;
+    const status = el('span', { className: 'count', style: 'flex:none' });
+    row.append(inp, addBtn, cancel, status);
+    promptList.appendChild(row);
+    inp.focus();
+    cancel.onclick = () => renderPromptList();
+    const submit = async (): Promise<void> => {
+      const text = inp.value.trim();
+      if (!text) {
+        status.textContent = 'enter a prompt first';
+        return;
+      }
+      addBtn.disabled = true;
+      status.textContent = 'saving…';
+      try {
+        const r = await fetch('/studio/prompts', {
+          method: 'POST',
+          headers: { 'content-type': 'application/json' },
+          body: JSON.stringify({ type: id, prompt: text }),
+        }).then((x) => x.json());
+        if (!r.ok) throw new Error(r.reason ?? 'rejected');
+        // Adopt the server's authoritative list, keep the in-memory default in
+        // sync, then select the new prompt.
+        typePrompts.length = 0;
+        typePrompts.push(...(r.prompts as string[]));
+        defaultPrompts[id] = [...typePrompts];
+        selectPrompt(typePrompts.length - 1);
+      } catch (err) {
+        addBtn.disabled = false;
+        status.textContent = `✗ ${String(err)}`;
+      }
+    };
+    addBtn.onclick = submit;
+    inp.onkeydown = (e) => {
+      if ((e as KeyboardEvent).key === 'Enter') void submit();
+    };
+  }
+
   prompt.oninput = () => {
     savePref(id, { prompt: prompt.value });
     refreshValidNote();
-  };
-  // Switching the dropdown loads that prompt into the editable input and
-  // remembers the choice; editing the input afterward overrides it (saved above).
-  promptSelect.onchange = () => {
-    const i = Number(promptSelect.value);
-    prompt.value = typePrompts[i];
-    savePref(id, { promptIdx: i, prompt: typePrompts[i] });
-    refreshValidNote();
     updateStale();
   };
+  renderPromptList();
+  runSec.appendChild(el('label', { className: 'fld', style: 'margin-top:8px' }, 'Edit the selected prompt (for a live Run)'));
   runSec.appendChild(prompt);
   runSec.appendChild(validNote);
   refreshValidNote();
@@ -450,9 +551,11 @@ async function selectType(id: string): Promise<void> {
 
   cmpBtn.onclick = () => runCompare(resultSec, prompt, dsSelect, tips, id);
 
-  // Restore a prior run for this type (the whole point — don't waste the work).
+  // Show a prior LIVE run if one exists (don't waste it); otherwise show the
+  // selected prompt's PERSISTED gallery render so output is visible immediately.
   const cached = lastRuns.get(id);
   if (cached) renderSingle(resultSec, cached.result, tips.value);
+  else void showGallery(activeIdx);
   updateStale();
 
   markUnsaved();
@@ -547,6 +650,87 @@ function renderSingle(host: HTMLElement, res: RunResult, tipsBlock: string): voi
   det.appendChild(el('label', { className: 'fld' }, 'Resolved prompt'));
   det.appendChild(el('pre', {}, escapeHtml(res.resolvedPrompt)));
   host.appendChild(det);
+}
+
+// ---- persisted gallery view (no live run) ----------------------------------
+/**
+ * Show a prompt's PERSISTED output (DGMO + render from build-gallery.mjs) — the
+ * default when you click a prompt, so every type×prompt is inspectable without
+ * spending a `claude -p` run. `entry` is null for new/unvalidated prompts.
+ */
+function renderGalleryEntry(
+  host: HTMLElement,
+  entry: GalleryEntry | null,
+  promptText: string,
+  type: string
+): void {
+  host.innerHTML = '';
+  const { glyph, label } = validationStatus(promptText);
+  const badge = el('div', { className: 'pbadge' }, `${glyph} ${label}`);
+  badge.style.color =
+    glyph === '✓' ? 'var(--good)' : glyph === '•' ? 'var(--muted)' : 'var(--warn)';
+  host.appendChild(badge);
+  host.appendChild(
+    el(
+      'div',
+      { className: 'count', style: 'margin:2px 0 8px' },
+      'Saved DGMO + render for this prompt (no live run). Edit the prompt above and hit Run to regenerate live.'
+    )
+  );
+
+  if (!entry || !entry.dgmo) {
+    host.appendChild(
+      el(
+        'p',
+        { className: 'spinner' },
+        'No saved output for this prompt yet — it’s newly added or unvalidated. Use Run to generate it live.'
+      )
+    );
+    return;
+  }
+
+  const grid = el('div', { className: 'result' });
+  // left: DGMO source + copy
+  const left = el('div');
+  const srcHead = el('div', { className: 'row', style: 'align-items:center;gap:8px' });
+  srcHead.appendChild(el('label', { className: 'fld', style: 'margin:0' }, 'Saved DGMO'));
+  const copyBtn = el('button', {
+    className: 'btn ghost narrow',
+    textContent: '⧉ Copy',
+    style: 'flex:none;padding:3px 10px',
+  }) as HTMLButtonElement;
+  copyBtn.onclick = async () => {
+    try {
+      await navigator.clipboard.writeText(entry.dgmo);
+      copyBtn.textContent = '✓ Copied';
+      setTimeout(() => (copyBtn.textContent = '⧉ Copy'), 1200);
+    } catch {
+      copyBtn.textContent = '✗ failed';
+      setTimeout(() => (copyBtn.textContent = '⧉ Copy'), 1500);
+    }
+  };
+  srcHead.appendChild(copyBtn);
+  left.appendChild(srcHead);
+  left.appendChild(el('pre', { style: 'margin-top:4px' }, escapeHtml(entry.dgmo)));
+  if (entry.error) left.appendChild(el('p', { className: 'diag' }, escapeHtml(entry.error)));
+  grid.appendChild(left);
+  // right: rendered image (served static from /gallery)
+  const right = el('div');
+  right.appendChild(el('label', { className: 'fld' }, 'Saved render'));
+  const box = el('div', { className: 'img' });
+  if (entry.img) {
+    const im = el('img') as HTMLImageElement;
+    im.src = `/gallery/${entry.img}`;
+    im.alt = `${type} — ${promptText}`;
+    box.appendChild(im);
+  } else {
+    box.appendChild(
+      el('span', { className: 'spinner', textContent: entry.error ? 'render failed' : 'no image' })
+    );
+  }
+  right.appendChild(box);
+  grid.appendChild(right);
+  host.appendChild(grid);
 }
 
 // ---- Phase-2 N=3 before/after compare --------------------------------------

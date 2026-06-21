@@ -1,0 +1,212 @@
+{
+  "arc": [
+    "arc Service Traffic\n\nGateway -> Auth 1200\nGateway -> Catalog 900\nGateway -> Cart 600\nCart -> Payments 320\nCatalog -> Search 540\nAuth -> Users 1100\n",
+    "arc Character Co-Appearances\n\nElizabeth -> Darcy 12\nElizabeth -> Jane 9\nElizabeth -> Wickham 6\nJane -> Bingley 8\nDarcy -> Bingley 7\nElizabeth -> Charlotte 5\nWickham -> Lydia 4\nLydia -> Bingley 2\n\norder degree\n",
+    "arc Module Dependencies\n\napi -> auth 5\napi -> db 8\nauth -> db 4\nauth -> cache 3\nservice -> api 6\nservice -> queue 2\nworker -> queue 4\nworker -> db 5\n\norder group\n",
+    "arc Email Volume Between Team Members\n\nAlice -> Bob 24\nAlice -> Carol 15\nBob -> Carol 18\nBob -> Dave 9\nCarol -> Dave 12\nDave -> Alice 7\nCarol -> Eve 6\nEve -> Alice 4\n\norder degree\n"
+  ],
+  "bar": [
+    "bar-stacked Quarterly Sales by Region\n\nseries\n  North America\n  Europe\n  Asia Pacific\n  Latin America\n\ny-label USD thousands\n\nQ1 820 610 430 180\nQ2 910 645 520 205\nQ3 870 700 640 240\nQ4 1040 760 810 300\n",
+    "bar Monthly Active Users\ny-label Users\nJan 1200\nFeb 1850\nMar 2400\nApr 3100\nMay 3950\nJun 4800\n",
+    "bar Revenue by Product Line\ny-label Revenue ($K)\nWidgets 420\nGadgets 380\nGizmos 290\nDoohickeys 510\nContraptions 175\n",
+    "bar Average Commute Time\ny-label Minutes\nNew York 41\nLos Angeles 34\nChicago 36\nHouston 28\nPhoenix 27\nPhiladelphia 33\n"
+  ],
+  "boxes-and-lines": [
+    "boxes-and-lines Web System Architecture\n\nBrowser\n  -> Load Balancer\nLoad Balancer\n  -> Web Server\nWeb Server\n  -> App Server\nApp Server\n  -> Cache\n  -> Database\n  -> Object Store\n",
+    "boxes-and-lines Microservices Backend\ndirection LR\n\nAPI Gateway\n  -> Auth Service\n  -> Catalog Service\n  -> Orders Service\n  -> Payments Service\n\nAuth Service -> Auth DB\nCatalog Service -> Catalog DB\nOrders Service -> Orders DB\nPayments Service -> Payments DB\n",
+    "boxes-and-lines Data Pipeline\ndirection LR\n\nSources\n  -> Ingest Layer\nIngest Layer -> Data Lake\nData Lake -> Transform\nTransform -> Warehouse\nWarehouse -> BI Dashboards\n",
+    "boxes-and-lines ML System\ndirection LR\n\nData Store\n  -> Feature Pipeline\nFeature Pipeline -> Training\nTraining -> Model Registry\nModel Registry -> Serving API\n"
+  ],
+  "c4": [
+    "c4 Payments Platform\n\nCustomer is a person\n  -pays via-> Web Checkout\n\nMerchant is a person\n  -reconciles-> Payments API\n\nPayments Platform is a system\n\nWeb Checkout is a container\n  tech: React\n  -POST charge-> Payments API\n\nPayments API is a container\n  tech: Node\n  -records-> Ledger\n  -screens-> Fraud Service\n\nLedger is a container is a database\n  tech: Postgres\n\nFraud Service is a container\n  tech: Python\n",
+    "c4 Online Bookstore\n\nCustomer is a person\n  -Browses and buys books-> Bookstore\n\nAdmin is a person\n  -Manages catalog-> Bookstore\n\nBookstore is a system\n  description: Sells books online\n  -Processes payments-> Payment Provider\n  ~Sends notifications~> Email Service\n\nPayment Provider is a system is a external\nEmail Service is a system is a external\n",
+    "c4 Ride-Sharing Platform\n\nRider is a person\n  -Requests rides-> Platform\n\nDriver is a person\n  -Accepts and completes rides-> Platform\n\nPlatform is a system\n  description: Connects riders with drivers\n  -Gets routes and ETAs-> Maps Service\n  -Processes payments-> Payments Provider\n\nMaps Service is a system is a external\nPayments Provider is a system is a external\n",
+    "c4 Hospital Records System\n\nDoctor is a person\n  -Views and updates records-> Records System\n\nPatient is a person\n  -Views own records-> Records System\n\nRecords System is a system\n  description: Stores patient medical records\n  -Requests test results-> Lab System\n  -Verifies coverage-> Insurance Provider\n\nLab System is a system is a external\nInsurance Provider is a system is a external\n"
+  ],
+  "chord": [
+    "chord Service-to-Service Traffic\n\nGateway -> Auth 1200\nGateway -> Catalog 900\nGateway -> Cart 600\nCart -> Payments 320\nCatalog -> Search 540\nAuth -> Users 1100\n",
+    "chord Migration Flows Between Regions\n\nNorth -> South 120\nNorth -> East 80\nSouth -> West 95\nEast -> West 60\nWest -> North 70\nSouth -> North 50\nEast -> South 40\nWest -> East 65\n",
+    "chord Trade Volume Between Countries\n\nUSA -- China 480\nUSA -- Germany 210\nUSA -- Japan 175\nChina -- Germany 190\nChina -- Japan 240\nGermany -- Japan 130\n",
+    "chord Team Collaboration Counts\n\nPlatform -- Frontend 42\nPlatform -- Backend 58\nFrontend -- Backend 37\nBackend -- Data 49\nData -- Infra 31\nInfra -- Platform 27\nFrontend -- Infra 18\n"
+  ],
+  "class": [
+    "class Blog Domain Model\n\nUser\n  + id: int\n  + email: text\n  + name: text\n  -> Post : writes\n  -> Comment : writes\n\nPost\n  + id: int\n  + author_id: int\n  + title: text\n  + body: text\n  -> Comment : has\n  -> Tag : tagged with\n\nComment\n  + id: int\n  + post_id: int\n  + user_id: int\n  + body: text\n\nTag\n  + id: int\n  + name: text\n",
+    "class Media Library\n\nabstract MediaItem\n  + title: string\n  + year: int\n\nBook extends MediaItem\n  + author: string\n  + pages: int\n\nMovie extends MediaItem\n  + director: string\n  + runtime: int\n\nAlbum extends MediaItem\n  + artist: string\n  + tracks: int\n\nLibrary\n  + name: string\n  o-- MediaItem\n",
+    "class Shape Hierarchy\n\nabstract Shape\n  + area(): number\n\nCircle extends Shape\n  + radius: number\n  + area(): number\n\nRectangle extends Shape\n  + width: number\n  + height: number\n  + area(): number\n\nTriangle extends Shape\n  + base: number\n  + height: number\n  + area(): number\n",
+    "class Shopping Cart\n\nCustomer\n  + name: string\n  + email: string\n  -> Cart\n\nCart\n  + total: number\n  *-- CartItem\n\nCartItem\n  + quantity: int\n  -> Product\n\nProduct\n  + name: string\n  + price: number\n"
+  ],
+  "cycle": [
+    "cycle Continuous Improvement\n\nPlan\n  Define goal & metric\n\nDo\n  Run the experiment\n\nCheck\n  Measure results\n\nAct\n  Adopt or adjust\n",
+    "cycle Software Development Lifecycle\n\nPlan\nDesign\nBuild\nTest\nDeploy\nMonitor\n",
+    "cycle Water Cycle\n\nEvaporation\nCondensation\nPrecipitation\nCollection\n",
+    "cycle Customer Feedback Loop\n\nCollect\nAnalyze\nPrioritize\nAct\nMeasure\n"
+  ],
+  "er": [
+    "er Blog Schema\n\nUser\n  id int pk\n  email text\n  name text\n  1-writes-* Post\n  1-posts-* Comment\n\nPost\n  id int pk\n  author_id int fk\n  title text\n  body text\n  1-has-* Comment\n  *-tagged-* Tag\n\nComment\n  id int pk\n  post_id int fk\n  user_id int fk\n  body text\n\nTag\n  id int pk\n  name text\n",
+    "er E-commerce Schema\n\ncustomers\n  id int pk\n  name varchar\n  email string unique\n  1-places-* orders\n\norders\n  id int pk\n  customer_id int fk\n  total decimal\n  created_at timestamp\n  1-contains-* order_items\n\norder_items\n  id int pk\n  order_id int fk\n  product_id int fk\n  quantity int\n  *-references-1 products\n\nproducts\n  id int pk\n  name varchar\n  price decimal\n  sku string unique\n",
+    "er Library Schema\n\nmembers\n  id int pk\n  name varchar\n  email string unique\n  1-borrows-* loans\n\nbooks\n  id int pk\n  title varchar\n  author varchar\n  isbn string unique\n  1-has-* copies\n\ncopies\n  id int pk\n  book_id int fk\n  barcode string unique\n  1-tracked_in-* loans\n\nloans\n  id int pk\n  member_id int fk\n  copy_id int fk\n  due_date timestamp\n",
+    "er University Schema\n\nstudents\n  id int pk\n  name varchar\n  email string unique\n  1-enrolls-* enrollments\n\ncourses\n  id int pk\n  title varchar\n  instructor_id int fk\n  credits int\n  1-has-* enrollments\n\nenrollments\n  id int pk\n  student_id int fk\n  course_id int fk\n  grade varchar\n\ninstructors\n  id int pk\n  name varchar\n  department varchar\n  1-teaches-* courses\n"
+  ],
+  "flowchart": [
+    "flowchart User Login\n\n(Start) -> /Enter credentials/ -> <Valid?>\n  -no-> <3 failed attempts?>\n    -yes-> [Lock account] -> (End)\n    -no-> /Enter credentials/\n  -yes-> /Enter 2FA code/ -> <2FA ok?>\n    -yes-> [Grant access] -> (End)\n    -no-> /Enter 2FA code/\n",
+    "flowchart Support Ticket Handling\n(New Ticket) -> [Triage by Severity] -> <Known Issue?>\n  -yes-> [Auto-Resolve] -> (Close Ticket)\n  -no-> <High Severity?>\n    -yes-> [Escalate to Human] -> (Close Ticket)\n    -no-> [Resolve Normally] -> (Close Ticket)\n",
+    "flowchart CI/CD Pipeline\n(Commit) -> [Run Tests] -> <Tests Pass?>\n  -no-> (Stop)\n  -yes-> [Build Artifact] -> [Deploy to Staging] -> [Run Smoke Tests] -> <Smoke Pass?>\n    -yes-> [Deploy to Production] -> (Done)\n    -no-> [Roll Back] -> (Done)\n",
+    "flowchart Returns and Refund Decision\n(Return Request) -> <Within Window?>\n  -no-> [Deny Return] -> (End)\n  -yes-> [Inspect Condition] -> <Condition?>\n    -good-> [Issue Refund] -> (End)\n    -worn-> [Offer Store Credit] -> (End)\n    -damaged-> [Deny Return] -> (End)\n"
+  ],
+  "function": [
+    "function Functions\n\nx -6 to 6\n\nsin(x) blue: sin(x)\nx / 2 red: x / 2\n",
+    "function Sine vs Linear\nx-label x\ny-label y\nx -6 to 6\n\nsin(x) blue: sin(x)\nx / 2 red: x / 2\n",
+    "function Polynomial vs Exponential Growth\nx-label x\ny-label y\nx 0 to 6\n\nx^2 blue: x^2\n2^x red: 2^x\n",
+    "function Damped Oscillation\nx-label x\ny-label y\nx 0 to 20\n\ndamped oscillation blue: e^(-x/3) * cos(x)\n"
+  ],
+  "funnel": [
+    "funnel Signup Funnel\n\nVisited site 48000\nSigned up 12400\nActivated 6100\nSubscribed 2300\nPaid annual 940\n",
+    "funnel E-commerce Checkout\n\nPage Views 10000\nAdd to Cart 4200\nCheckout Started 2100\nPayment 1500\nCompleted 1200\n",
+    "funnel Recruiting Pipeline\n\nApplications 1200\nScreened 480\nInterviewed 160\nOffered 40\nHired 25\n",
+    "funnel Sales Pipeline\n\nLeads 2000\nQualified 800\nDemo 350\nProposal 150\nClosed-Won 60\n"
+  ],
+  "gantt": [
+    "gantt Launch Project\nstart 2026-01-05\n\nDiscovery start: 2026-01-05, duration: 10d\nDesign start: 2026-01-19, duration: 14d\nBuild start: 2026-02-02, duration: 28d\nQA start: 2026-03-02, duration: 12d\nLaunch start: 2026-03-16, duration: 5d\n",
+    "gantt Website Redesign\nstart 2026-03-02\n\n[Discovery] t: Phase 1\n  Stakeholder Interviews 10bd\n    -> Requirements 8bd\n\n[Design]\n  Wireframes 10bd\n    -> Visual Design 12bd\n      -> Design Review 3bd\n\n[Development]\n  Frontend Build 20bd\n  Backend Build 20bd\n    -> Integration 8bd\n\n[Content]\n  Content Migration 15bd\n\n[QA]\n  Test Pass 10bd\n    -> Bug Fixes 6bd\n\n[Launch]\n  Launch Day 0d\n",
+    "gantt Conference Planning\nstart 2026-04-01\n\n[Venue]\n  Book Venue 5bd\n    -> Confirm Logistics 8bd\n\n[Speakers]\n  Confirm Speakers 15bd\n    -> Finalize Agenda 5bd\n\n[Marketing]\n  Marketing Campaign 25bd\n\n[Registration]\n  Open Registration 20bd\n    -> Close Registration 2bd\n\n[Event]\n  Conference 2d\n",
+    "gantt Mobile MVP\nstart 2026-05-04\n\n[Research]\n  User Research 10bd\n    -> Findings Report 4bd\n\n[Design]\n  Wireframes 12bd\n    -> Design Review 3bd\n\n[Build]\n  Core Build 25bd\n    -> Polish 8bd\n\n[Beta]\n  Beta Test 15bd\n    -> Beta Fixes 6bd\n\n[Submission]\n  App Store Submission 0d\n"
+  ],
+  "heatmap": [
+    "heatmap Team Skills Matrix\n\ncolumns\n  TypeScript\n  Rust\n  SQL\n  Design\n  Ops\n\nDana 5 2 4 3 2\nSam 4 5 3 1 5\nPriya 4 1 3 5 2\nLeo 3 4 5 2 4\n",
+    "heatmap Website Traffic by Day and Hour\n\ncolumns\n  Mon\n  Tue\n  Wed\n  Thu\n  Fri\n  Sat\n  Sun\n\n12 AM 12 10 11 9 14 22 24\n6 AM 30 32 28 31 27 18 16\n9 AM 85 88 82 80 79 40 35\n12 PM 72 70 74 68 66 55 50\n3 PM 90 92 88 85 83 60 52\n6 PM 65 60 62 58 70 75 68\n9 PM 40 38 42 36 55 80 74\n",
+    "heatmap Feature Usage by Customer Segment\n\ncolumns\n  Enterprise\n  Mid-Market\n  SMB\n  Startup\n  Free\n\nDashboards 95 80 70 55 30\nReports 90 75 60 40 15\nIntegrations 85 65 45 25 8\nAutomations 70 50 35 18 5\nAPI Access 88 60 40 20 3\n",
+    "heatmap Monthly Rainfall by City\n\ncolumns\n  Jan\n  Feb\n  Mar\n  Apr\n  May\n  Jun\n  Jul\n  Aug\n  Sep\n  Oct\n  Nov\n  Dec\n\nLondon 55 41 42 44 49 45 45 50 49 69 59 55\nSeattle 142 89 95 67 49 38 18 22 39 89 161 150\nMumbai 1 0 1 1 18 485 868 603 367 89 14 2\nSydney 102 118 129 127 102 132 97 81 69 77 83 78\n"
+  ],
+  "infra": [
+    "infra API Traffic\n\ninternet\n  -> CDN\n\nCDN\n  -/2000 req-s-> Gateway\n\nGateway\n  -/1200 req-s-> Auth\n  -/900 req-s-> Catalog\n  -/600 req-s-> Orders\n\nOrders\n  -/450 req-s-> Postgres\n\nCatalog\n  -/700 req-s-> Postgres\n",
+    "infra Three-Tier Web App\ninternet\n  -/1200/s-> LoadBalancer\nLoadBalancer\n  -/600/s-> WebServer 1\n  -/600/s-> WebServer 2\nWebServer 1\n  -/600/s-> AppServer\nWebServer 2\n  -/600/s-> AppServer\nAppServer\n  -/900/s-> DB Primary\nDB Primary\n  -/300/s-> DB Replica\nDB Replica\n",
+    "infra Video CDN\ninternet\n  -/5000/s-> Edge Nodes\nEdge Nodes\n  -/5000/s-> Shield Cache\nShield Cache\n  -/800/s-> Origin\nOrigin\n  -/100/s-> Transcoder\nTranscoder\n",
+    "infra Event-Driven Order System\ninternet\n  -/400/s-> API Gateway\nAPI Gateway\n  -/400/s-> Orders Service\nOrders Service\n  ~/400/s~> Message Queue\nMessage Queue\n  ~/400/s~> Billing Worker\n  ~/400/s~> Notification Worker\nBilling Worker\nNotification Worker\n"
+  ],
+  "journey-map": [
+    "journey-map User Onboarding\n\npersona New user\n\n[Discover]\n  Finds the app score: 3\n\n[Sign up]\n  Creates account score: 4\n\n[Setup]\n  Imports data score: 2\n\n[First value]\n  Builds first diagram score: 5\n\n[Habit]\n  Returns weekly score: 4\n",
+    "journey-map Booking a Flight\n\nSearch score: 3, emotion: Curious\nCompare score: 2, emotion: Overwhelmed\nBook score: 4, emotion: Confident\nCheck in score: 3, emotion: Anxious\nFly score: 5, emotion: Relieved\n",
+    "journey-map Patient Visit\n\nScheduling score: 3, emotion: Hopeful\nArrival score: 4, emotion: Calm\nWaiting score: 2, emotion: Impatient\nConsult score: 4, emotion: Reassured\nCheckout score: 3, emotion: Neutral\nFollow-up score: 4, emotion: Cared\n",
+    "journey-map First Grocery Delivery\n\nDiscover score: 3, emotion: Curious\nSign up score: 2, emotion: Hesitant\nFirst order score: 4, emotion: Excited\nDelivery score: 5, emotion: Delighted\nReorder score: 5, emotion: Loyal\n"
+  ],
+  "kanban": [
+    "kanban Sprint Board\n\n[Backlog]\n  Password reset\n  Search v2\n\n[In Progress]\n  Login API c: Sam\n  Onboarding flow c: Leo\n\n[Review]\n  Dark mode c: Priya\n\n[Done]\n  Billing page c: Mara\n",
+    "kanban Content Calendar\n\n[Ideas]\n  Q3 product teardown\n  Customer success story\n  SEO keyword roundup\n\n[Drafting]\n  Launch announcement\n  Onboarding tutorial\n\n[Editing]\n  Pricing page rewrite\n\n[Scheduled]\n  Newsletter #42\n\n[Published]\n  Year in review\n",
+    "kanban Hiring Pipeline\n\n[Applied]\n  Jordan Lee\n  Priya Patel\n  Sam Rivera\n\n[Screening]\n  Alex Chen\n  Morgan Diaz\n\n[Interview]\n  Taylor Kim\n  Chris Okafor\n\n[Offer]\n  Dana Walsh\n\n[Hired]\n  Robin Singh\n",
+    "kanban Home Renovation\n\n[To Do]\n  Repaint living room\n  Replace kitchen faucet\n  Order new blinds\n\n[In Progress]\n  Tile bathroom floor\n  Install closet shelving\n\n[Blocked]\n  Rewire garage outlets\n\n[Done]\n  Patch drywall\n  Refinish hardwood\n"
+  ],
+  "map": [
+    "map Hub Flight Routes\n\nJFK ~daily~> LAX\nJFK ~daily~> LHR\nJFK ~daily~> ORD\nJFK ~daily~> MIA\nJFK ~2x daily~> SFO\nJFK ~daily~> CDG\n",
+    "map US Road Trip\nroute New York City\n  -> Chicago\n  -> Denver\n  -> San Francisco\n",
+    "map European Capitals\npoi London\npoi Paris\npoi Berlin\npoi Madrid\npoi Rome\n",
+    "map Flights from London Heathrow\nLHR ~> New York\nLHR ~> Dubai\nLHR ~> Singapore\nLHR ~> Tokyo\n"
+  ],
+  "mindmap": [
+    "mindmap Mobile App v2\n\n  Onboarding\n    Guided tour\n    Sample data\n    Checklist\n  Performance\n    Lazy load\n    Caching\n    Smaller bundle\n  Collaboration\n    Comments\n    Sharing\n    Presence\n  Monetization\n    Pro tier\n    Team plan\n    Usage limits\n",
+    "mindmap Wedding Planning\n\nVenue\n  Ceremony site\n  Reception hall\nCatering\n  Menu\n  Cake\n  Drinks\nGuests\n  Guest list\n  Invitations\n  Seating chart\nBudget\n  Vendor deposits\n  Contingency\nAttire\n  Dress\n  Suit\n  Accessories\n",
+    "mindmap Architecture Decision\n\nOptions\n  Monolith\n  Microservices\n  Serverless\nTrade-offs\n  Performance\n  Cost\n  Complexity\nConstraints\n  Budget\n  Timeline\n  Team skills\nStakeholders\n  Engineering\n  Product\n  Operations\n",
+    "mindmap Learning a Language\n\nVocabulary\n  Flashcards\n  Word lists\nGrammar\n  Verb conjugation\n  Sentence structure\nListening\n  Podcasts\n  Movies\nSpeaking\n  Conversation practice\n  Pronunciation\nResources\n  Apps\n  Tutors\n  Textbooks\n"
+  ],
+  "org": [
+    "org Engineering Org\n\nDana Ruiz\n  role: VP Engineering\n  Sam Okafor\n    role: Dir. Platform\n    Leo Park\n      role: EM, Infra\n    Mara Cohen\n      role: EM, Data\n  Priya Nair\n    role: Dir. Product Eng\n    Tariq Bell\n      role: EM, Web\n    Iris Vance\n      role: EM, Mobile\n",
+    "org Acme Startup\nCEO\n  VP of Product\n    Product Manager\n    Designer\n  VP of Engineering\n    Backend Lead\n    Frontend Lead\n    QA Engineer\n  Head of Sales\n    Account Executive\n    SDR\n",
+    "org Cardiology Department\nDepartment Head\n  Attending Physician A\n    Resident A1\n    Resident A2\n  Attending Physician B\n    Resident B1\n    Resident B2\n  Nurse Manager\n    Charge Nurse\n    Staff Nurse\n",
+    "org Lincoln High School\nPrincipal\n  Vice Principal\n    Dean of Students\n    Registrar\n  Head of Math\n    Math Teacher 1\n    Math Teacher 2\n  Head of Science\n    Science Teacher 1\n    Lab Coordinator\n  Counseling Lead\n    Counselor 1\n    Counselor 2\n"
+  ],
+  "pert": [
+    "pert Launch Project\ntime-unit d\n\nDiscovery 10\nDesign 14\nBuild 28\nQA 12\nLaunch 5\n\nDiscovery\n  -> Design\nDesign\n  -> Build\nBuild\n  -> QA\nQA\n  -> Launch\n",
+    "pert Building a House\ntime-unit d\ndefault-confidence medium\n\nfoundation 3 5 8\n  -> framing\nframing 4 6 10\n  -> roofing\n  -> plumbing\n  -> electrical\nroofing 2 3 5\n  -> drywall\nplumbing 3 4 6\n  -> drywall\nelectrical 2 3 5\n  -> drywall\ndrywall 2 3 4\n  -> finishing\nfinishing 3 5 7\n",
+    "pert Publishing a Book\ntime-unit w\ndefault-confidence medium\n\nwriting 8 12 20\n  -> editing\nediting 3 4 6\n  -> layout\ncover design 2 3 5\n  -> layout\nlayout 1 2 3\n  -> printing\nprinting 2 3 4\n  -> distribution\ndistribution 1 2 3\n",
+    "pert Product Launch\ntime-unit w\ndefault-confidence medium\n\ndevelopment 6 8 12\n  -> qa\nqa 2 3 5\n  -> release\nmarketing 3 4 6\n  -> release\nrelease 1 1 2\n  -> post-launch review\npost-launch review 1 2 3\n"
+  ],
+  "pyramid": [
+    "pyramid Signup Funnel\n\nPaid annual description: \"940 users\"\nSubscribed description: \"2,300 users\"\nActivated description: \"6,100 users\"\nSigned up description: \"12,400 users\"\nVisited site description: \"48,000 users\"\n",
+    "pyramid Maslow's Hierarchy of Needs\n\nSelf-Actualization\nEsteem\nLove & Belonging\nSafety\nPhysiological\n",
+    "pyramid Content Marketing Stages\n\nLoyalty\nConversion\nEngagement\nAwareness\n",
+    "pyramid Workforce Structure\n\nExecutives\nManagers\nSenior Staff\nIndividual Contributors\n"
+  ],
+  "quadrant": [
+    "quadrant Energy use vs GDP per capita\n\nx-label Low GDP, High GDP\ny-label Low Energy, High Energy\n\nUnited States 76300 12700\nCanada 53400 14400\nMexico 11500 2300\nPanama 17900 2350\nCosta Rica 13400 2050\nGuatemala 5400 650\nHonduras 3050 900\nTrinidad & Tobago 18400 6400\nDominican Republic 10100 1750\nJamaica 6050 1250\nUruguay 17000 3050\nChile 16500 3900\nArgentina 13000 3200\nBrazil 8900 2750\nPeru 7100 1450\nColombia 6650 1350\nParaguay 6000 1650\nBolivia 3600 850\n",
+    "quadrant Feature Prioritization\nx-label Low Effort, High Effort\ny-label Low Value, High Value\n\ntop-left Quick Wins green\ntop-right Big Bets blue\nbottom-left Fill-Ins yellow\nbottom-right Time Sinks red\n\nSingle Sign-On 0.8 0.9\nDark Mode 0.2 0.6\nExport to PDF 0.3 0.4\nRealtime Collaboration 0.9 0.85\nCustom Themes 0.25 0.2\nAdvanced Search 0.6 0.7\n",
+    "quadrant Competitive Landscape\nx-label Low Market Share, High Market Share\ny-label Low Growth, High Growth\n\ntop-left Rising Stars green\ntop-right Leaders blue\nbottom-left Niche Players yellow\nbottom-right Incumbents red\n\nAcme Corp 0.85 0.4\nBolt Inc 0.2 0.8\nCirrus 0.6 0.75\nDelta Systems 0.7 0.3\nEcho Labs 0.25 0.35\n",
+    "quadrant Eisenhower Matrix\nx-label Not Urgent, Urgent\ny-label Not Important, Important\n\ntop-left Schedule blue\ntop-right Do First red\nbottom-left Eliminate yellow\nbottom-right Delegate green\n\nFix production outage 0.95 0.9\nPlan Q3 roadmap 0.2 0.85\nReply to newsletter 0.7 0.15\nStrategy offsite prep 0.3 0.8\nRoutine status email 0.6 0.2\n"
+  ],
+  "raci": [
+    "raci Project RACI Matrix\nroles PM, Eng Lead, Designer, QA\n\nDefine requirements\n  PM: A\n  Eng Lead: C\n  Designer: C\n  QA: I\n\nBuild feature\n  PM: I\n  Eng Lead: R\n  Designer: C\n  QA: I\n\nDesign UI\n  PM: C\n  Eng Lead: I\n  Designer: R\n  QA: I\n\nTest release\n  PM: I\n  Eng Lead: C\n  Designer: I\n  QA: R\n\nApprove launch\n  PM: A\n  Eng Lead: C\n  Designer: I\n  QA: C\n",
+    "raci Website Launch\nroles PM, Designer, Developer, QA\n\nDefine requirements\n  PM: A R\n  Designer: C\n  Developer: C\nDesign mockups\n  Designer: A R\n  PM: C\n  Developer: I\nBuild the site\n  Developer: A R\n  PM: I\n  QA: C\nTest and QA\n  QA: A R\n  Developer: C\n  PM: I\nGo live\n  PM: A\n  Developer: R\n  QA: C\n",
+    "raci Incident Response\nroles On-call, Eng Lead, Comms, Manager\n\nDetect and triage\n  On-call: A R\n  Eng Lead: C\n  Manager: I\nMitigate the incident\n  Eng Lead: A\n  On-call: R\n  Manager: I\nCommunicate status\n  Comms: A R\n  Manager: C\n  On-call: I\nResolve and close\n  Eng Lead: A R\n  On-call: C\n  Manager: I\nPostmortem review\n  Manager: A\n  Eng Lead: R\n  Comms: C\n",
+    "raci Quarterly Report\nroles Analyst, Manager, Finance, Exec\n\nGather data\n  Analyst: A R\n  Finance: C\n  Manager: I\nValidate figures\n  Finance: A R\n  Analyst: C\n  Manager: I\nDraft the report\n  Analyst: A R\n  Manager: C\n  Exec: I\nReview and approve\n  Manager: A\n  Exec: R\n  Analyst: C\nDistribute to stakeholders\n  Exec: A\n  Manager: R\n  Analyst: I\n"
+  ],
+  "ring": [
+    "ring Department Budget\n\nOperations description: \"9% of budget\"\nSupport description: \"11% of budget\"\nMarketing description: \"15% of budget\"\nSales description: \"23% of budget\"\nEngineering description: \"42% of budget\"\n",
+    "ring Circles of Influence\n\nIndividual\nTeam\nDepartment\nCompany\n",
+    "ring OSI Network Model\n\nPhysical\nData Link\nNetwork\nTransport\nSession\nPresentation\nApplication\n",
+    "ring Earth's Layers\n\nInner Core\nOuter Core\nMantle\nCrust\n"
+  ],
+  "sankey": [
+    "sankey Service-to-Service Traffic\n\nGateway -> Auth 1200\nGateway -> Catalog 900\nGateway -> Cart 600\nCart -> Payments 320\nCatalog -> Search 540\nAuth -> Users 1100\n",
+    "sankey Household Budget\n\nIncome green\n  Housing 1800\n  Food 600\n  Transport 400\n  Savings 500\n  Discretionary 300\n",
+    "sankey Web Traffic\n\nSearch green\n  Landing Page 500\nSocial blue\n  Landing Page 300\nDirect teal\n  Landing Page 200\n\nLanding Page\n  Converted 250 green\n  Bounced 750 red\n",
+    "sankey Energy Flow\n\nCoal\n  Electricity 400\nGas\n  Electricity 300\n  Heating 200\nSolar green\n  Electricity 150\n\nElectricity\n  Useful Energy 500 green\n  Losses 350 red\n\nHeating\n  Useful Energy 120 green\n  Losses 80 red\n"
+  ],
+  "scatter": [
+    "scatter Energy Use vs GDP per Capita\n\nx-label GDP per capita (USD)\ny-label Electricity use per capita (kWh/yr)\n\n[North America]\n  United States 76300 12700\n  Canada 53400 14400\n  Mexico 11500 2300\n\n[Central America]\n  Panama 17900 2350\n  Costa Rica 13400 2050\n  Guatemala 5400 650\n  Honduras 3050 900\n\n[Caribbean]\n  Trinidad & Tobago 18400 6400\n  Dominican Republic 10100 1750\n  Jamaica 6050 1250\n\n[South America]\n  Uruguay 17000 3050\n  Chile 16500 3900\n  Argentina 13000 3200\n  Brazil 8900 2750\n  Peru 7100 1450\n  Colombia 6650 1350\n  Paraguay 6000 1650\n  Bolivia 3600 850\n",
+    "scatter Ad Spend vs Sales\nx-label Ad Spend ($K)\ny-label Sales ($K)\n\nSpring Launch 12 45\nSummer Sale 28 88\nBack to School 18 61\nHoliday Push 40 120\nBrand Awareness 22 50\nRetargeting 8 38\nInfluencer 15 72\nSearch Ads 33 96\n",
+    "scatter House Size vs Price\nx-label Size (sq ft)\ny-label Price ($K)\n\n101 Oak 1200 320\n14 Maple 1800 410\n9 Birch 950 265\n220 Elm 2400 560\n7 Cedar 1500 375\n33 Pine 2100 490\n58 Willow 1350 340\n12 Aspen 2800 640\n",
+    "scatter Study Hours vs Exam Score\nx-label Study Hours\ny-label Exam Score\n\n[Section A] blue\n  Ava 5 72\n  Ben 8 85\n  Cora 3 61\n  Dan 10 91\n  Eli 6 78\n\n[Section B] green\n  Finn 7 80\n  Gina 4 65\n  Hugo 9 88\n  Iris 2 55\n  Jack 6 74\n"
+  ],
+  "sequence": [
+    "sequence Checkout Flow\nUser -Place order-> Web App\nWeb App -Charge $42.00-> Payment API\nPayment API -Authorize-> Bank\nBank -Approved-> Payment API\nPayment API -Payment ok-> Web App\nWeb App -Order confirmed-> User\n",
+    "sequence OAuth Login\nBrowser -sign in-> App\nApp -redirect-> IdentityProvider\nIdentityProvider -prompt-> User\nUser -authenticate-> IdentityProvider\nIdentityProvider -authorization code-> App\nApp -exchange code-> IdentityProvider\nIdentityProvider -access token-> App\nApp -signed in-> Browser\n",
+    "sequence Cache-Aside Read\nService -get key-> Redis\nRedis -miss-> Service\nService -read value-> Postgres\nPostgres -value-> Service\nService -write back-> Redis\nService -return value-> Caller\n",
+    "sequence Food Delivery Order\nCustomer -submit order-> Dispatch\nDispatch -prepare order-> Restaurant\nDispatch -assign-> Driver\nRestaurant -food ready-> Dispatch\nDriver -pick up-> Restaurant\nDriver -deliver-> Customer\n"
+  ],
+  "sitemap": [
+    "sitemap Marketing Site\n\nHome\n  Products\n    Product Detail\n  Pricing\n  Docs\n    Guides\n    API Reference\n  Blog\n  Contact\n",
+    "sitemap E-commerce Store\n\nHome\n  Shop\n    Categories\n    Product\n  Cart\n  Checkout\n  Account\n  Support\n",
+    "sitemap SaaS App\n\nLanding\n  Pricing\n  Docs\n  Dashboard\n    Projects\n    Settings\n    Billing\n  Login\n",
+    "sitemap Restaurant Website\n\nHome\n  Menu\n  Reservations\n  About\n  Contact\n"
+  ],
+  "slope": [
+    "slope Market Share Shift\n\nperiod 2024 2026\n\nProduct A 34 41\nProduct B 28 22\nProduct C 18 24\nProduct D 12 9\nOther 8 4\n",
+    "slope Regional Market Share\n\nperiod 2020 2025\n\nNorth America 32 38\nEurope 28 24\nAsia Pacific 22 30\nLatin America 10 5\nMiddle East 8 3\n",
+    "slope Satisfaction Before vs After Redesign\n\nperiod\n  Before\n  After\n\nDashboard 62 81\nReports 58 74\nSettings 70 72\nSearch 45 79\nMobile App 51 68\n",
+    "slope Average Rent by Neighborhood\n\nperiod 2019 2024\n\nDowntown 1800 2600\nRiverside 1400 2100\nOld Town 1600 1950\nHillcrest 1200 1850\n"
+  ],
+  "state": [
+    "state Order Lifecycle\n\n[*] -> Cart\nCart -checkout-> Pending Payment\nPending Payment -payment ok-> Paid\nPending Payment -payment failed-> Cancelled\nPaid -fulfilled-> Shipped\nShipped -received-> Delivered\nPaid -refunded-> Cancelled\n",
+    "state Document Review\n[*] -> Draft\nDraft -submit-> In Review\nIn Review -request changes-> Changes Requested\nChanges Requested -resubmit-> In Review\nIn Review -approve-> Approved\nApproved -publish-> Published\nPublished -archive-> Archived\nArchived -> [*]\n",
+    "state Network Connection\n[*] -> Disconnected\nDisconnected -connect-> Connecting\nConnecting -established-> Connected\nConnecting -timeout-> Failed\nConnected -drop-> Reconnecting\nReconnecting -restored-> Connected\nReconnecting -give up-> Failed\nFailed -retry-> Connecting\nConnected -disconnect-> Disconnected\n",
+    "state Support Ticket\n[*] -> Open\nOpen -assign-> In Progress\nIn Progress -need info-> Waiting on Customer\nWaiting on Customer -reply-> In Progress\nIn Progress -resolve-> Resolved\nResolved -confirm-> Closed\nClosed -reopen-> Reopened\nReopened -reassign-> In Progress\n"
+  ],
+  "tech-radar": [
+    "tech-radar Team Skills Radar\n\nrings\n  Adopt\n  Trial\n  Assess\n  Hold\n\nLanguages & Frameworks quadrant: top-right\n  TypeScript ring: Adopt\n  Rust ring: Trial\n\nTools quadrant: top-left\n  Ops ring: Adopt\n\nPlatforms quadrant: bottom-left\n  SQL ring: Adopt\n\nTechniques quadrant: bottom-right\n  Design ring: Assess\n",
+    "tech-radar Frontend Tech Radar\n\nrings\n  Adopt\n  Trial\n  Assess\n  Hold\n\nFrameworks quadrant: top-right\n  React ring: Adopt, trend: stable\n  Svelte ring: Trial, trend: up\n  Solid ring: Assess, trend: new\n\nBuild Tools quadrant: top-left\n  Vite ring: Adopt, trend: up\n  Webpack ring: Hold, trend: down\n  Turbopack ring: Assess, trend: new\n\nStyling quadrant: bottom-left\n  Tailwind CSS ring: Adopt, trend: stable\n  CSS Modules ring: Trial, trend: stable\n  Sass ring: Hold, trend: down\n\nState Management quadrant: bottom-right\n  Zustand ring: Adopt, trend: up\n  Redux ring: Trial, trend: down\n  Signals ring: Assess, trend: new\n",
+    "tech-radar Data Engineering Tech Radar\n\nrings\n  Adopt\n  Trial\n  Assess\n  Hold\n\nLanguages quadrant: bottom-right\n  Python ring: Adopt, trend: stable\n  SQL ring: Adopt, trend: stable\n  Scala ring: Hold, trend: down\n\nPlatforms quadrant: bottom-left\n  Snowflake ring: Adopt, trend: up\n  Databricks ring: Trial, trend: up\n  BigQuery ring: Trial, trend: stable\n\nTechniques quadrant: top-right\n  ELT ring: Adopt, trend: up\n  Data Contracts ring: Assess, trend: new\n  Lakehouse ring: Trial, trend: up\n\nTools quadrant: top-left\n  dbt ring: Adopt, trend: stable\n  Airflow ring: Trial, trend: stable\n  Dagster ring: Assess, trend: new\n",
+    "tech-radar Cloud & DevOps Tech Radar\n\nrings\n  Adopt\n  Trial\n  Assess\n  Hold\n\nCompute quadrant: top-right\n  Kubernetes ring: Adopt, trend: stable\n  Serverless Functions ring: Trial, trend: up\n  WebAssembly ring: Assess, trend: new\n\nCI/CD quadrant: top-left\n  GitHub Actions ring: Adopt, trend: up\n  Jenkins ring: Hold, trend: down\n  ArgoCD ring: Trial, trend: up\n\nObservability quadrant: bottom-left\n  OpenTelemetry ring: Adopt, trend: up\n  Prometheus ring: Adopt, trend: stable\n  Datadog ring: Trial, trend: stable\n\nInfrastructure quadrant: bottom-right\n  Terraform ring: Adopt, trend: stable\n  Pulumi ring: Trial, trend: up\n  CloudFormation ring: Hold, trend: down\n"
+  ],
+  "timeline": [
+    "timeline Product Milestones\n\n2026-02 Beta opens\n2026-04 Public launch\n2026-07 Mobile app\n2026-10 Enterprise tier\n2027-01 Marketplace\n",
+    "timeline Major Web Browser Releases\n1993-01 Mosaic released\n1994-12 Netscape Navigator 1.0\n1995-08 Internet Explorer 1.0\n1996-11 Opera 2.0 public release\n2003-01 Safari 1.0\n2004-11 Firefox 1.0\n2008-09 Google Chrome 1.0\n2010-01 Internet Explorer 9 preview\n",
+    "timeline Company History\n2014-03 Founding\n2015-06 First product launch\n2016-09 Series A funding\n2020-11 IPO\n2024-05 Acquisition\n",
+    "timeline The Apollo Program\n1961-05 Kennedy sets Moon goal\n1961 -> 1966 Mercury and Gemini groundwork\n1967-01 Apollo 1 fire\n1968-12 Apollo 8 orbits the Moon\n1969-07 Apollo 11 first Moon landing\n1970-04 Apollo 13 safe return\n1972-12 Apollo 17 final mission\n"
+  ],
+  "venn": [
+    "venn Audience Overlap\n\nNewsletter as news\nApp Users as app\nPaid as paid\n\nnews + app 2400\napp + paid 1200\nnews + paid 800\nnews + app + paid 500\n",
+    "venn Shared Skills\n\nFrontend as fe blue\nBackend as be green\nDesign as ds red\n\nfe + be APIs\nfe + ds UX Engineering\nbe + ds Design Systems\nfe + be + ds Product Sense\n",
+    "venn Customer Channels\n\nMobile as mob blue\nWeb as web green\n\nmob + web Both Channels\n",
+    "venn Subscription Tiers\n\nBasic as ba blue\nPro as pr green\nEnterprise as en red\n\nba + pr Priority Support\npr + en Advanced Analytics\nba + pr + en Core Features\n"
+  ],
+  "wireframe": [
+    "wireframe Login\nmobile\n\nimage round\n# Sign In\n[Email]\n[Password] password\n(Sign in) primary\n- Forgot password?\n",
+    "wireframe Product Detail\n\n[Main]\n  image wide\n  # Wireless Headphones\n  ## $129.99\n  (Add to Cart) primary\n\n[Reviews]\n  # Reviews\n  - Great sound quality\n  - Comfortable fit\n  - Worth the price\n",
+    "wireframe Dashboard\n\nnav\n\n[Sidebar]\n  - Overview\n  - Reports\n  - Settings\n\n[Main]\n  # Overview\n  [Users]  [Revenue]  [Active]\n  chart line\n",
+    "wireframe Sign Up\n\n# Create Account\n[Name]\n[Email]\n[Password] password\n<x> I accept the terms\n(Create Account) primary\n"
+  ],
+  "wordcloud": [
+    "wordcloud Technology Mentions\n\nTypeScript 95\nAI 88\nReact 80\nRust 70\nPostgres 60\nDocker 55\nKubernetes 52\nGraphQL 40\nVite 35\nEdge 33\nWASM 30\nTauri 28\n",
+    "wordcloud Programming Languages\n\nJavaScript 95\nPython 92\nJava 78\nTypeScript 70\nC++ 60\nGo 50\nRust 45\nRuby 40\nPHP 38\nSwift 35\nKotlin 30\nC# 55\n",
+    "wordcloud Customer Review Keywords\n\nfast 90\nreliable 82\neasy 78\nintuitive 65\naffordable 60\nhelpful 55\nbuggy 40\nslow 35\nconfusing 30\nexpensive 28\nclunky 22\n",
+    "wordcloud Support Ticket Words\n\nlogin 95\npassword 88\nerror 80\ncrash 65\nrefund 55\nbilling 50\nslow 48\naccount 45\nupgrade 38\nsync 32\ntimeout 28\n"
+  ]
+}

@@ -100,6 +100,20 @@
       .grid3 .img img { max-width: 100%; max-height: 150px; }
       .arm-title { color: var(--muted); font-size: 11px; margin: 10px 0 4px; }
       .spinner { color: var(--muted); font-size: 11px; }
+      /* clickable prompt list (replaces the old dropdown) */
+      .prompt-list { display: flex; flex-direction: column; gap: 5px; margin: 4px 0; }
+      .prompt-row {
+        display: flex; gap: 9px; align-items: baseline; text-align: left;
+        background: var(--chip); border: 1px solid var(--line); color: var(--fg);
+        border-radius: 6px; padding: 8px 11px; cursor: pointer; font: inherit;
+        line-height: 1.4;
+      }
+      .prompt-row:hover { border-color: var(--accent); }
+      .prompt-row.active { border-color: var(--accent); background: #20283a; }
+      .prompt-row .pglyph { flex: none; font-size: 13px; width: 14px; }
+      .prompt-row .pnum { flex: none; color: var(--muted); }
+      .prompt-row.add { color: var(--muted); font-style: italic; }
+      .pbadge { font-size: 11px; margin: 4px 0 0; }
     </style>
   </head>
   <body>

@@ -5,6 +5,12 @@ bundle/
 *.tgz
 .DS_Store
 
+# Guidance-studio rendered gallery — regenerated from committed gallery-sources.json
+# by `node tools/guidance-studio/build-gallery.mjs` (deterministic, no LLM). Keeps
+# the 16MB of PNGs out of git history; `pnpm studio` rebuilds them on launch.
+tools/guidance-studio/gallery/
+tools/guidance-studio/gallery.json
+
 # Secrets — never commit
 .mcpregistry_*
 .env

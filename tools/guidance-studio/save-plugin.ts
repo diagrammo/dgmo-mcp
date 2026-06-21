@@ -253,6 +253,65 @@ export function savePlugin(): Plugin {
         }
       });
 
+      // Pre-rendered gallery (gallery.json) — the persisted DGMO + render for
+      // every type × starter prompt, so the UI can show output WITHOUT a live
+      // run. Built by build-gallery.mjs; the PNGs are served as static files
+      // from the Vite root (/gallery/<type>-<idx>.png).
+      server.middlewares.use('/studio/gallery', (req, res, next) => {
+        if (req.method !== 'GET') return next();
+        try {
+          const p = path.join(here, 'gallery.json');
+          if (!existsSync(p)) {
+            sendJson(res, 200, {});
+            return;
+          }
+          sendJson(res, 200, JSON.parse(readFileSync(p, 'utf8')));
+        } catch (err) {
+          sendJson(res, 500, { error: String(err) });
+        }
+      });
+
+      // Add a new starter prompt for a type. Appends to prompts.json (so the
+      // studio sees it immediately) AND prompts-extra.json (so a build.mjs
+      // regen preserves it). New prompts are unvalidated (no gallery render)
+      // until validated — the UI flags them.
+      server.middlewares.use('/studio/prompts', (req, res, next) => {
+        if (req.method !== 'POST') return next();
+        readBody(req).then((body) => {
+          try {
+            const { type, prompt } = JSON.parse(body) as {
+              type: string;
+              prompt: string;
+            };
+            if (!type || !prompt || !prompt.trim())
+              throw new Error('type and a non-empty prompt are required');
+            const text = prompt.trim();
+            const promptsPath = path.join(here, 'prompts.json');
+            const extraPath = path.join(here, 'prompts-extra.json');
+            const prompts = JSON.parse(readFileSync(promptsPath, 'utf8')) as Record<
+              string,
+              string[]
+            >;
+            if (!prompts[type]) throw new Error(`unknown chart type: ${type}`);
+            if (prompts[type].includes(text)) {
+              sendJson(res, 200, { ok: true, prompts: prompts[type], added: false });
+              return;
+            }
+            prompts[type] = [...prompts[type], text];
+            writeFileSync(promptsPath, JSON.stringify(prompts, null, 2) + '\n');
+            // Mirror to prompts-extra.json (survives build.mjs regeneration).
+            const extra = existsSync(extraPath)
+              ? (JSON.parse(readFileSync(extraPath, 'utf8')) as Record<string, string[]>)
+              : {};
+            extra[type] = [...(extra[type] ?? []), text];
+            writeFileSync(extraPath, JSON.stringify(extra, null, 2) + '\n');
+            sendJson(res, 200, { ok: true, prompts: prompts[type], added: true });
+          } catch (err) {
+            sendJson(res, 400, { ok: false, reason: String(err) });
+          }
+        });
+      });
+
       // One run: claude -p → renderPipeline → source + image (+ proof of inputs).
       server.middlewares.use('/studio/run', (req, res, next) => {
         if (req.method !== 'POST') return next();

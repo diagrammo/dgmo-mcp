@@ -163,9 +163,9 @@
   ],
   "sitemap": [
     "Create a sitemap of the site structure in the sample data.",
-    "Create a sitemap of an e-commerce store: a Home page linking to Shop (with Categories and a Product page), Cart, Checkout, Account, and Support.",
-    "Create a sitemap of a SaaS app: a Landing page linking to Pricing, Docs, a Dashboard (with Projects, Settings, and Billing), and Login.",
-    "Create a sitemap of a restaurant website: a Home page linking to Menu, Reservations, About, and Contact."
+    "Create a sitemap of an e-commerce store with a Home page that links to Shop, Cart, Checkout, Account, and Support, and a Shop page that links to Categories and a Product page. (Draw each link as an arrow from the parent page so the pages are connected, not a flat list.)",
+    "Create a sitemap of a SaaS app with a Landing page that links to Pricing, Docs, a Dashboard, and Login, and a Dashboard that links to Projects, Settings, and Billing. (Draw each link as an arrow from the parent page so the pages are connected, not a flat list.)",
+    "Create a sitemap of a restaurant website with a Home page that links to Menu, Reservations, About, and Contact. (Draw each link as an arrow from the Home page so the pages are connected, not a flat list.)"
   ],
   "slope": [
     "Make a slope chart comparing each item’s value between the two periods in the sample data.",

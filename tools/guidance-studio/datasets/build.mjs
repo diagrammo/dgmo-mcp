@@ -12,7 +12,7 @@
 // only. `suitsTypes` is HAND-AUTHORED here (the manifest is the source of
 // truth) — it lists chart-type ids for which the dataset is a natural fit, and
 // drives the studio's per-type dataset suggestions (Phase 2).
-import { writeFileSync, mkdirSync } from 'node:fs';
+import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
@@ -563,9 +563,9 @@ const PROMPTS = {
   ],
   sitemap: [
     'Create a sitemap of the site structure in the sample data.',
-    'Create a sitemap of an e-commerce store: a Home page linking to Shop (with Categories and a Product page), Cart, Checkout, Account, and Support.',
-    'Create a sitemap of a SaaS app: a Landing page linking to Pricing, Docs, a Dashboard (with Projects, Settings, and Billing), and Login.',
-    'Create a sitemap of a restaurant website: a Home page linking to Menu, Reservations, About, and Contact.',
+    'Create a sitemap of an e-commerce store with a Home page that links to Shop, Cart, Checkout, Account, and Support, and a Shop page that links to Categories and a Product page. (Draw each link as an arrow from the parent page so the pages are connected, not a flat list.)',
+    'Create a sitemap of a SaaS app with a Landing page that links to Pricing, Docs, a Dashboard, and Login, and a Dashboard that links to Projects, Settings, and Billing. (Draw each link as an arrow from the parent page so the pages are connected, not a flat list.)',
+    'Create a sitemap of a restaurant website with a Home page that links to Menu, Reservations, About, and Contact. (Draw each link as an arrow from the Home page so the pages are connected, not a flat list.)',
   ],
   gantt: [
     'Make a Gantt chart of the project tasks in the sample data, with their start dates and durations.',
@@ -734,20 +734,39 @@ writeFileSync(
   JSON.stringify(manifest, null, 2) + '\n'
 );
 
+// Merge in any user-added prompts (prompts-extra.json, written by the studio's
+// "+ Add prompt" action) so regeneration never drops them. Extras append AFTER
+// the built-in prompts for each type; deduped against the built-ins.
+const extraPath = path.join(here, '..', 'prompts-extra.json');
+let extras = {};
+try {
+  extras = JSON.parse(readFileSync(extraPath, 'utf8'));
+} catch {
+  /* no extras yet — fine */
+}
+const mergedPrompts = {};
+for (const k of Object.keys(PROMPTS)) {
+  const base = PROMPTS[k];
+  const add = (extras[k] ?? []).filter((p) => p && !base.includes(p));
+  mergedPrompts[k] = [...base, ...add];
+}
+
 // Per-type starter prompts → ../prompts.json (sibling to registry.json so
 // main.ts can static-import it). Sorted for stable diffs.
 const sortedPrompts = Object.fromEntries(
-  Object.keys(PROMPTS)
+  Object.keys(mergedPrompts)
     .sort()
-    .map((k) => [k, PROMPTS[k]])
+    .map((k) => [k, mergedPrompts[k]])
 );
 writeFileSync(
   path.join(here, '..', 'prompts.json'),
   JSON.stringify(sortedPrompts, null, 2) + '\n'
 );
 
+const extraCount = Object.values(mergedPrompts).flat().length -
+  Object.values(PROMPTS).flat().length;
 console.log(
-  `[datasets] wrote ${manifest.length} datasets + manifest; ${Object.keys(PROMPTS).length} prompts → prompts.json`
+  `[datasets] wrote ${manifest.length} datasets + manifest; ${Object.values(mergedPrompts).flat().length} prompts (${extraCount} user-added) → prompts.json`
 );
 console.log(
   `[studio] wrote ${DATASETS.length} dataset fixtures + manifest.json`
