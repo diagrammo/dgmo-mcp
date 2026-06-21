@@ -11,6 +11,7 @@ import { describe, it, expect } from 'vitest';
 import registry from '../tools/guidance-studio/registry.json';
 import manifest from '../tools/guidance-studio/datasets/manifest.json';
 import prompts from '../tools/guidance-studio/prompts.json';
+import promptValidation from '../tools/guidance-studio/prompt-validation.json';
 
 // Types whose content is fully specified by the prompt itself, so no injected
 // dataset is needed (logic/structure the model builds from the instruction).
@@ -55,6 +56,30 @@ describe('guidance-studio per-type coverage', () => {
       expect(typeIds).toContain(id);
       expect(promptMap[id]?.[0]?.trim()).toBeTruthy();
     }
+  });
+
+  it('every starter prompt has a persisted, passing validation verdict', () => {
+    // prompt-validation.json records the validation pass (parse + render +
+    // intent) and the studio surfaces it per prompt. Lock it in sync: every
+    // current prompt must have a verdict, keyed by exact text, that passed.
+    type Verdict = { prompt: string; valid: boolean; render: string; intent: string };
+    const byText = new Map<string, Verdict>();
+    for (const [k, v] of Object.entries(
+      promptValidation as Record<string, unknown>
+    )) {
+      if (k === '_meta') continue;
+      for (const verdict of v as Verdict[]) byText.set(verdict.prompt, verdict);
+    }
+    const problems: string[] = [];
+    for (const id of typeIds) {
+      for (const p of promptMap[id] ?? []) {
+        const v = byText.get(p);
+        if (!v) problems.push(`${id}: no verdict for "${p.slice(0, 40)}…"`);
+        else if (!v.valid || v.render !== 'ok' || v.intent !== 'good')
+          problems.push(`${id}: weak verdict for "${p.slice(0, 40)}…"`);
+      }
+    }
+    expect(problems).toEqual([]);
   });
 
   it('every dataset suitsTypes entry maps to a real chart type (no typos)', () => {

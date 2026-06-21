@@ -139,9 +139,9 @@
   ],
   "ring": [
     "Make a ring chart of the department budget breakdown in the sample data.",
-    "Make a ring chart of project time allocation across phases.",
-    "Make a ring chart of a portfolio allocation across asset classes.",
-    "Make a ring chart of energy generation by source."
+    "Make a ring chart of an organization's circles of influence, from the individual at the core outward through team, department, and company.",
+    "Make a ring chart of the OSI network model layers, from the physical layer at the core out to the application layer.",
+    "Make a ring chart of Earth's layers, from the inner core outward through the outer core, mantle, and crust."
   ],
   "sankey": [
     "Make a Sankey diagram of the service-to-service traffic in the sample data.",
