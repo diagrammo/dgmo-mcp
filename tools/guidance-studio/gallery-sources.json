@@ -138,7 +138,7 @@
     "raci Quarterly Report\nroles Analyst, Manager, Finance, Exec\n\nGather data\n  Analyst: A R\n  Finance: C\n  Manager: I\nValidate figures\n  Finance: A R\n  Analyst: C\n  Manager: I\nDraft the report\n  Analyst: A R\n  Manager: C\n  Exec: I\nReview and approve\n  Manager: A\n  Exec: R\n  Analyst: C\nDistribute to stakeholders\n  Exec: A\n  Manager: R\n  Analyst: I\n"
   ],
   "ring": [
-    "ring Department Budget\n\nOperations description: \"9% of budget\"\nSupport description: \"11% of budget\"\nMarketing description: \"15% of budget\"\nSales description: \"23% of budget\"\nEngineering description: \"42% of budget\"\n",
+    "ring Defense in Depth\n\nData description: \"Encryption at rest, tokenization, least-privilege access\"\nApplication description: \"Input validation, authentication, secure coding\"\nHost description: \"Hardened OS, endpoint protection, timely patching\"\nNetwork description: \"Segmentation, firewalls, intrusion detection\"\nPerimeter description: \"Edge firewall, DDoS protection, VPN gateways\"\nPhysical & People description: \"Facility access control, security training, governance\"\n",
     "ring Circles of Influence\n\nIndividual\nTeam\nDepartment\nCompany\n",
     "ring OSI Network Model\n\nPhysical\nData Link\nNetwork\nTransport\nSession\nPresentation\nApplication\n",
     "ring Earth's Layers\n\nInner Core\nOuter Core\nMantle\nCrust\n"

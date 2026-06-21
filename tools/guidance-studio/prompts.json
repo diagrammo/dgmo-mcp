@@ -138,7 +138,7 @@
     "Make a RACI matrix for producing a quarterly report across the roles Analyst, Manager, Finance, and Exec."
   ],
   "ring": [
-    "Make a ring chart of the department budget breakdown in the sample data.",
+    "Make a ring chart of the defense-in-depth security model in the sample data, with the protected data at the core and each layer of defense wrapping outward to the perimeter.",
     "Make a ring chart of an organization's circles of influence, from the individual at the core outward through team, department, and company.",
     "Make a ring chart of the OSI network model layers, from the physical layer at the core out to the application layer.",
     "Make a ring chart of Earth's layers, from the inner core outward through the outer core, mantle, and crust."

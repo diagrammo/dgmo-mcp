@@ -170,8 +170,8 @@
     ]
   },
   {
-    "id": "budget-breakdown",
-    "label": "Department budget breakdown",
+    "id": "defense-in-depth",
+    "label": "Defense-in-depth security layers",
     "suitsTypes": [
       "ring"
     ]

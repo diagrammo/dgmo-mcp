@@ -604,7 +604,7 @@
   ],
   "ring": [
     {
-      "prompt": "Make a ring chart of the department budget breakdown in the sample data.",
+      "prompt": "Make a ring chart of the defense-in-depth security model in the sample data, with the protected data at the core and each layer of defense wrapping outward to the perimeter.",
       "valid": true,
       "render": "ok",
       "intent": "good"

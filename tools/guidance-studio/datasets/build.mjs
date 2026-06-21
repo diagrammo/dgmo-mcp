@@ -467,17 +467,36 @@ const DATASETS = [
     },
   },
   {
-    id: 'budget-breakdown',
-    label: 'Department budget breakdown',
+    id: 'defense-in-depth',
+    label: 'Defense-in-depth security layers',
     suitsTypes: ['ring'],
     data: {
-      unit: '% of budget',
-      segments: [
-        { name: 'Engineering', value: 42 },
-        { name: 'Sales', value: 23 },
-        { name: 'Marketing', value: 15 },
-        { name: 'Support', value: 11 },
-        { name: 'Operations', value: 9 },
+      ordering: 'core (the protected asset) outward to the outermost defense',
+      layers: [
+        {
+          name: 'Data',
+          note: 'Encryption at rest, tokenization, least-privilege access',
+        },
+        {
+          name: 'Application',
+          note: 'Input validation, authentication, secure coding',
+        },
+        {
+          name: 'Host',
+          note: 'Hardened OS, endpoint protection, timely patching',
+        },
+        {
+          name: 'Network',
+          note: 'Segmentation, firewalls, intrusion detection',
+        },
+        {
+          name: 'Perimeter',
+          note: 'Edge firewall, DDoS protection, VPN gateways',
+        },
+        {
+          name: 'Physical & People',
+          note: 'Facility access control, security training, governance',
+        },
       ],
     },
   },
@@ -700,7 +719,7 @@ const PROMPTS = {
     'Make a pyramid chart of a workforce structure — executives, managers, senior staff, and individual contributors — widest at the base.',
   ],
   ring: [
-    'Make a ring chart of the department budget breakdown in the sample data.',
+    'Make a ring chart of the defense-in-depth security model in the sample data, with the protected data at the core and each layer of defense wrapping outward to the perimeter.',
     "Make a ring chart of an organization's circles of influence, from the individual at the core outward through team, department, and company.",
     'Make a ring chart of the OSI network model layers, from the physical layer at the core out to the application layer.',
     "Make a ring chart of Earth's layers, from the inner core outward through the outer core, mantle, and crust.",

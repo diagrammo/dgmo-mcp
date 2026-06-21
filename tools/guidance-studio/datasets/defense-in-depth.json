@@ -1,0 +1,36 @@
+{
+  "id": "defense-in-depth",
+  "label": "Defense-in-depth security layers",
+  "suitsTypes": [
+    "ring"
+  ],
+  "data": {
+    "ordering": "core (the protected asset) outward to the outermost defense",
+    "layers": [
+      {
+        "name": "Data",
+        "note": "Encryption at rest, tokenization, least-privilege access"
+      },
+      {
+        "name": "Application",
+        "note": "Input validation, authentication, secure coding"
+      },
+      {
+        "name": "Host",
+        "note": "Hardened OS, endpoint protection, timely patching"
+      },
+      {
+        "name": "Network",
+        "note": "Segmentation, firewalls, intrusion detection"
+      },
+      {
+        "name": "Perimeter",
+        "note": "Edge firewall, DDoS protection, VPN gateways"
+      },
+      {
+        "name": "Physical & People",
+        "note": "Facility access control, security training, governance"
+      }
+    ]
+  }
+}
