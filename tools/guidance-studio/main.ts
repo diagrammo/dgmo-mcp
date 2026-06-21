@@ -114,11 +114,14 @@ const state = {
   datasets: [] as DatasetMeta[],
 };
 
-// Last single-Run result per type, kept in memory so switching chart types
-// doesn't throw away a `claude -p` run. `sig` captures the inputs that produced
-// it (prompt + dataset + tips); if those later differ, the restored result is
-// flagged stale rather than silently misleading. (Survives type-switching;
-// re-runs on a full page reload — base64 images are too big for localStorage.)
+// Last single-Run result per (type, prompt), kept in memory so switching chart
+// types OR prompts doesn't throw away a `claude -p` run. Keyed `type::idx` so
+// each prompt row keeps its own run — clicking away and back restores it
+// instead of falling back to the persisted gallery. `sig` captures the inputs
+// that produced it (prompt + dataset + tips); if those later differ, the
+// restored result is flagged stale rather than silently misleading. (Survives
+// type/prompt switching; re-runs on a full page reload — base64 images are too
+// big for localStorage.)
 const lastRuns = new Map<string, { result: RunResult; sig: string }>();
 
 // Per-type prompt + dataset choice, remembered browser-locally (runs stay
@@ -308,6 +311,9 @@ async function selectType(id: string): Promise<void> {
     typePrompts.length - 1
   );
 
+  // Cache key for the active prompt's live run (see `lastRuns`).
+  const runKey = (): string => `${id}::${activeIdx}`;
+
   // Editable copy of the active prompt — what Run/Compare actually send (lets
   // you tweak a prompt before a live run without disturbing the saved list).
   const prompt = el('input', {
@@ -364,7 +370,10 @@ async function selectType(id: string): Promise<void> {
     savePref(id, { promptIdx: i, prompt: typePrompts[i] });
     renderPromptList();
     refreshValidNote();
-    void showGallery(i);
+    // Restore this prompt's prior live run if we have one; else the gallery.
+    const cached = lastRuns.get(runKey());
+    if (cached) renderSingle(resultSec, cached.result, tips.value);
+    else void showGallery(i);
     updateStale();
   }
 
@@ -510,7 +519,7 @@ async function selectType(id: string): Promise<void> {
   const sigNow = (): string =>
     JSON.stringify({ p: prompt.value, d: dsSelect.value, t: tips.value.trim() });
   const updateStale = (): void => {
-    const cached = lastRuns.get(id);
+    const cached = lastRuns.get(runKey());
     staleNote.style.display =
       cached && resultSec.childElementCount > 0 && cached.sig !== sigNow()
         ? ''
@@ -542,7 +551,7 @@ async function selectType(id: string): Promise<void> {
     try {
       const res = await runOnce();
       renderSingle(resultSec, res, tips.value);
-      lastRuns.set(id, { result: res, sig: sigNow() });
+      lastRuns.set(runKey(), { result: res, sig: sigNow() });
     } catch (err) {
       resultSec.innerHTML = `<p class="diag">Run failed: ${String(err)}</p>`;
     }
@@ -553,7 +562,7 @@ async function selectType(id: string): Promise<void> {
 
   // Show a prior LIVE run if one exists (don't waste it); otherwise show the
   // selected prompt's PERSISTED gallery render so output is visible immediately.
-  const cached = lastRuns.get(id);
+  const cached = lastRuns.get(runKey());
   if (cached) renderSingle(resultSec, cached.result, tips.value);
   else void showGallery(activeIdx);
   updateStale();
