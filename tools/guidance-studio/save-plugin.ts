@@ -24,7 +24,7 @@ import {
   currentTipsBlock,
   tipsCoverage,
 } from './validate-tips';
-import { extractSection } from '../../src/reference';
+import { extractSection, extractColorRule } from '../../src/reference';
 
 const TIPS_BLOCK_RE = /<!--\s*TIPS start\s*-->[\s\S]*?<!--\s*TIPS end\s*-->/;
 
@@ -338,10 +338,18 @@ export function savePlugin(): Plugin {
             const dataset = datasetId ? readDataset(datasetId) : null;
             // Per-type syntax reference (the get_language_reference slice), minus
             // its TIPS block — the live tips are injected separately above, so
-            // this avoids double-sending them.
-            const reference = (extractSection(md, type) ?? '')
+            // this avoids double-sending them. Prepend the universal color rule
+            // exactly as MCP's sliceWithColorRule does, so a studio run sees the
+            // same closed-11-color / no-hex contract a real client gets (else the
+            // model invents hex colors the reference never sanctioned).
+            const section = (extractSection(md, type) ?? '')
               .replace(TIPS_BLOCK_RE, '')
               .trim();
+            const colorRule = extractColorRule(md);
+            const reference =
+              section && colorRule
+                ? `${colorRule}\n\n---\n\n${section}`
+                : section;
             const resolvedPrompt = buildResolvedPrompt(
               type,
               userPrompt,
