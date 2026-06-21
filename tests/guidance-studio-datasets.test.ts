@@ -21,15 +21,26 @@ const DATASETLESS = new Set(['flowchart', 'function', 'wireframe']);
 const typeIds = (registry as { types: { id: string }[] }).types.map(
   (t) => t.id
 );
-const promptMap = prompts as Record<string, string>;
+const promptMap = prompts as Record<string, string[]>;
 const suited = new Set(
   (manifest as { suitsTypes: string[] }[]).flatMap((d) => d.suitsTypes)
 );
 
 describe('guidance-studio per-type coverage', () => {
-  it('every chart type has a non-empty starter prompt', () => {
-    const missing = typeIds.filter((id) => !promptMap[id]?.trim());
+  it('every chart type has a non-empty starter prompt list', () => {
+    const missing = typeIds.filter(
+      (id) => !promptMap[id]?.length || !promptMap[id][0]?.trim()
+    );
     expect(missing).toEqual([]);
+  });
+
+  it('every prompt entry is a non-empty trimmed string', () => {
+    for (const id of typeIds) {
+      for (const p of promptMap[id] ?? []) {
+        expect(typeof p).toBe('string');
+        expect(p.trim()).toBeTruthy();
+      }
+    }
   });
 
   it('every chart type has a dataset except the datasetless logic types', () => {
@@ -42,7 +53,7 @@ describe('guidance-studio per-type coverage', () => {
   it('datasetless types are intentional (still have a prompt)', () => {
     for (const id of DATASETLESS) {
       expect(typeIds).toContain(id);
-      expect(promptMap[id]?.trim()).toBeTruthy();
+      expect(promptMap[id]?.[0]?.trim()).toBeTruthy();
     }
   });
 
