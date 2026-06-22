@@ -45,9 +45,12 @@ export function extractColorRule(markdown: string): string | null {
 
 /**
  * Slice the per-type block for `chartType`, resolving aliases first. A block
- * runs from its `<!-- TYPE:<id> -->` marker to the next TYPE marker or the next
- * `^## ` (H2) heading, whichever comes first. Returns null when no anchor
- * resolves (the id has neither a literal marker nor an alias).
+ * runs from just after its `<!-- TYPE:<id> -->` marker to the next TYPE marker
+ * or the next `^## ` (H2) heading, whichever comes first. The opening TYPE
+ * marker is a purely structural anchor — it is EXCLUDED from the returned slice
+ * so it never reaches a consumer (the model would otherwise echo it verbatim as
+ * the first line of its generated diagram). Returns null when no anchor resolves
+ * (the id has neither a literal marker nor an alias).
  */
 export function extractSection(
   markdown: string,
@@ -58,12 +61,11 @@ export function extractSection(
   const startRe = new RegExp(`<!--\\s*TYPE:${resolved}\\s*-->`);
   const startMatch = startRe.exec(markdown);
   if (!startMatch) return null;
-  const start = startMatch.index;
-  const after = start + startMatch[0].length;
+  const after = startMatch.index + startMatch[0].length;
   const rest = markdown.slice(after);
   const nextType = rest.search(/<!--\s*TYPE:[a-z0-9-]+\s*-->/);
   const nextH2 = rest.search(/^## /m);
   const ends = [nextType, nextH2].filter((n) => n !== -1);
   const end = ends.length ? after + Math.min(...ends) : markdown.length;
-  return markdown.slice(start, end).trim();
+  return markdown.slice(after, end).trim();
 }

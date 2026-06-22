@@ -186,8 +186,17 @@ describe('integration — all 45 chart-type ids resolve against the real referen
   }
 });
 
-// AC11: authored TIPS reach the per-type MCP slice automatically — the slice is
-// inclusive of the TYPE marker, so no MCP code change is needed. This asserts the
+// The slice EXCLUDES the structural opening TYPE marker — it is a doc anchor, not
+// DGMO syntax, and the model would echo it verbatim as the first line of output.
+describe('extractSection excludes the structural TYPE marker', () => {
+  it('a sliced block does not contain a <!-- TYPE:id --> anchor', () => {
+    const block = extractSection(FIXTURE, 'bar') ?? '';
+    expect(block).toContain('Bar body across simple charts.');
+    expect(block).not.toMatch(/<!--\s*TYPE:/);
+  });
+});
+
+// AC11: authored TIPS reach the per-type MCP slice automatically. This asserts the
 // delivery channel for the seed tranche; aliased ids (line→bar) inherit it.
 describe('per-type TIPS ride along the MCP slice (AC11)', () => {
   const ref = workspaceReference();

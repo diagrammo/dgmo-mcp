@@ -92,8 +92,13 @@ function resolveLanguageReference(): string {
  * documented block.
  */
 function sliceWithColorRule(content: string, chartType: string): string | null {
-  const section = extractSection(content, chartType);
-  if (!section) return null;
+  const raw = extractSection(content, chartType);
+  if (!raw) return null;
+  // Strip the TIPS delimiter comments (keep the guidance prose) so no structural
+  // HTML-comment scaffolding rides along to the model — it would echo such a
+  // comment verbatim into the generated diagram. The opening TYPE marker is
+  // already excluded by extractSection.
+  const section = raw.replace(/[ \t]*<!--\s*TIPS (?:start|end)\s*-->[ \t]*\n?/g, '');
   const colorRule = extractColorRule(content);
   return colorRule ? `${colorRule}\n\n---\n\n${section}` : section;
 }
