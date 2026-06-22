@@ -44,6 +44,34 @@ export function extractColorRule(markdown: string): string | null {
 }
 
 /**
+ * Extract the universal "always title the diagram" rule (the `<!-- TITLE start -->`
+ * / `<!-- TITLE end -->` block inside the STYLING core). Like the color rule, it
+ * is prepended to EVERY per-type slice so the model is told to title every
+ * diagram regardless of type — the STYLING core itself never rides the slice.
+ * Returns null if the markers are absent (older bundled reference).
+ */
+export function extractTitleRule(markdown: string): string | null {
+  const m = markdown.match(
+    /<!--\s*TITLE start\s*-->([\s\S]*?)<!--\s*TITLE end\s*-->/
+  );
+  return m ? m[1].trim() : null;
+}
+
+/**
+ * Extract the universal "categorize and color by a tag group" rule (the
+ * `<!-- CATEGORIZE start -->` / `<!-- CATEGORIZE end -->` block inside the
+ * STYLING core). Like the color + title rules it is prepended to EVERY per-type
+ * slice so the model is pushed to find a categorization axis and color by it for
+ * every diagram. Returns null if the markers are absent (older bundled reference).
+ */
+export function extractCategorizeRule(markdown: string): string | null {
+  const m = markdown.match(
+    /<!--\s*CATEGORIZE start\s*-->([\s\S]*?)<!--\s*CATEGORIZE end\s*-->/
+  );
+  return m ? m[1].trim() : null;
+}
+
+/**
  * Slice the per-type block for `chartType`, resolving aliases first. A block
  * runs from just after its `<!-- TYPE:<id> -->` marker to the next TYPE marker
  * or the next `^## ` (H2) heading, whichever comes first. The opening TYPE

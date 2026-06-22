@@ -37,7 +37,12 @@ import type { ChartTypeScore } from './suggest/scoring.js';
 import { buildPreviewHtml, buildReportHtml } from './html-report.js';
 import type { ReportSection } from './html-report.js';
 import { openInBrowser } from './open-browser.js';
-import { extractSection, extractColorRule } from './reference.js';
+import {
+  extractSection,
+  extractColorRule,
+  extractTitleRule,
+  extractCategorizeRule,
+} from './reference.js';
 import { version as PACKAGE_VERSION } from '../package.json';
 
 // ---------------------------------------------------------------------------
@@ -99,8 +104,17 @@ function sliceWithColorRule(content: string, chartType: string): string | null {
   // comment verbatim into the generated diagram. The opening TYPE marker is
   // already excluded by extractSection.
   const section = raw.replace(/[ \t]*<!--\s*TIPS (?:start|end)\s*-->[ \t]*\n?/g, '');
-  const colorRule = extractColorRule(content);
-  return colorRule ? `${colorRule}\n\n---\n\n${section}` : section;
+  // Universal rules that ride EVERY slice (the STYLING core itself does not):
+  // the closed-set color contract, the always-title rule, and the
+  // categorize-and-color rule.
+  const universal = [
+    extractColorRule(content),
+    extractTitleRule(content),
+    extractCategorizeRule(content),
+  ].filter(Boolean);
+  return universal.length
+    ? `${universal.join('\n\n')}\n\n---\n\n${section}`
+    : section;
 }
 
 /** Write HTML to a temp file and return the path. */

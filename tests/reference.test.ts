@@ -20,6 +20,8 @@ import {
   extractSection,
   parseTypeAliases,
   extractColorRule,
+  extractTitleRule,
+  extractCategorizeRule,
 } from '../src/reference.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -142,6 +144,32 @@ describe('color rule rides every per-type slice (closed-set contract)', () => {
     expect(rule).toMatch(/crimson/);
     expect(rule).toMatch(/royalblue/);
     expect(rule).toMatch(/hex/i);
+  });
+});
+
+describe('title rule rides every per-type slice (always-title contract)', () => {
+  const ref = workspaceReference();
+  const anchored = ref != null && /<!--\s*TYPE:/.test(ref);
+
+  it('the real reference defines the TITLE block', () => {
+    if (!anchored) return;
+    const rule = extractTitleRule(ref as string);
+    expect(rule).toBeTruthy();
+    expect(rule).toMatch(/title/i);
+    expect(rule).not.toMatch(/<!--/); // markers stripped from the extracted rule
+  });
+});
+
+describe('categorize rule rides every per-type slice (color-by-grouping push)', () => {
+  const ref = workspaceReference();
+  const anchored = ref != null && /<!--\s*TYPE:/.test(ref);
+
+  it('the real reference defines the CATEGORIZE block', () => {
+    if (!anchored) return;
+    const rule = extractCategorizeRule(ref as string);
+    expect(rule).toBeTruthy();
+    expect(rule).toMatch(/tag group/i);
+    expect(rule).not.toMatch(/<!--/); // markers stripped from the extracted rule
   });
 });
 

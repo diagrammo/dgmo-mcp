@@ -24,7 +24,12 @@ import {
   currentTipsBlock,
   tipsCoverage,
 } from './validate-tips';
-import { extractSection, extractColorRule } from '../../src/reference';
+import {
+  extractSection,
+  extractColorRule,
+  extractTitleRule,
+  extractCategorizeRule,
+} from '../../src/reference';
 
 const TIPS_BLOCK_RE = /<!--\s*TIPS start\s*-->[\s\S]*?<!--\s*TIPS end\s*-->/;
 
@@ -33,6 +38,12 @@ const REPO_ROOT = path.join(here, '../..'); // dgmo-mcp/
 // Authoring target = the workspace dgmo source (edits are written back here).
 const REF_PATH = path.join(here, '../../../dgmo/docs/language-reference.md');
 const DATASETS_DIR = path.join(here, 'datasets');
+// Persisted manual runs ("trials"). Survives a browser refresh AND a dev-server
+// restart — build-gallery.mjs only ever rewrites gallery.json + gallery/, never
+// this file — so a hand-run diagram isn't lost back to the baseline gallery.
+// Keyed type → idx → { prompt, sig, result, ts }. The base64 PNG lives inline
+// (a disk file, not localStorage), so there are no image files to serve.
+const TRIALS_PATH = path.join(here, 'trial-runs.json');
 // Target the ESM build (.mjs) explicitly — robust regardless of Node's CJS
 // named-export interop. `pnpm studio` runs `pnpm build` first so this exists.
 const RENDER_HELPERS_PATH = path.join(REPO_ROOT, 'dist/render-helpers.mjs');
@@ -58,6 +69,15 @@ interface Dataset {
   label: string;
   suitsTypes: string[];
   data: unknown;
+}
+
+function readTrials(): Record<string, Record<string, unknown>> {
+  if (!existsSync(TRIALS_PATH)) return {};
+  try {
+    return JSON.parse(readFileSync(TRIALS_PATH, 'utf8'));
+  } catch {
+    return {}; // corrupt scratch file — start fresh rather than crash the studio
+  }
 }
 
 function readManifest(): { id: string; label: string; suitsTypes: string[] }[] {
@@ -216,6 +236,45 @@ export function savePlugin(): Plugin {
         next();
       });
 
+      // Persisted manual runs. GET returns the whole store (the UI hydrates its
+      // in-memory run cache from it on load); POST upserts one (type, idx) trial.
+      server.middlewares.use('/studio/trials', (req, res, next) => {
+        if (req.method === 'GET') {
+          sendJson(res, 200, readTrials());
+          return;
+        }
+        if (req.method === 'POST') {
+          readBody(req).then((body) => {
+            try {
+              const { type, idx, prompt, sig, result } = JSON.parse(body) as {
+                type: string;
+                idx: number;
+                prompt: string;
+                sig: string;
+                result: unknown;
+              };
+              if (!type || idx == null)
+                throw new Error('type and idx are required');
+              const all = readTrials();
+              (all[type] ??= {})[String(idx)] = {
+                prompt,
+                sig,
+                result,
+                ts: Date.now(),
+              };
+              const tmp = `${TRIALS_PATH}.tmp-${process.pid}`;
+              writeFileSync(tmp, JSON.stringify(all, null, 2) + '\n');
+              renameSync(tmp, TRIALS_PATH); // atomic on the same filesystem
+              sendJson(res, 200, { ok: true });
+            } catch (err) {
+              sendJson(res, 400, { ok: false, reason: String(err) });
+            }
+          });
+          return;
+        }
+        next();
+      });
+
       // Datasets for the dropdown; ?type= filters to suitsTypes (Phase-2 default
       // is applied browser-side, the filter is the data behind it).
       server.middlewares.use('/studio/datasets', (req, res, next) => {
@@ -345,10 +404,17 @@ export function savePlugin(): Plugin {
             const section = (extractSection(md, type) ?? '')
               .replace(TIPS_BLOCK_RE, '')
               .trim();
-            const colorRule = extractColorRule(md);
+            // Mirror sliceWithColorRule: the same universal rules (color contract,
+            // always-title, categorize-and-color) ride every real MCP slice, so a
+            // studio run sees them.
+            const universal = [
+              extractColorRule(md),
+              extractTitleRule(md),
+              extractCategorizeRule(md),
+            ].filter(Boolean);
             const reference =
-              section && colorRule
-                ? `${colorRule}\n\n---\n\n${section}`
+              section && universal.length
+                ? `${universal.join('\n\n')}\n\n---\n\n${section}`
                 : section;
             const resolvedPrompt = buildResolvedPrompt(
               type,

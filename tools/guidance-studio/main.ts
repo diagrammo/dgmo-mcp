@@ -119,10 +119,56 @@ const state = {
 // each prompt row keeps its own run — clicking away and back restores it
 // instead of falling back to the persisted gallery. `sig` captures the inputs
 // that produced it (prompt + dataset + tips); if those later differ, the
-// restored result is flagged stale rather than silently misleading. (Survives
-// type/prompt switching; re-runs on a full page reload — base64 images are too
-// big for localStorage.)
+// restored result is flagged stale rather than silently misleading.
+//
+// This map is persisted server-side to trial-runs.json: every Run upserts its
+// (type, idx) entry, and the map is hydrated from that file on load — so a hand-
+// run diagram survives a page refresh (and a dev-server restart) instead of
+// snapping back to the baseline gallery.
 const lastRuns = new Map<string, { result: RunResult; sig: string }>();
+
+/** Persist one manual run so it survives a reload (fire-and-forget). The svg is
+ *  dropped before persisting — display uses the base64 PNG, and svg is large. */
+function persistTrial(
+  type: string,
+  idx: number,
+  promptText: string,
+  sig: string,
+  result: RunResult
+): void {
+  void fetch('/studio/trials', {
+    method: 'POST',
+    headers: { 'content-type': 'application/json' },
+    body: JSON.stringify({
+      type,
+      idx,
+      prompt: promptText,
+      sig,
+      result: { ...result, svg: null },
+    }),
+  }).catch(() => {
+    /* dev tool — a failed persist just means this run is in-memory only */
+  });
+}
+
+/** Hydrate lastRuns from the persisted trial store (called once at boot). */
+async function hydrateTrials(): Promise<void> {
+  try {
+    const store = (await fetch('/studio/trials').then((r) => r.json())) as Record<
+      string,
+      Record<string, { sig?: string; result?: RunResult }>
+    >;
+    for (const [type, byIdx] of Object.entries(store)) {
+      for (const [idx, rec] of Object.entries(byIdx)) {
+        if (rec?.result)
+          lastRuns.set(`${type}::${idx}`, { result: rec.result, sig: rec.sig ?? '' });
+      }
+    }
+  } catch {
+    /* dev tool — no persisted trials yet */
+  }
+}
+const trialsReady = hydrateTrials();
 
 // Per-type prompt + dataset choice, remembered browser-locally (runs stay
 // ephemeral — only TIPS persist to disk; this just stops a crafted prompt from
@@ -222,6 +268,7 @@ async function selectType(id: string): Promise<void> {
   state.type = id;
   renderPicker();
   work.innerHTML = '<p class="spinner">Loading…</p>';
+  await trialsReady; // ensure persisted runs are in lastRuns before we consult it
 
   const [guidance, ds] = await Promise.all([
     fetch(`/studio/guidance?type=${encodeURIComponent(id)}`).then((r) => r.json()),
@@ -551,7 +598,9 @@ async function selectType(id: string): Promise<void> {
     try {
       const res = await runOnce();
       renderSingle(resultSec, res, tips.value);
-      lastRuns.set(runKey(), { result: res, sig: sigNow() });
+      const sig = sigNow();
+      lastRuns.set(runKey(), { result: res, sig });
+      persistTrial(id, activeIdx, prompt.value, sig, res);
     } catch (err) {
       resultSec.innerHTML = `<p class="diag">Run failed: ${String(err)}</p>`;
     }

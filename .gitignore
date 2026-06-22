@@ -11,6 +11,11 @@ bundle/
 tools/guidance-studio/gallery/
 tools/guidance-studio/gallery.json
 
+# Guidance-studio persisted manual runs (scratch trials, base64 PNGs inline).
+# Local-only — survives refresh/restart but never committed.
+tools/guidance-studio/trial-runs.json
+tools/guidance-studio/trial-runs.json.tmp-*
+
 # Secrets — never commit
 .mcpregistry_*
 .env
