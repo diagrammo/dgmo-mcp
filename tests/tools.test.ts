@@ -64,9 +64,28 @@ describe('server exposes the expected tool set', () => {
     'validate_diagram',
     'suggest_chart_type',
     'get_examples',
+    'check_app_installed',
   ];
   it('registers every expected tool (no missing / renamed)', () => {
     for (const name of EXPECTED) expect(toolNames).toContain(name);
+  });
+});
+
+describe('check_app_installed', () => {
+  it('returns a boolean install verdict and machine-readable JSON', async () => {
+    const { text, isError } = await call('check_app_installed', {});
+    expect(isError).toBe(false);
+    // Last text block is JSON with the structured verdict.
+    const json = JSON.parse(text.trim().split('\n').pop() ?? '{}') as {
+      installed: boolean;
+      paths: string[];
+      platform: string;
+    };
+    expect(typeof json.installed).toBe('boolean');
+    expect(Array.isArray(json.paths)).toBe(true);
+    expect(json.platform).toBe(process.platform);
+    // Prose steers the model toward the right default output.
+    expect(text).toMatch(/installed|share/i);
   });
 });
 

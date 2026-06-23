@@ -4,9 +4,9 @@ import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { exec } from 'node:child_process';
-import { readdirSync, readFileSync, writeFileSync } from 'node:fs';
+import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
-import { tmpdir } from 'node:os';
+import { homedir, tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import {
   parseDgmo,
@@ -127,6 +127,24 @@ function writeTempPng(base64: string): string {
   const filePath = join(tmpdir(), `dgmo-render-${randomUUID()}.png`);
   writeFileSync(filePath, Buffer.from(base64, 'base64'));
   return filePath;
+}
+
+/**
+ * Detect the installed Diagrammo desktop app (macOS only — the app ships for
+ * macOS). Mirrors the path check baked into the CLI launcher
+ * (diagrammo-app/src-tauri/src/lib.rs): the two standard install locations.
+ * Returns the bundle paths found so the AI can decide its output strategy:
+ * when installed, save the .dgmo source and open THAT file live in the app
+ * rather than publishing an online share URL.
+ */
+function detectDesktopApp(): { installed: boolean; paths: string[] } {
+  if (process.platform !== 'darwin') return { installed: false, paths: [] };
+  const candidates = [
+    '/Applications/Diagrammo.app',
+    join(homedir(), 'Applications', 'Diagrammo.app'),
+  ];
+  const paths = candidates.filter((p) => existsSync(p));
+  return { installed: paths.length > 0, paths };
 }
 
 // ---------------------------------------------------------------------------
@@ -265,9 +283,15 @@ server.tool(
 
 server.tool(
   'open_in_app',
-  'Open a DGMO diagram in the Diagrammo desktop app (macOS only). Falls back to browser preview if the app is not installed.',
+  'Open a DGMO diagram in the Diagrammo desktop app (macOS only). Falls back to browser preview if the app is not installed. Pass `filePath` to open a saved .dgmo file directly — the app opens THAT file, so in-app edits autosave back to it (one editable source of truth, live re-render). This is the preferred path when the app is installed: write the .dgmo source first, then open it here. Omit `filePath` for an ephemeral diagram (sends a deep link; the app creates its own copy).',
   {
     dgmo: z.string().describe('DGMO diagram markup'),
+    filePath: z
+      .string()
+      .optional()
+      .describe(
+        'Absolute path to an already-saved .dgmo file. When set, the app opens this exact file for live editing instead of receiving a deep-linked copy.'
+      ),
   },
   {
     title: 'Open in Diagrammo App',
@@ -275,7 +299,7 @@ server.tool(
     destructiveHint: false,
     openWorldHint: true,
   },
-  async ({ dgmo }) => {
+  async ({ dgmo, filePath }) => {
     const result = encodeDiagramUrl(dgmo);
     if (result.error === 'too-large') {
       return {
@@ -294,10 +318,20 @@ server.tool(
     const hash = url.split('#')[1] ?? '';
     const deepLink = `diagrammo://open?dgmo=${hash}`;
 
+    // When a saved file path is given, open THAT file in the app (via the .dgmo
+    // file association) so it stays the single editable source — in-app edits
+    // autosave back to disk. Otherwise hand off the diagram via deep link.
+    const openCmd = filePath
+      ? `open -a Diagrammo ${JSON.stringify(filePath)}`
+      : `open ${JSON.stringify(deepLink)}`;
+    const successText = filePath
+      ? `Opened ${filePath} in Diagrammo app (live editing — in-app changes save back to this file).`
+      : 'Opened diagram in Diagrammo app.';
+
     return new Promise((resolve) => {
       // exec's callback is sync-typed; wrap the async body in a void IIFE
       // so the Promise return doesn't violate @typescript-eslint/no-misused-promises.
-      exec(`open ${JSON.stringify(deepLink)}`, (error) => {
+      exec(openCmd, (error) => {
         void (async () => {
           if (error) {
             // Fallback: render to SVG and open in browser
@@ -352,7 +386,7 @@ server.tool(
               content: [
                 {
                   type: 'text' as const,
-                  text: 'Opened diagram in Diagrammo app.',
+                  text: successText,
                 },
               ],
             });
@@ -360,6 +394,37 @@ server.tool(
         })();
       });
     });
+  }
+);
+
+// --- Tool: check_app_installed ---
+
+server.tool(
+  'check_app_installed',
+  'Check whether the Diagrammo desktop app is installed (macOS). Call this ONCE before choosing how to show a diagram. If installed, the preferred output is to save the .dgmo source and open that file live in the app (open_in_app with filePath) — do NOT default to an online share URL. If not installed, fall back to the online share URL.',
+  {},
+  {
+    title: 'Check Diagrammo App Installed',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: false,
+  },
+  () => {
+    const { installed, paths } = detectDesktopApp();
+    const text = installed
+      ? `Diagrammo desktop app IS installed (${paths.join(', ')}). Preferred output: save the .dgmo source, then open that file live with open_in_app({ filePath }). Do not render a PNG or open an online URL unless the user explicitly asks.`
+      : process.platform === 'darwin'
+        ? 'Diagrammo desktop app is NOT installed. Default output: online share URL (share_diagram + open the URL).'
+        : 'Desktop-app detection is macOS-only; assume not installed. Default output: online share URL (share_diagram + open the URL).';
+    return {
+      content: [
+        { type: 'text' as const, text },
+        {
+          type: 'text' as const,
+          text: JSON.stringify({ installed, paths, platform: process.platform }),
+        },
+      ],
+    };
   }
 );
 
