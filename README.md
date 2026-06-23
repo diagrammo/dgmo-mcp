@@ -85,10 +85,22 @@ embed anywhere:
 
 ## Setup
 
-### Claude Code
+### Easiest — one command
 
-Add to your project's `.claude/settings.local.json` (or run
-`npx @diagrammo/dgmo --install-claude-code-integration` to do it automatically):
+Install the [`dgmo`](https://www.npmjs.com/package/@diagrammo/dgmo) CLI and let it wire everything up:
+
+```bash
+npm install -g @diagrammo/dgmo   # or: brew install diagrammo/dgmo/dgmo
+dgmo install                     # auto-detects Claude Code, Codex, Claude Desktop, Cursor, …
+```
+
+`dgmo install` configures each detected assistant non-interactively and points it at `dgmo mcp`, so there's no separate package to install or prompts to answer. Target one surface with `dgmo install claude-code` (or `codex`, `claude-desktop`, …).
+
+### Manual configuration
+
+Prefer to edit configs yourself? Point any MCP client at the server via `npx` (no global install needed):
+
+**Claude Code** — `.claude/settings.local.json`; **Claude Desktop** — `~/Library/Application Support/Claude/claude_desktop_config.json`:
 
 ```json
 {
@@ -101,22 +113,7 @@ Add to your project's `.claude/settings.local.json` (or run
 }
 ```
 
-### Claude Desktop
-
-Add to `~/Library/Application Support/Claude/claude_desktop_config.json`:
-
-```json
-{
-  "mcpServers": {
-    "dgmo": {
-      "command": "npx",
-      "args": ["-y", "@diagrammo/dgmo-mcp"]
-    }
-  }
-}
-```
-
-Restart Claude Desktop after saving — the tools appear automatically.
+If you have the `dgmo` CLI installed, `{ "command": "dgmo", "args": ["mcp"] }` works too. Restart the client after saving — the tools appear automatically.
 
 ## Privacy
 
