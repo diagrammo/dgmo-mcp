@@ -93,6 +93,12 @@ interface RunResult {
   injectedTips: string;
   diagnostics: { severity: string; message: string }[];
   error: string | null;
+  // Epoch ms when this result was produced by a live `claude -p` run. Stamped
+  // client-side on Run (and hydrated from the trial store's `ts`) so the result
+  // header can prove freshness — without it, a re-run that yields near-identical
+  // output looks like nothing happened (the green "validated" badge is a stored
+  // status, not a run indicator).
+  ranAt?: number;
 }
 
 const types: TypeEntry[] = (registry as { types: TypeEntry[] }).types;
@@ -156,12 +162,16 @@ async function hydrateTrials(): Promise<void> {
   try {
     const store = (await fetch('/studio/trials').then((r) => r.json())) as Record<
       string,
-      Record<string, { sig?: string; result?: RunResult }>
+      Record<string, { sig?: string; ts?: number; result?: RunResult }>
     >;
     for (const [type, byIdx] of Object.entries(store)) {
       for (const [idx, rec] of Object.entries(byIdx)) {
-        if (rec?.result)
+        if (rec?.result) {
+          // Surface when this run last executed so a hydrated result still
+          // reads as a (prior) live run, not a fresh one.
+          if (rec.ts != null && rec.result.ranAt == null) rec.result.ranAt = rec.ts;
           lastRuns.set(`${type}::${idx}`, { result: rec.result, sig: rec.sig ?? '' });
+        }
       }
     }
   } catch {
@@ -597,6 +607,7 @@ async function selectType(id: string): Promise<void> {
     resultSec.innerHTML = '<p class="spinner">Running claude…</p>';
     try {
       const res = await runOnce();
+      res.ranAt = Date.now();
       renderSingle(resultSec, res, tips.value);
       const sig = sigNow();
       lastRuns.set(runKey(), { result: res, sig });
@@ -649,6 +660,23 @@ function checklistItems(tipsBlockOrBody: string): string[] {
 
 function renderSingle(host: HTMLElement, res: RunResult, tipsBlock: string): void {
   host.innerHTML = '';
+  // Freshness banner: proves the Run actually produced THIS result, so an
+  // identical-looking re-run is distinguishable from a no-op. Distinct from the
+  // green "validated …" badge, which is a stored status that never moves on Run.
+  if (res.ranAt != null) {
+    const when = new Date(res.ranAt);
+    const fresh = Date.now() - res.ranAt < 4000;
+    host.appendChild(
+      el(
+        'div',
+        {
+          className: 'count',
+          style: `color:var(--good);margin-bottom:6px${fresh ? '' : ';opacity:.7'}`,
+        },
+        `● Live run — ${fresh ? 'just now, ' : ''}${when.toLocaleTimeString()}`
+      )
+    );
+  }
   const grid = el('div', { className: 'result' });
   // left: source (with a copy button on the label row)
   const left = el('div');
