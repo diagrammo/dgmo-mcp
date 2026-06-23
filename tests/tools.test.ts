@@ -64,7 +64,6 @@ describe('server exposes the expected tool set', () => {
     'validate_diagram',
     'suggest_chart_type',
     'get_examples',
-    'migrate_diagram',
   ];
   it('registers every expected tool (no missing / renamed)', () => {
     for (const name of EXPECTED) expect(toolNames).toContain(name);
@@ -173,17 +172,6 @@ describe('render_diagram', () => {
     expect(text).toMatch(/<svg/);
     expect(text.toLowerCase()).toContain('not registered');
     expect(text).toContain('slate');
-  });
-});
-
-describe('migrate_diagram', () => {
-  it('responds with content for legacy syntax without crashing', async () => {
-    // migrate may report "nothing to migrate" as isError depending on the
-    // bundled dgmo; the contract point is that it RESPONDS, not how.
-    const { text } = await call('migrate_diagram', {
-      dgmo: 'sequence T\n\ntag Team as t\n  A blue\n\nA -hi-> B',
-    });
-    expect(text.length).toBeGreaterThan(0);
   });
 });
 

@@ -16,8 +16,6 @@ import {
   getPalette,
   chartTypes,
   CHART_TYPE_DESCRIPTIONS,
-  migrateContent,
-  formatLineDiff,
   INVALID_COLOR_CODE,
 } from '@diagrammo/dgmo/advanced';
 // Render-to-raster path, single-sourced in ./render-helpers so the dev-only
@@ -936,63 +934,6 @@ server.tool(
 
     return {
       content: [{ type: 'text' as const, text }],
-    };
-  }
-);
-
-// --- Tool N: migrate_diagram ---
-
-server.tool(
-  'migrate_diagram',
-  'Migrate legacy DGMO content (pre-0.18.0) to the unified §1.4 same-line metadata grammar. Input is the source of a `.dgmo` file or a single fenced ```dgmo block; output is the migrated source plus a unified-style diff. The `|` metadata delimiter was removed in 0.18.0 in favor of `Foo k: v, k: v` inline. Use this when you encounter a `.dgmo` file authored against 0.17.x that emits `E_PIPE_OPERATOR_REMOVED` diagnostics.',
-  {
-    content: z
-      .string()
-      .describe(
-        'The DGMO source to migrate. A single full diagram (including the first-line chart type) — not a multi-block markdown file.'
-      ),
-  },
-  {
-    title: 'Migrate Diagram',
-    readOnlyHint: true,
-    destructiveHint: false,
-    openWorldHint: false,
-    idempotentHint: true,
-  },
-  async ({ content }) => {
-    const result = migrateContent(content);
-    if (!result.changed) {
-      return {
-        content: [
-          {
-            type: 'text' as const,
-            text: 'No changes needed — content is already on the §1.4 grammar (or contains no metadata to migrate).',
-          },
-        ],
-      };
-    }
-    const diff = formatLineDiff('input', content, result.migrated);
-    return {
-      content: [
-        {
-          type: 'text' as const,
-          text: [
-            `Migrated ${result.changedLines.length} line(s) (chart type: ${result.chartType ?? 'unknown'}).`,
-            '',
-            '## Migrated source',
-            '',
-            '```dgmo',
-            result.migrated.trimEnd(),
-            '```',
-            '',
-            '## Diff',
-            '',
-            '```diff',
-            diff,
-            '```',
-          ].join('\n'),
-        },
-      ],
     };
   }
 );
