@@ -88,7 +88,7 @@ embed anywhere:
 ### Claude Code
 
 Add to your project's `.claude/settings.local.json` (or run
-`npx @diagrammo/dgmo --install-claude-code-integration` to do it automatically):
+`npx @diagrammo/dgmo install claude-code` to do it automatically):
 
 ```json
 {
