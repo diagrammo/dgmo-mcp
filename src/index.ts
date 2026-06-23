@@ -742,34 +742,64 @@ server.tool(
 
 // --- Tool 9: suggest_chart_type ---
 
+/** Option labels for the ASK-THE-USER choice lists. */
+const OPTION_LETTERS = 'ABCDEFGH';
+
 /**
  * Format ranked candidates for Claude. Locked-in layout so the tool output
  * is easy to parse at a glance and remains stable across releases.
+ *
+ * The output is also the enforcement point for the "ask, don't guess" flow:
+ * when the scorer is not confident (no real trigger matched → `fellBack`, or
+ * the top two are equally plausible → `ambiguous`) it returns a directive that
+ * tells the caller to present the candidates to the user and WAIT, instead of
+ * silently picking one. This rides the MCP tool text so it reaches every
+ * client, not just surfaces that load the skill.
  */
-function formatSuggestions(
+export function formatSuggestions(
   ranked: readonly ChartTypeScore[],
   fellBack: boolean,
   confidenceBanner: 'high' | 'medium' | 'ambiguous'
 ): string {
+  // No real trigger fired — we genuinely don't know. Ask the user; never guess.
   if (ranked.length === 0 || fellBack) {
     const fallbacks = chartTypes.filter((c) => c.fallback);
-    const lines = [
-      'No strong trigger match for this prompt. Consider these general-purpose options:',
-      ...fallbacks.map((c) => `- ${c.id}: ${c.description}`),
+    return [
+      '⚠️ ASK THE USER — no chart type clearly matches this request.',
+      'Do not guess a type. Ask the user which of these general-purpose options fits, or to describe their data/intent in more detail:',
       '',
-      'If none of these fit, call `mcp__dgmo__list_chart_types` to see the full list.',
+      ...fallbacks.map((c, i) => `  [${OPTION_LETTERS[i]}] ${c.id} — ${c.description}`),
+      '',
+      'If none fit, call `mcp__dgmo__list_chart_types` for the full list. Wait for the user to choose before generating any diagram.',
+    ].join('\n');
+  }
+
+  const top3 = ranked.slice(0, 3);
+
+  // Two or more types are equally plausible — present the choice, don't pick one.
+  if (confidenceBanner === 'ambiguous') {
+    const lines = [
+      '⚠️ ASK THE USER — these chart types are equally plausible; do not pick one yourself.',
+      'Present these options to the user and wait for their choice before generating:',
+      '',
     ];
+    for (const [i, r] of top3.entries()) {
+      lines.push(`  [${OPTION_LETTERS[i]}] ${r.type.id} — ${r.type.description}`);
+      if (r.matched.length) lines.push(`      matched: ${r.matched.join(', ')}`);
+    }
+    lines.push('');
+    lines.push(
+      "Once the user chooses, call mcp__dgmo__get_examples('<id>') for a starter template."
+    );
     return lines.join('\n');
   }
 
+  // Confident enough to proceed with the top match.
   const banner =
     confidenceBanner === 'high'
-      ? 'Confidence: high'
-      : confidenceBanner === 'medium'
-        ? 'Confidence: medium'
-        : "Confidence: ambiguous — top two are equally plausible. If you can't tell from context, ask the user one clarifying question before proceeding.";
+      ? 'Confidence: high — use the top match below.'
+      : 'Confidence: medium — use the top match below; the runner-up is also plausible if the context points that way.';
 
-  const top3 = ranked.slice(0, 3);
   const lines: string[] = [banner, ''];
   for (const [i, r] of top3.entries()) {
     const label = i === 0 ? 'Top match' : 'Secondary';
@@ -788,7 +818,7 @@ function formatSuggestions(
 
 server.tool(
   'suggest_chart_type',
-  "Suggest the best DGMO chart type for a user's plain-English diagram request.\n\nALWAYS CALL THIS FIRST when creating a new diagram — it prevents guessing and is the authoritative selection mechanism.\n\nReturns: confidence banner (high/medium/ambiguous), up to 3 ranked candidates with descriptions, matched trigger phrases, and pointers to get_examples for starter DGMO stubs.",
+  "Suggest the best DGMO chart type for a user's plain-English diagram request.\n\nALWAYS CALL THIS FIRST when creating a new diagram — it prevents guessing and is the authoritative selection mechanism.\n\nReturns one of two shapes: (1) a confident pick (high/medium) with the top match's syntax, or (2) an '⚠️ ASK THE USER' directive when the choice is ambiguous or nothing matched. On an ASK-THE-USER directive, do NOT pick a type yourself — present the listed candidates to the user and wait for their choice before generating.",
   {
     prompt: z
       .string()
@@ -804,8 +834,10 @@ server.tool(
     // Workflow-driven fetch (AC14/ADR-5): since this tool is "ALWAYS CALL
     // FIRST", ride that step to deliver the chosen type's syntax. Append the
     // top match's per-type reference block so the model gets it without a
-    // separate get_language_reference round-trip it might skip.
-    if (!fellBack && ranked.length > 0) {
+    // separate get_language_reference round-trip it might skip. Skip it when the
+    // choice is ambiguous — we're asking the user to pick, so there is no single
+    // "top match" syntax to deliver yet (they fetch it after choosing).
+    if (!fellBack && confidence !== 'ambiguous' && ranked.length > 0) {
       try {
         const section = sliceWithColorRule(
           resolveLanguageReference(),
