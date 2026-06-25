@@ -665,6 +665,7 @@
     {
       "prompt": "a swimlane of the order fulfillment process",
       "accept": [
+        "swimlane",
         "flowchart",
         "sequence"
       ]

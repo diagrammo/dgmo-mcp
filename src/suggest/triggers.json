@@ -600,5 +600,61 @@
       "frequent words"
     ],
     "concepts": []
+  },
+  "swimlane": {
+    "phrases": [
+      "swimlane",
+      "swim lane",
+      "swimlane diagram",
+      "cross-functional flowchart",
+      "BPMN diagram",
+      "process by role",
+      "handoffs between teams",
+      "cross-team process",
+      "lanes"
+    ],
+    "concepts": []
+  },
+  "version-control": {
+    "phrases": [
+      "git graph",
+      "gitgraph",
+      "git branches",
+      "branch and merge",
+      "commit history",
+      "version control graph",
+      "git history",
+      "branching diagram",
+      "merge diagram",
+      "git workflow"
+    ],
+    "concepts": []
+  },
+  "event-line": {
+    "phrases": [
+      "event line",
+      "annotated timeline",
+      "narrative timeline",
+      "history of",
+      "infographic timeline",
+      "story timeline",
+      "not to scale timeline",
+      "key events"
+    ],
+    "concepts": []
+  },
+  "block": {
+    "phrases": [
+      "block diagram",
+      "block layout",
+      "grid of blocks",
+      "system layout",
+      "architecture grid",
+      "hardware layout",
+      "nested blocks",
+      "block-beta",
+      "components grid"
+    ],
+    "concepts": []
   }
 }

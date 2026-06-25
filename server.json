@@ -6,7 +6,7 @@
     "url": "https://github.com/diagrammo/dgmo-mcp",
     "source": "github"
   },
-  "version": "0.4.2",
+  "version": "0.5.0",
   "packages": [
     {
       "registryType": "npm",
