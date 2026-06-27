@@ -9,16 +9,6 @@
     "concepts": [],
     "prior": 5
   },
-  "area": {
-    "phrases": [
-      "area chart",
-      "filled line",
-      "cumulative trend",
-      "how much",
-      "cumulative"
-    ],
-    "concepts": []
-  },
   "bar": {
     "phrases": [
       "bar chart",
@@ -40,20 +30,12 @@
       "compare across",
       "values for each",
       "count by",
-      "number of"
+      "number of",
+      "stacked bar",
+      "composite bar"
     ],
     "concepts": [],
     "prior": 3
-  },
-  "bar-stacked": {
-    "phrases": [
-      "stacked bar",
-      "stacked bar chart",
-      "multi-series bar",
-      "composite bar",
-      "stacked breakdown"
-    ],
-    "concepts": []
   },
   "boxes-and-lines": {
     "phrases": [
@@ -107,24 +89,6 @@
       "cycle",
       "flywheel",
       "cyclical"
-    ],
-    "concepts": []
-  },
-  "daci": {
-    "phrases": [
-      "daci",
-      "daci matrix",
-      "decision matrix",
-      "decision tracking",
-      "driver approver"
-    ],
-    "concepts": []
-  },
-  "doughnut": {
-    "phrases": [
-      "doughnut chart",
-      "donut chart",
-      "ring chart"
     ],
     "concepts": []
   },
@@ -264,7 +228,9 @@
       "over the last",
       "daily",
       "per day",
-      "throughout the year"
+      "throughout the year",
+      "filled line",
+      "cumulative trend"
     ],
     "concepts": []
   },
@@ -300,15 +266,6 @@
       "taxonomy",
       "nested categories",
       "idea branch"
-    ],
-    "concepts": []
-  },
-  "multi-line": {
-    "phrases": [
-      "multi-line chart",
-      "multiple trends",
-      "multiple series over time",
-      "by month"
     ],
     "concepts": []
   },
@@ -352,7 +309,9 @@
       "percentage of",
       "breakdown of",
       "composition of",
-      "share each"
+      "share each",
+      "donut chart",
+      "doughnut chart"
     ],
     "concepts": [],
     "prior": 5
@@ -405,7 +364,9 @@
       "accountable",
       "who owns",
       "who approves",
-      "who is informed"
+      "who is informed",
+      "decision matrix",
+      "driver approver"
     ],
     "concepts": []
   },
@@ -421,13 +382,6 @@
       "rate each",
       "skill levels",
       "competencies"
-    ],
-    "concepts": []
-  },
-  "rasci": {
-    "phrases": [
-      "rasci",
-      "rasci matrix"
     ],
     "concepts": []
   },

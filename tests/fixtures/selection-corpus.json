@@ -1,7 +1,7 @@
 {
   "_doc": "Selection-tuning corpus for the prompt → chart-type gate. Each case is a realistic plain-English diagram request + the chart-type id(s) any correct `suggest_chart_type` top-1 may land on (membership in `accept` counts). Seeded from dgmo/tests/fixtures/prompt-suite.json (36) + the 10 inline cases mirrored from suggest.test.ts = 46. `accept` ids must exist in @diagrammo/dgmo chartTypes. `accept` is ORDERED: `accept[0]` is the CANONICAL/preferred answer (use it when one type is clearly best; leave order arbitrary for genuinely ambiguous unions). The hard gate counts membership in `accept`; a separate ADVISORY 'primary hit-rate' (non-gated, printed by the test) tracks how often the scorer lands `accept[0]` — quality signal that membership can mask. `baseline` = the top-1 pass-count the regression gate ratchets against (raise it as the harness fixes cases; never lower without re-baselining). `dgmoVersion` records the @diagrammo/dgmo the baseline was measured against — scores can shift when dgmo bumps. A case may carry `\"wontfix\": true` (+ optional `\"note\"`) to PARK it — a prompt we've decided not to solve as worded (too ambiguous / good-enough); parked cases are excluded from the active pass-count + baseline but kept here as documented known-limitations. Grow this aggressively via the harness's add-a-case control.",
-  "baseline": 173,
-  "dgmoVersion": "0.41.0",
+  "baseline": 170,
+  "dgmoVersion": "0.42.0",
   "cases": [
     {
       "prompt": "show the steps of a user logging in via OAuth",
@@ -50,22 +50,19 @@
     {
       "prompt": "bar chart of revenue by region",
       "accept": [
-        "bar",
-        "bar-stacked"
+        "bar"
       ]
     },
     {
       "prompt": "line chart of monthly signups over the past year",
       "accept": [
-        "line",
-        "multi-line"
+        "line"
       ]
     },
     {
       "prompt": "compare sales across products",
       "accept": [
-        "bar",
-        "bar-stacked"
+        "bar"
       ]
     },
     {
@@ -77,15 +74,13 @@
     {
       "prompt": "users over time",
       "accept": [
-        "line",
-        "multi-line"
+        "line"
       ]
     },
     {
       "prompt": "pie chart of market share by vendor",
       "accept": [
-        "pie",
-        "doughnut"
+        "pie"
       ]
     },
     {
@@ -122,9 +117,7 @@
     {
       "prompt": "RACI matrix for the data-migration project",
       "accept": [
-        "raci",
-        "rasci",
-        "daci"
+        "raci"
       ]
     },
     {
@@ -240,7 +233,6 @@
       "prompt": "ring chart of budget allocation across departments",
       "accept": [
         "ring",
-        "doughnut",
         "pie"
       ]
     },
@@ -327,9 +319,7 @@
     {
       "prompt": "which team member is accountable for each deliverable",
       "accept": [
-        "raci",
-        "rasci",
-        "daci"
+        "raci"
       ]
     },
     {
@@ -381,8 +371,7 @@
     {
       "prompt": "share of the market held by each phone maker",
       "accept": [
-        "pie",
-        "doughnut"
+        "pie"
       ]
     },
     {
@@ -444,15 +433,13 @@
     {
       "prompt": "monthly active users since launch",
       "accept": [
-        "line",
-        "multi-line"
+        "line"
       ]
     },
     {
       "prompt": "revenue for each region side by side",
       "accept": [
-        "bar",
-        "bar-stacked"
+        "bar"
       ]
     },
     {
@@ -522,31 +509,25 @@
     {
       "prompt": "compare revenue across our five product lines",
       "accept": [
-        "bar",
-        "bar-stacked"
+        "bar"
       ]
     },
     {
       "prompt": "how website visits changed month over month this year",
       "accept": [
-        "line",
-        "multi-line",
-        "area"
+        "line"
       ]
     },
     {
       "prompt": "what fraction of the budget each team consumes",
       "accept": [
-        "pie",
-        "doughnut"
+        "pie"
       ]
     },
     {
       "prompt": "who owns, who approves, and who is informed for each deliverable",
       "accept": [
-        "raci",
-        "rasci",
-        "daci"
+        "raci"
       ]
     },
     {
@@ -636,7 +617,6 @@
       "prompt": "the percentage of users on each plan tier",
       "accept": [
         "pie",
-        "doughnut",
         "bar"
       ]
     },
@@ -651,7 +631,6 @@
     {
       "prompt": "temperature by month across several cities",
       "accept": [
-        "multi-line",
         "line",
         "heatmap"
       ]
@@ -673,22 +652,20 @@
     {
       "prompt": "growth of three products over five years",
       "accept": [
-        "multi-line",
         "line"
       ]
     },
     {
       "prompt": "cumulative revenue building up over the year",
       "accept": [
-        "area",
         "line"
       ]
     },
     {
       "prompt": "a stacked breakdown of revenue by segment over time",
       "accept": [
-        "bar-stacked",
-        "area"
+        "bar",
+        "line"
       ]
     },
     {
@@ -733,14 +710,12 @@
     {
       "prompt": "stock price movement over the quarter",
       "accept": [
-        "line",
-        "area"
+        "line"
       ]
     },
     {
       "prompt": "compare growth of iOS versus Android installs over time",
       "accept": [
-        "multi-line",
         "line"
       ]
     },
@@ -779,7 +754,6 @@
       "prompt": "breakdown of traffic by channel",
       "accept": [
         "pie",
-        "doughnut",
         "bar"
       ]
     },
@@ -787,7 +761,6 @@
       "prompt": "what share each browser holds",
       "accept": [
         "pie",
-        "doughnut",
         "bar"
       ]
     },
@@ -795,7 +768,6 @@
       "prompt": "composition of our monthly cloud bill",
       "accept": [
         "pie",
-        "doughnut",
         "bar",
         "sankey"
       ]
