@@ -57,14 +57,6 @@
     "description": "Tasks × roles responsibility matrix with constraint linting"
   },
   {
-    "id": "rasci",
-    "description": "RACI variant adding Support (R A S C I)"
-  },
-  {
-    "id": "daci",
-    "description": "Decision matrix with Driver, Approver, Contributor, Informed"
-  },
-  {
     "id": "tech-radar",
     "description": "Technology adoption quadrants (adopt/trial/assess/hold)"
   },
@@ -143,20 +135,8 @@
     "fallback": true
   },
   {
-    "id": "multi-line",
-    "description": "Multiple series trends over time"
-  },
-  {
-    "id": "area",
-    "description": "Filled line chart"
-  },
-  {
     "id": "pie",
     "description": "Part-to-whole proportions"
-  },
-  {
-    "id": "doughnut",
-    "description": "Ring-style pie chart"
   },
   {
     "id": "radar",
@@ -165,10 +145,6 @@
   {
     "id": "polar-area",
     "description": "Radial bar chart"
-  },
-  {
-    "id": "bar-stacked",
-    "description": "Multi-series categorical"
   },
   {
     "id": "scatter",

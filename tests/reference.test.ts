@@ -28,7 +28,7 @@ const here = dirname(fileURLToPath(import.meta.url));
 
 const FIXTURE = `# Ref
 
-<!-- TYPE-ALIASES: line=bar pie=bar daci=raci -->
+<!-- TYPE-ALIASES: line=bar pie=bar polar-area=bar -->
 
 ## 1. Intro
 
@@ -66,7 +66,7 @@ describe('parseTypeAliases', () => {
     const m = parseTypeAliases(FIXTURE);
     expect(m.get('line')).toBe('bar');
     expect(m.get('pie')).toBe('bar');
-    expect(m.get('daci')).toBe('raci');
+    expect(m.get('polar-area')).toBe('bar');
     expect(m.size).toBe(3);
   });
 

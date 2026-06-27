@@ -17,8 +17,8 @@ import promptValidation from '../tools/guidance-studio/prompt-validation.json';
 // dataset is needed (logic/structure the model builds from the instruction).
 const DATASETLESS = new Set(['flowchart', 'function', 'wireframe']);
 
-// The studio shows exactly the TYPE-block ids in registry.json (35), not the
-// full 45-entry chartTypes registry (which includes aliases like pie/doughnut).
+// The studio shows exactly the TYPE-block ids in registry.json, not the full
+// chartTypes registry (which includes grouped data-chart ids like line/pie).
 const typeIds = (registry as { types: { id: string }[] }).types.map(
   (t) => t.id
 );

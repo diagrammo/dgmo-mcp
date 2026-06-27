@@ -15,7 +15,7 @@ import {
 // Minimal reference doc with an alias map and two TYPE blocks: one already has
 // TIPS (map), one does not yet (bar). The bar block is followed by an H2 to
 // exercise the boundary.
-const MD = `<!-- TYPE-ALIASES: doughnut=pie multi-line=line -->
+const MD = `<!-- TYPE-ALIASES: polar-area=radar line=bar -->
 
 ## 1. Bar
 
@@ -65,8 +65,8 @@ describe('validateTipsEdit', () => {
   });
 
   it('resolves aliases to the parent block', () => {
-    const r = validateTipsEdit(MD, 'doughnut', GOOD); // alias → pie? no pie block here
-    // doughnut aliases to pie which has no block → reject with clear reason
+    const r = validateTipsEdit(MD, 'polar-area', GOOD); // alias → radar, no radar block here
+    // polar-area aliases to radar which has no block → reject with clear reason
     expect(r.ok).toBe(false);
     expect(r.reason).toMatch(/no TYPE block/i);
   });

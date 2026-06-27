@@ -9,13 +9,13 @@
 // never disagree about where a type's block lives.
 //
 // Replaces the old heading-regex slicer, which failed for every hyphenated id
-// (journey-map, bar-stacked, boxes-and-lines, …) and every grouped data-chart
+// (journey-map, boxes-and-lines, tech-radar, …) and every grouped data-chart
 // id (F4).
 // ============================================================
 
 /**
  * Parse the `<!-- TYPE-ALIASES: a=b c=b ... -->` map. Grouped data-chart /
- * matrix ids (line, pie, rasci, …) share another id's documented block.
+ * matrix ids (line, pie, raci, …) share another id's documented block.
  */
 export function parseTypeAliases(markdown: string): Map<string, string> {
   const m = markdown.match(/<!--\s*TYPE-ALIASES:\s*([^>]*?)-->/);

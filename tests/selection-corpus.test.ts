@@ -108,8 +108,8 @@ describe('selection accuracy — baseline ratchet', () => {
   // assertion is the trivially-true invariant so the line always prints in CI.
   it('reports primary (canonical accept[0]) hit-rate — advisory, not gated', () => {
     const active = activeCases(corpus);
-    // Synonym-aware: landing a sibling of the canonical (pie≈doughnut≈ring,
-    // arc≈chord) counts as primary — within-group differences aren't a miss.
+    // Synonym-aware: landing a sibling of the canonical (arc≈chord) counts as
+    // primary — within-group differences aren't a miss.
     const primaryHits = active.filter((c) => {
       const got = top1(c.prompt);
       return !!got && sameSelectionGroup(c.accept[0], got);
@@ -163,19 +163,19 @@ describe('diffRun — net-delta logic (AC11)', () => {
 
 describe('synonym groups — opinionated equivalence', () => {
   it('treats within-group types as interchangeable, across-group as distinct', () => {
-    expect(sameSelectionGroup('pie', 'doughnut')).toBe(true);
     expect(sameSelectionGroup('arc', 'chord')).toBe(true);
-    expect(sameSelectionGroup('pie', 'pie')).toBe(true);
+    expect(sameSelectionGroup('arc', 'arc')).toBe(true);
+    expect(sameSelectionGroup('arc', 'sankey')).toBe(false); // distinct flow chart
+    expect(sameSelectionGroup('arc', 'pie')).toBe(false);
     expect(sameSelectionGroup('pie', 'ring')).toBe(false); // ring is a distinct chart
     expect(sameSelectionGroup('pie', 'bar')).toBe(false);
-    expect(sameSelectionGroup('arc', 'pie')).toBe(false);
   });
 
   it('accepts a pick that is a synonym of any listed accept id', () => {
-    expect(accepts(['pie'], 'doughnut')).toBe(true); // honor the policy
-    expect(accepts(['arc'], 'chord')).toBe(true);
-    expect(accepts(['bar'], 'doughnut')).toBe(false);
-    expect(accepts(['pie'], undefined)).toBe(false);
+    expect(accepts(['arc'], 'chord')).toBe(true); // honor the policy
+    expect(accepts(['chord'], 'arc')).toBe(true);
+    expect(accepts(['bar'], 'chord')).toBe(false);
+    expect(accepts(['arc'], undefined)).toBe(false);
   });
 
   it('every synonym-group id is a real chart type', () => {

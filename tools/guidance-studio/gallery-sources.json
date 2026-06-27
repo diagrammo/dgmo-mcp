@@ -6,7 +6,7 @@
     "arc Email Volume Between Team Members\n\nAlice -> Bob 24\nAlice -> Carol 15\nBob -> Carol 18\nBob -> Dave 9\nCarol -> Dave 12\nDave -> Alice 7\nCarol -> Eve 6\nEve -> Alice 4\n\norder degree\n"
   ],
   "bar": [
-    "bar-stacked Quarterly Sales by Region\n\nseries\n  North America\n  Europe\n  Asia Pacific\n  Latin America\n\ny-label USD thousands\n\nQ1 820 610 430 180\nQ2 910 645 520 205\nQ3 870 700 640 240\nQ4 1040 760 810 300\n",
+    "bar Quarterly Sales by Region\n\nstack\n  North America\n  Europe\n  Asia Pacific\n  Latin America\n\ny-label USD thousands\n\nQ1 820 610 430 180\nQ2 910 645 520 205\nQ3 870 700 640 240\nQ4 1040 760 810 300\n",
     "bar Monthly Active Users\ny-label Users\nJan 1200\nFeb 1850\nMar 2400\nApr 3100\nMay 3950\nJun 4800\n",
     "bar Revenue by Product Line\ny-label Revenue ($K)\nWidgets 420\nGadgets 380\nGizmos 290\nDoohickeys 510\nContraptions 175\n",
     "bar Average Commute Time\ny-label Minutes\nNew York 41\nLos Angeles 34\nChicago 36\nHouston 28\nPhoenix 27\nPhiladelphia 33\n"

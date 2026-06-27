@@ -1,14 +1,13 @@
 // Selection synonym groups — near-identical chart types we deliberately DON'T
-// distinguish in chart-type selection (pie vs doughnut, arc vs chord). Each group
-// lists interchangeable types, CANONICAL FIRST. We stay opinionated: a popularity
+// distinguish in chart-type selection (arc vs chord). Each group lists
+// interchangeable types, CANONICAL FIRST. We stay opinionated: a popularity
 // prior (see triggers.json) makes the canonical win ambiguous prompts, while an
-// explicit phrase ("doughnut chart") still wins via its contiguous match. These
-// groups make the regression gate + advisory primary-hit-rate treat any sibling
-// of an accepted type as equivalent, so within-group differences never count as a
-// miss — killing the noise. Membership here is a product decision, not a claim
-// the renderers are identical.
+// explicit phrase still wins via its contiguous match. These groups make the
+// regression gate + advisory primary-hit-rate treat any sibling of an accepted
+// type as equivalent, so within-group differences never count as a miss —
+// killing the noise. Membership here is a product decision, not a claim the
+// renderers are identical.
 export const SYNONYM_GROUPS: readonly (readonly string[])[] = [
-  ['pie', 'doughnut'], // same part-to-whole chart, hole or no hole; pie canonical
   ['arc', 'chord'], // connection / relationship arcs; arc is canonical
 ];
 
