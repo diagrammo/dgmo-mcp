@@ -1,6 +1,6 @@
 {
   "_doc": "Selection-tuning corpus for the prompt → chart-type gate. Each case is a realistic plain-English diagram request + the chart-type id(s) any correct `suggest_chart_type` top-1 may land on (membership in `accept` counts). Seeded from dgmo/tests/fixtures/prompt-suite.json (36) + the 10 inline cases mirrored from suggest.test.ts = 46. `accept` ids must exist in @diagrammo/dgmo chartTypes. `accept` is ORDERED: `accept[0]` is the CANONICAL/preferred answer (use it when one type is clearly best; leave order arbitrary for genuinely ambiguous unions). The hard gate counts membership in `accept`; a separate ADVISORY 'primary hit-rate' (non-gated, printed by the test) tracks how often the scorer lands `accept[0]` — quality signal that membership can mask. `baseline` = the top-1 pass-count the regression gate ratchets against (raise it as the harness fixes cases; never lower without re-baselining). `dgmoVersion` records the @diagrammo/dgmo the baseline was measured against — scores can shift when dgmo bumps. A case may carry `\"wontfix\": true` (+ optional `\"note\"`) to PARK it — a prompt we've decided not to solve as worded (too ambiguous / good-enough); parked cases are excluded from the active pass-count + baseline but kept here as documented known-limitations. Grow this aggressively via the harness's add-a-case control.",
-  "baseline": 170,
+  "baseline": 172,
   "dgmoVersion": "0.42.0",
   "cases": [
     {
@@ -152,6 +152,19 @@
     },
     {
       "prompt": "timeline of major company milestones",
+      "accept": [
+        "timeline"
+      ]
+    },
+    {
+      "prompt": "timeline of ancient Rome from its founding in 753 BCE to the fall of the empire",
+      "accept": [
+        "timeline",
+        "event-line"
+      ]
+    },
+    {
+      "prompt": "second-by-second timeline of a rocket launch sequence",
       "accept": [
         "timeline"
       ]
