@@ -503,7 +503,11 @@
       "milestone timeline",
       "milestones",
       "roadmap",
-      "key dates"
+      "key dates",
+      "ancient history timeline",
+      "BCE timeline",
+      "launch sequence",
+      "second-by-second timeline"
     ],
     "concepts": []
   },
@@ -593,7 +597,8 @@
       "infographic timeline",
       "story timeline",
       "not to scale timeline",
-      "key events"
+      "key events",
+      "ancient history"
     ],
     "concepts": []
   },
