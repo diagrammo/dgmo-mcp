@@ -98,11 +98,11 @@ describe('validate_diagram', () => {
     expect(text.toLowerCase()).toMatch(/valid|no error|0 error/);
   });
 
-  it('flags a clearly invalid diagram (removed pipe metadata)', async () => {
+  it('flags a clearly invalid diagram (empty flowchart — no nodes)', async () => {
     const { text } = await call('validate_diagram', {
-      dgmo: 'infra\n\nLB\n  -> API | split: 70%',
+      dgmo: 'flowchart',
     });
-    expect(text.toLowerCase()).toMatch(/error|pipe|removed|invalid/);
+    expect(text.toLowerCase()).toMatch(/error|invalid|no nodes|found/);
   });
 });
 
@@ -174,7 +174,7 @@ describe('render_diagram', () => {
 
   it('returns an error for an invalid diagram instead of rendering', async () => {
     const { text } = await call('render_diagram', {
-      dgmo: 'infra\n\nLB\n  -> API | split: 70%',
+      dgmo: 'flowchart',
       format: 'svg',
     });
     expect(text.toLowerCase()).toMatch(/error/);

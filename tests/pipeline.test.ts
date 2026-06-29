@@ -20,7 +20,7 @@ describe('renderPipeline', () => {
   });
 
   it('reports parse errors → null svg + formatted error + error diagnostics', async () => {
-    const r = await renderPipeline('infra\n\nLB\n  -> API | split: 70%', {
+    const r = await renderPipeline('flowchart', {
       theme: 'light',
       palette: 'slate',
     });
