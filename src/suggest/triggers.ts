@@ -4,12 +4,17 @@
 //
 // The DATA lives in `triggers.json` (one entry per chart-type id) so the eval
 // harness's curation UI can read/edit it as plain data. Each entry has:
-//   • phrases  — literal contiguous phrases the scorer matches (the vocabulary)
+//   • phrases  — literal contiguous phrases the scorer matches (the vocabulary).
+//                GENERATED: projected from the canonical model's shared keyword
+//                field (dgmo-content/registry.json) by scripts/project-triggers.mjs
+//                — see docs/registry-entity-model.md. Curate phrases in the
+//                console Workspace, not here; `pnpm check:triggers` guards drift.
 //   • concepts — plain-language authoring hints ("trigonometry", "venues") that
 //                an LLM-in-the-loop expander turns INTO phrases; the scorer
 //                itself never reads concepts (they only produce phrases).
 //   • prior    — optional popularity bias (0–10): how typically a user means
 //                this type when the prompt is ambiguous. Absent = 0 = no bias.
+//   concepts + prior are MCP-owned TUNING and stay authored here.
 //
 // Keyed by id; validated against @diagrammo/dgmo chartTypes by suggest.test.ts.
 import data from './triggers.json';

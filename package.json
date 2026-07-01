@@ -54,6 +54,8 @@
     "bundle": "bash scripts/bundle.sh",
     "lint": "eslint .",
     "lint:fix": "eslint . --fix",
+    "project:triggers": "node scripts/project-triggers.mjs",
+    "check:triggers": "node scripts/project-triggers.mjs --check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:deadcode": "knip",
