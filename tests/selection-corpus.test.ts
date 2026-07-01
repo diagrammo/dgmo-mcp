@@ -108,8 +108,8 @@ describe('selection accuracy — baseline ratchet', () => {
   // assertion is the trivially-true invariant so the line always prints in CI.
   it('reports primary (canonical accept[0]) hit-rate — advisory, not gated', () => {
     const active = activeCases(corpus);
-    // Synonym-aware: landing a sibling of the canonical (arc≈chord) counts as
-    // primary — within-group differences aren't a miss.
+    // Synonym-aware: landing a sibling of the canonical counts as primary —
+    // within-group differences aren't a miss. (No groups are defined currently.)
     const primaryHits = active.filter((c) => {
       const got = top1(c.prompt);
       return !!got && sameSelectionGroup(c.accept[0], got);
@@ -163,7 +163,6 @@ describe('diffRun — net-delta logic (AC11)', () => {
 
 describe('synonym groups — opinionated equivalence', () => {
   it('treats within-group types as interchangeable, across-group as distinct', () => {
-    expect(sameSelectionGroup('arc', 'chord')).toBe(true);
     expect(sameSelectionGroup('arc', 'arc')).toBe(true);
     expect(sameSelectionGroup('arc', 'sankey')).toBe(false); // distinct flow chart
     expect(sameSelectionGroup('arc', 'pie')).toBe(false);
@@ -171,10 +170,9 @@ describe('synonym groups — opinionated equivalence', () => {
     expect(sameSelectionGroup('pie', 'bar')).toBe(false);
   });
 
-  it('accepts a pick that is a synonym of any listed accept id', () => {
-    expect(accepts(['arc'], 'chord')).toBe(true); // honor the policy
-    expect(accepts(['chord'], 'arc')).toBe(true);
-    expect(accepts(['bar'], 'chord')).toBe(false);
+  it('accepts a pick that is an accepted id or a synonym of one', () => {
+    expect(accepts(['arc'], 'arc')).toBe(true);
+    expect(accepts(['bar'], 'arc')).toBe(false);
     expect(accepts(['arc'], undefined)).toBe(false);
   });
 

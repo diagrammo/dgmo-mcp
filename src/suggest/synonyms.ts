@@ -1,15 +1,14 @@
 // Selection synonym groups — near-identical chart types we deliberately DON'T
-// distinguish in chart-type selection (arc vs chord). Each group lists
-// interchangeable types, CANONICAL FIRST. We stay opinionated: a popularity
-// prior (see triggers.json) makes the canonical win ambiguous prompts, while an
-// explicit phrase still wins via its contiguous match. These groups make the
-// regression gate + advisory primary-hit-rate treat any sibling of an accepted
-// type as equivalent, so within-group differences never count as a miss —
-// killing the noise. Membership here is a product decision, not a claim the
-// renderers are identical.
-export const SYNONYM_GROUPS: readonly (readonly string[])[] = [
-  ['arc', 'chord'], // connection / relationship arcs; arc is canonical
-];
+// distinguish in chart-type selection. Each group lists interchangeable types,
+// CANONICAL FIRST. We stay opinionated: a popularity prior (see triggers.json)
+// makes the canonical win ambiguous prompts, while an explicit phrase still wins
+// via its contiguous match. These groups make the regression gate + advisory
+// primary-hit-rate treat any sibling of an accepted type as equivalent, so
+// within-group differences never count as a miss — killing the noise.
+// Membership here is a product decision, not a claim the renderers are
+// identical. (Currently empty — the former arc/chord pair collapsed when `chord`
+// was removed as a chart type; `arc` is the only surviving circular layout.)
+export const SYNONYM_GROUPS: readonly (readonly string[])[] = [];
 
 const groupOf = (id: string): readonly string[] | undefined =>
   SYNONYM_GROUPS.find((g) => g.includes(id));
