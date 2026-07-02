@@ -18,12 +18,26 @@ import {
   mkdirSync,
   rmSync,
   existsSync,
+  readdirSync,
 } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(here, '../..');
+
+// The gallery is committed (137 PNGs + gallery.json). Re-rendering it on every
+// `pnpm hub` cost a minute for no gain, so skip when it's already present.
+// Pass --force to regenerate after editing gallery-sources.json.
+const FORCE = process.argv.includes('--force');
+const OUT_DIR = path.join(here, 'gallery');
+const GALLERY_JSON = path.join(here, 'gallery.json');
+if (!FORCE && existsSync(GALLERY_JSON) && existsSync(OUT_DIR) && readdirSync(OUT_DIR).some((f) => f.endsWith('.png'))) {
+  const n = readdirSync(OUT_DIR).filter((f) => f.endsWith('.png')).length;
+  console.log(`[gallery] cached (${n} pngs) — pass --force to rebuild`);
+  process.exit(0);
+}
+
 const RENDER_HELPERS = path.join(REPO_ROOT, 'dist/render-helpers.mjs');
 if (!existsSync(RENDER_HELPERS)) {
   console.error('dist/render-helpers.mjs missing — run `pnpm build` first.');
@@ -48,7 +62,6 @@ for (const [k, v] of Object.entries(validation)) {
   for (const e of v) verdictByPrompt.set(e.prompt, e);
 }
 
-const OUT_DIR = path.join(here, 'gallery');
 rmSync(OUT_DIR, { recursive: true, force: true });
 mkdirSync(OUT_DIR, { recursive: true });
 
