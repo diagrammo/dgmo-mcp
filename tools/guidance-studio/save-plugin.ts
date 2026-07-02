@@ -15,15 +15,11 @@
 // `require.resolve`/font bundling run in plain Node. `pnpm studio` builds first.
 // ============================================================
 import type { Plugin } from 'vite';
-import { writeFileSync, readFileSync, existsSync, renameSync, rmSync } from 'node:fs';
+import { writeFileSync, readFileSync, existsSync, renameSync } from 'node:fs';
 import { fileURLToPath, pathToFileURL } from 'node:url';
 import path from 'node:path';
 import { execFile } from 'node:child_process';
-import {
-  validateTipsEdit,
-  currentTipsBlock,
-  tipsCoverage,
-} from './validate-tips';
+import { currentTipsBlock, tipsCoverage } from './validate-tips';
 import {
   extractSection,
   extractColorRule,
@@ -198,38 +194,17 @@ export function savePlugin(): Plugin {
           return;
         }
         if (req.method === 'POST') {
-          readBody(req).then((body) => {
-            try {
-              const { type, block } = JSON.parse(body) as {
-                type: string;
-                block: string;
-              };
-              const md = readFileSync(REF_PATH, 'utf8');
-              const v = validateTipsEdit(md, type, block);
-              if (!v.ok || !v.result) {
-                sendJson(res, 400, { ok: false, reason: v.reason });
-                return;
-              }
-              // Snapshot to .bak, then write atomically (temp + rename) so a
-              // crash mid-write can never leave a truncated reference file.
-              writeFileSync(REF_PATH + '.bak', md);
-              const tmp = `${REF_PATH}.tmp-${process.pid}`;
-              try {
-                writeFileSync(tmp, v.result);
-                renameSync(tmp, REF_PATH); // atomic on the same filesystem
-              } catch (writeErr) {
-                try {
-                  rmSync(tmp, { force: true });
-                } catch {
-                  /* best-effort temp cleanup */
-                }
-                writeFileSync(REF_PATH, md); // restore from in-memory snapshot
-                throw writeErr;
-              }
-              sendJson(res, 200, { ok: true });
-            } catch (err) {
-              sendJson(res, 400, { ok: false, reason: String(err) });
-            }
+          // Guidance is now single-sourced in dgmo-content/registry.json
+          // (entity.guidance) and PROJECTED into language-reference.md's TIPS
+          // blocks by dgmo-content/scripts/project-guidance-to-reference.mjs.
+          // Writing TIPS here would be silently reverted by the next projection
+          // (and check-all's drift guard would fail CI), so the write-back is
+          // disabled — edit guidance in the Diagrammo Console instead. GET
+          // /studio/guidance still serves the current (projected) TIPS read-only.
+          sendJson(res, 409, {
+            ok: false,
+            reason:
+              'Guidance is single-sourced in the registry (dgmo-content/registry.json → entity.guidance) and projected into language-reference.md. Edit it in the Diagrammo Console; run scripts/project-guidance-to-reference.mjs to regenerate the TIPS.',
           });
           return;
         }
