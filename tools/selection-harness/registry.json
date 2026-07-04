@@ -17,7 +17,7 @@
   },
   {
     "id": "sequence",
-    "description": "Message / interaction flows",
+    "description": "Message request and response interaction flows",
     "fallback": true
   },
   {
@@ -37,8 +37,20 @@
     "description": "Project network with three-point estimates, critical path, and uncertainty (Beta-PERT, Monte Carlo)"
   },
   {
+    "id": "swimlane",
+    "description": "Cross-functional process flow with lanes, phases and gateways (BPMN-style)"
+  },
+  {
+    "id": "version-control",
+    "description": "Git / version-control branch-and-merge graph: commits, branches, merges, rebase, HEAD and remote-tracking (gitGraph-style)"
+  },
+  {
     "id": "timeline",
     "description": "Events, eras, and date ranges"
+  },
+  {
+    "id": "event-line",
+    "description": "Annotated narrative timeline — events on a horizontal line with descriptions (not the date-scaled timeline)"
   },
   {
     "id": "org",
@@ -81,6 +93,14 @@
     "description": "Concentric rings showing nested or hierarchical categories (read core-out)"
   },
   {
+    "id": "treemap",
+    "description": "Nested rectangles sized by value — show a hierarchy’s proportions (budgets, disk usage, portfolios) with color by category, value heatmap, or branch"
+  },
+  {
+    "id": "block",
+    "description": "Block diagram: an author-controlled grid of rectangular blocks with nested, collapsible containers — system/hardware/architecture layouts where the 2-D arrangement is the meaning"
+  },
+  {
     "id": "map",
     "description": "Geographic concept map: highlight/score regions, drop points of interest, connect with routes or edges"
   },
@@ -98,7 +118,7 @@
   },
   {
     "id": "slope",
-    "description": "Change between two periods"
+    "description": "Change between 2 time periods"
   },
   {
     "id": "sankey",
@@ -126,7 +146,7 @@
   },
   {
     "id": "bar",
-    "description": "Categorical comparisons",
+    "description": "Categorical comparisons for 3 - 5 figures",
     "fallback": true
   },
   {

@@ -61,6 +61,11 @@
       "hasTips": true
     },
     {
+      "id": "swimlane",
+      "description": "Cross-functional process flow with lanes, phases and gateways (BPMN-style)",
+      "hasTips": true
+    },
+    {
       "id": "boxes-and-lines",
       "description": "General-purpose node-edge diagrams with groups and tags",
       "hasTips": true
@@ -96,11 +101,6 @@
       "hasTips": true
     },
     {
-      "id": "chord",
-      "description": "Circular flow relationships",
-      "hasTips": true
-    },
-    {
       "id": "funnel",
       "description": "Conversion pipeline",
       "hasTips": true
@@ -118,6 +118,16 @@
     {
       "id": "arc",
       "description": "Network relationships",
+      "hasTips": true
+    },
+    {
+      "id": "event-line",
+      "description": "Annotated narrative timeline — events on a horizontal line with descriptions (not the date-scaled timeline)",
+      "hasTips": true
+    },
+    {
+      "id": "version-control",
+      "description": "Git / version-control branch-and-merge graph: commits, branches, merges, rebase, HEAD and remote-tracking (gitGraph-style)",
       "hasTips": true
     },
     {
@@ -163,6 +173,16 @@
     {
       "id": "ring",
       "description": "Concentric rings showing nested or hierarchical categories (read core-out)",
+      "hasTips": true
+    },
+    {
+      "id": "treemap",
+      "description": "Nested rectangles sized by value — show a hierarchy’s proportions (budgets, disk usage, portfolios) with color by category, value heatmap, or branch",
+      "hasTips": true
+    },
+    {
+      "id": "block",
+      "description": "Block diagram: an author-controlled grid of rectangular blocks with nested, collapsible containers — system/hardware/architecture layouts where the 2-D arrangement is the meaning",
       "hasTips": true
     },
     {
