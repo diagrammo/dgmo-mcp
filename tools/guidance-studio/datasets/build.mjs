@@ -38,7 +38,7 @@ const DATASETS = [
   {
     id: 'survey-funnel',
     label: 'Signup funnel (visitors → paid)',
-    suitsTypes: ['funnel', 'pie', 'pyramid'],
+    suitsTypes: ['funnel', 'pie', 'pyramid', 'treemap'],
     data: {
       stages: [
         { name: 'Visited site', count: 48000 },
@@ -115,7 +115,7 @@ const DATASETS = [
   {
     id: 'service-traffic',
     label: 'Service-to-service traffic (req/s)',
-    suitsTypes: ['sankey', 'chord', 'arc'],
+    suitsTypes: ['sankey', 'arc'],
     data: {
       unit: 'requests/sec',
       flows: [
@@ -171,7 +171,7 @@ const DATASETS = [
   {
     id: 'release-milestones',
     label: 'Product release milestones',
-    suitsTypes: ['timeline'],
+    suitsTypes: ['timeline', 'event-line'],
     data: {
       milestones: [
         { date: '2026-02', label: 'Beta opens' },
@@ -185,7 +185,7 @@ const DATASETS = [
   {
     id: 'checkout-sequence',
     label: 'Checkout message flow',
-    suitsTypes: ['sequence'],
+    suitsTypes: ['sequence', 'swimlane'],
     data: {
       participants: ['User', 'Web App', 'Payment API', 'Bank'],
       messages: [
@@ -347,7 +347,7 @@ const DATASETS = [
   {
     id: 'system-architecture',
     label: 'Web system architecture',
-    suitsTypes: ['boxes-and-lines'],
+    suitsTypes: ['boxes-and-lines', 'block'],
     data: {
       boxes: [
         'Browser',
@@ -516,6 +516,23 @@ const DATASETS = [
       ],
     },
   },
+  {
+    id: 'feature-branch-history',
+    label: 'Feature-branch git history',
+    suitsTypes: ['version-control'],
+    data: {
+      branches: ['main', 'feature/auth', 'hotfix/login'],
+      commits: [
+        { branch: 'main', id: 'c1', label: 'init' },
+        { branch: 'main', id: 'c2', label: 'scaffold app' },
+        { branch: 'feature/auth', from: 'c2', id: 'c3', label: 'add login form' },
+        { branch: 'feature/auth', id: 'c4', label: 'wire OAuth' },
+        { branch: 'hotfix/login', from: 'c2', id: 'c5', label: 'fix redirect' },
+        { branch: 'main', merge: 'hotfix/login', id: 'c6', label: 'merge hotfix' },
+        { branch: 'main', merge: 'feature/auth', id: 'c7', label: 'merge auth' },
+      ],
+    },
+  },
 ];
 
 // Per-chart-type starter PROMPTS — a LIST of valid, type-appropriate
@@ -640,11 +657,35 @@ const PROMPTS = {
     'Make a Sankey diagram of web traffic: traffic sources flowing into landing pages, then splitting into converted and bounced.',
     'Make a Sankey diagram of energy flow: energy sources flowing into sectors, then splitting into useful energy and losses.',
   ],
-  chord: [
-    'Make a chord diagram of the service-to-service traffic in the sample data.',
-    'Make a chord diagram of migration flows between five regions.',
-    'Make a chord diagram of trade volume between four countries.',
-    'Make a chord diagram of collaboration counts between five engineering teams.',
+  'event-line': [
+    'Make an event line of the product milestones in the sample data — one card per dated event, in order.',
+    "Make an event line of a startup's first year: incorporate in January, ship the MVP in March, close a seed round in June, hire the first five engineers in September, and reach 10k users in December.",
+    'Make an event line of the Apollo 11 mission: launch, Earth orbit, trans-lunar injection, lunar orbit, landing, first steps, ascent, and splashdown.',
+    "Make an event line of a book's publishing timeline: draft finished, agent signed, manuscript sold, edits completed, cover revealed, and launch day.",
+  ],
+  swimlane: [
+    'Make a swimlane diagram of the checkout flow in the sample data — one lane per participant, each message a step in that lane.',
+    'Make a swimlane diagram of an expense-approval process across Employee, Manager, and Finance lanes: the Employee submits a report, the Manager reviews and approves it, Finance reimburses, and the Employee is notified.',
+    'Make a swimlane diagram of a bug lifecycle across Reporter, Triage, and Engineering lanes: the Reporter files a bug, Triage labels and prioritizes it, Engineering fixes and verifies it, then Triage closes it.',
+    'Make a swimlane diagram of an online order across Customer, Warehouse, and Courier lanes: the Customer places an order, the Warehouse picks and packs it, the Courier ships and delivers it, and the Customer confirms receipt.',
+  ],
+  block: [
+    'Make a block diagram of the system in the sample data — lay the components out as a grid of labeled blocks.',
+    'Make a block diagram of a computer: a CPU block containing ALU and control-unit sub-blocks sits beside a memory block and an I/O block, all joined by a system-bus row.',
+    'Make a block diagram of a three-tier web app as rows: a presentation row (web and mobile clients), an application row (API and workers), and a data row (primary database and cache).',
+    'Make a block diagram of an audio signal chain arranged left to right: input, preamp, equalizer, compressor, amplifier, output.',
+  ],
+  treemap: [
+    'Make a treemap of the funnel stages in the sample data, sizing each block by the count at that stage.',
+    'Make a treemap of a monthly household budget: Housing 1800, Food 600, Transport 400, Utilities 250, Entertainment 200, and Savings 550 — size each block by its amount.',
+    'Make a treemap of a company headcount by department: Engineering 120, Sales 80, Support 60, Marketing 40, and Operations 30.',
+    'Make a treemap of global energy sources by share: Oil 31, Coal 27, Gas 24, Renewables 8, Hydro 6, and Nuclear 4.',
+  ],
+  'version-control': [
+    'Make a version-control graph of the branch history in the sample data — show the commits on each branch and where they merge.',
+    'Make a version-control graph of a git-flow release: branch develop off main, branch a feature off develop, merge the feature back into develop, cut a release branch, then merge the release into both main and develop.',
+    'Make a version-control graph of a hotfix: from a main branch with three commits, branch a hotfix, add one fix commit, and merge it back into main.',
+    'Make a version-control graph of two parallel features: from main, branch feature-a and feature-b, add two commits on each, then merge both back into main in turn.',
   ],
   funnel: [
     'Make a funnel chart of the signup funnel in the sample data.',

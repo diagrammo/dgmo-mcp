@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "validatedOn": "2026-06-20",
+    "validatedOn": "2026-07-04",
     "method": "Each prompt authored by a competent model (per-type subagent), parsed through the renderPipeline gate (VALID), rendered to PNG via the dgmo render path, and the image judged against the prompt intent. The persisted DGMO + render for each is browsable in the studio gallery.",
-    "summary": "35 types x 4 prompts = 140 validated: all parse, render, and match intent. The 3 new ring prompts were reframed from proportional-allocation (wrong for ring) to nested/core-out concepts per spec section 24; the 3 new sitemap prompts were reworded to steer toward the connected-arrow form (indentation alone renders disconnected boxes)."
+    "summary": "35 types x 4 prompts = 140 validated: all parse, render, and match intent. The 3 new ring prompts were reframed from proportional-allocation (wrong for ring) to nested/core-out concepts per spec section 24; the 3 new sitemap prompts were reworded to steer toward the connected-arrow form (indentation alone renders disconnected boxes). 2026-07-04: added event-line, swimlane, block, treemap, and version-control (5 types x 4 prompts) after the dgmo 0.44 chart-type sync + chord removal; each authored to DGMO and rendered through the CLI (parse+render VALID), intent judged against the prompt."
   },
   "arc": [
     {
@@ -909,6 +909,136 @@
     },
     {
       "prompt": "Make a word cloud of common support-ticket words sized by frequency.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "event-line": [
+    {
+      "prompt": "Make an event line of the product milestones in the sample data — one card per dated event, in order.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make an event line of a startup's first year: incorporate in January, ship the MVP in March, close a seed round in June, hire the first five engineers in September, and reach 10k users in December.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make an event line of the Apollo 11 mission: launch, Earth orbit, trans-lunar injection, lunar orbit, landing, first steps, ascent, and splashdown.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make an event line of a book's publishing timeline: draft finished, agent signed, manuscript sold, edits completed, cover revealed, and launch day.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "swimlane": [
+    {
+      "prompt": "Make a swimlane diagram of the checkout flow in the sample data — one lane per participant, each message a step in that lane.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a swimlane diagram of an expense-approval process across Employee, Manager, and Finance lanes: the Employee submits a report, the Manager reviews and approves it, Finance reimburses, and the Employee is notified.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a swimlane diagram of a bug lifecycle across Reporter, Triage, and Engineering lanes: the Reporter files a bug, Triage labels and prioritizes it, Engineering fixes and verifies it, then Triage closes it.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a swimlane diagram of an online order across Customer, Warehouse, and Courier lanes: the Customer places an order, the Warehouse picks and packs it, the Courier ships and delivers it, and the Customer confirms receipt.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "block": [
+    {
+      "prompt": "Make a block diagram of the system in the sample data — lay the components out as a grid of labeled blocks.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a block diagram of a computer: a CPU block containing ALU and control-unit sub-blocks sits beside a memory block and an I/O block, all joined by a system-bus row.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a block diagram of a three-tier web app as rows: a presentation row (web and mobile clients), an application row (API and workers), and a data row (primary database and cache).",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a block diagram of an audio signal chain arranged left to right: input, preamp, equalizer, compressor, amplifier, output.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "treemap": [
+    {
+      "prompt": "Make a treemap of the funnel stages in the sample data, sizing each block by the count at that stage.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a treemap of a monthly household budget: Housing 1800, Food 600, Transport 400, Utilities 250, Entertainment 200, and Savings 550 — size each block by its amount.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a treemap of a company headcount by department: Engineering 120, Sales 80, Support 60, Marketing 40, and Operations 30.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a treemap of global energy sources by share: Oil 31, Coal 27, Gas 24, Renewables 8, Hydro 6, and Nuclear 4.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "version-control": [
+    {
+      "prompt": "Make a version-control graph of the branch history in the sample data — show the commits on each branch and where they merge.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a version-control graph of a git-flow release: branch develop off main, branch a feature off develop, merge the feature back into develop, cut a release branch, then merge the release into both main and develop.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a version-control graph of a hotfix: from a main branch with three commits, branch a hotfix, add one fix commit, and merge it back into main.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    },
+    {
+      "prompt": "Make a version-control graph of two parallel features: from main, branch feature-a and feature-b, add two commits on each, then merge both back into main in turn.",
       "valid": true,
       "render": "ok",
       "intent": "good"

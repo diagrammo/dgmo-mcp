@@ -2,7 +2,8 @@
   "id": "checkout-sequence",
   "label": "Checkout message flow",
   "suitsTypes": [
-    "sequence"
+    "sequence",
+    "swimlane"
   ],
   "data": {
     "participants": [

@@ -2,7 +2,8 @@
   "id": "release-milestones",
   "label": "Product release milestones",
   "suitsTypes": [
-    "timeline"
+    "timeline",
+    "event-line"
   ],
   "data": {
     "milestones": [

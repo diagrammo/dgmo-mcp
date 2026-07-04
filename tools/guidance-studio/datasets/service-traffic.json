@@ -3,7 +3,6 @@
   "label": "Service-to-service traffic (req/s)",
   "suitsTypes": [
     "sankey",
-    "chord",
     "arc"
   ],
   "data": {

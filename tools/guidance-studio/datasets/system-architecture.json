@@ -2,7 +2,8 @@
   "id": "system-architecture",
   "label": "Web system architecture",
   "suitsTypes": [
-    "boxes-and-lines"
+    "boxes-and-lines",
+    "block"
   ],
   "data": {
     "boxes": [

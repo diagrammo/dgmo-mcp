@@ -13,7 +13,8 @@
     "suitsTypes": [
       "funnel",
       "pie",
-      "pyramid"
+      "pyramid",
+      "treemap"
     ]
   },
   {
@@ -51,7 +52,6 @@
     "label": "Service-to-service traffic (req/s)",
     "suitsTypes": [
       "sankey",
-      "chord",
       "arc"
     ]
   },
@@ -67,14 +67,16 @@
     "id": "release-milestones",
     "label": "Product release milestones",
     "suitsTypes": [
-      "timeline"
+      "timeline",
+      "event-line"
     ]
   },
   {
     "id": "checkout-sequence",
     "label": "Checkout message flow",
     "suitsTypes": [
-      "sequence"
+      "sequence",
+      "swimlane"
     ]
   },
   {
@@ -124,7 +126,8 @@
     "id": "system-architecture",
     "label": "Web system architecture",
     "suitsTypes": [
-      "boxes-and-lines"
+      "boxes-and-lines",
+      "block"
     ]
   },
   {
@@ -181,6 +184,13 @@
     "label": "Project RACI matrix",
     "suitsTypes": [
       "raci"
+    ]
+  },
+  {
+    "id": "feature-branch-history",
+    "label": "Feature-branch git history",
+    "suitsTypes": [
+      "version-control"
     ]
   }
 ]

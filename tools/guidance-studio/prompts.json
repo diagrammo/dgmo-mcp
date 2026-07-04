@@ -11,6 +11,12 @@
     "Make a bar chart of revenue across five product lines.",
     "Make a bar chart of the average commute time in minutes for six cities."
   ],
+  "block": [
+    "Make a block diagram of the system in the sample data — lay the components out as a grid of labeled blocks.",
+    "Make a block diagram of a computer: a CPU block containing ALU and control-unit sub-blocks sits beside a memory block and an I/O block, all joined by a system-bus row.",
+    "Make a block diagram of a three-tier web app as rows: a presentation row (web and mobile clients), an application row (API and workers), and a data row (primary database and cache).",
+    "Make a block diagram of an audio signal chain arranged left to right: input, preamp, equalizer, compressor, amplifier, output."
+  ],
   "boxes-and-lines": [
     "Draw a boxes-and-lines architecture diagram of the components in the sample data and how they connect.",
     "Draw a boxes-and-lines diagram of a microservices backend: an API gateway routing to auth, catalog, orders, and payments services, each with its own database.",
@@ -22,12 +28,6 @@
     "Create a C4 context diagram of an online bookstore: customers and an admin use the bookstore system, which relies on an external payment provider and an email service. (Static renders show the context level only.)",
     "Create a C4 context diagram of a ride-sharing platform: riders and drivers use the platform, which depends on an external maps service and a payments provider. (Static renders show the context level only.)",
     "Create a C4 context diagram of a hospital records system: doctors and patients use the system, which integrates with an external lab system and an insurance provider. (Static renders show the context level only.)"
-  ],
-  "chord": [
-    "Make a chord diagram of the service-to-service traffic in the sample data.",
-    "Make a chord diagram of migration flows between five regions.",
-    "Make a chord diagram of trade volume between four countries.",
-    "Make a chord diagram of collaboration counts between five engineering teams."
   ],
   "class": [
     "Create a class diagram of the domain model in the sample data, with each class’s fields and the relationships between classes.",
@@ -46,6 +46,12 @@
     "Create an ER diagram of an e-commerce schema with customers, orders, order_items, and products, including primary and foreign keys and the relationships between them.",
     "Create an ER diagram of a library schema with members, books, copies, and loans, including primary and foreign keys and the relationships between them.",
     "Create an ER diagram of a university schema with students, courses, enrollments, and instructors, including primary and foreign keys and the relationships between them."
+  ],
+  "event-line": [
+    "Make an event line of the product milestones in the sample data — one card per dated event, in order.",
+    "Make an event line of a startup's first year: incorporate in January, ship the MVP in March, close a seed round in June, hire the first five engineers in September, and reach 10k users in December.",
+    "Make an event line of the Apollo 11 mission: launch, Earth orbit, trans-lunar injection, lunar orbit, landing, first steps, ascent, and splashdown.",
+    "Make an event line of a book's publishing timeline: draft finished, agent signed, manuscript sold, edits completed, cover revealed, and launch day."
   ],
   "flowchart": [
     "Make a flowchart of a user login flow: enter credentials, validate them, prompt for a 2FA code, lock the account after 3 failed attempts, otherwise grant access.",
@@ -179,6 +185,12 @@
     "Make a state diagram of a network connection with the states Disconnected, Connecting, Connected, Reconnecting, and Failed, and the events that move between them.",
     "Make a state diagram of a support ticket with the states Open, In Progress, Waiting on Customer, Resolved, Closed, and Reopened, and the transitions between them."
   ],
+  "swimlane": [
+    "Make a swimlane diagram of the checkout flow in the sample data — one lane per participant, each message a step in that lane.",
+    "Make a swimlane diagram of an expense-approval process across Employee, Manager, and Finance lanes: the Employee submits a report, the Manager reviews and approves it, Finance reimburses, and the Employee is notified.",
+    "Make a swimlane diagram of a bug lifecycle across Reporter, Triage, and Engineering lanes: the Reporter files a bug, Triage labels and prioritizes it, Engineering fixes and verifies it, then Triage closes it.",
+    "Make a swimlane diagram of an online order across Customer, Warehouse, and Courier lanes: the Customer places an order, the Warehouse picks and packs it, the Courier ships and delivers it, and the Customer confirms receipt."
+  ],
   "tech-radar": [
     "Make a tech radar from the sample data, placing each technology in a ring by adoption level.",
     "Make a tech radar of frontend technologies placed across the Adopt, Trial, Assess, and Hold rings.",
@@ -191,11 +203,23 @@
     "Make a timeline of a company’s history: founding, first product, Series A, IPO, and acquisition.",
     "Make a timeline of the Apollo program from 1961 to 1972."
   ],
+  "treemap": [
+    "Make a treemap of the funnel stages in the sample data, sizing each block by the count at that stage.",
+    "Make a treemap of a monthly household budget: Housing 1800, Food 600, Transport 400, Utilities 250, Entertainment 200, and Savings 550 — size each block by its amount.",
+    "Make a treemap of a company headcount by department: Engineering 120, Sales 80, Support 60, Marketing 40, and Operations 30.",
+    "Make a treemap of global energy sources by share: Oil 31, Coal 27, Gas 24, Renewables 8, Hydro 6, and Nuclear 4."
+  ],
   "venn": [
     "Make a Venn diagram of the audience sets and their overlaps in the sample data.",
     "Make a Venn diagram of skills shared between frontend, backend, and design.",
     "Make a Venn diagram of customers using mobile, web, or both.",
     "Make a Venn diagram of the features shared across three subscription tiers."
+  ],
+  "version-control": [
+    "Make a version-control graph of the branch history in the sample data — show the commits on each branch and where they merge.",
+    "Make a version-control graph of a git-flow release: branch develop off main, branch a feature off develop, merge the feature back into develop, cut a release branch, then merge the release into both main and develop.",
+    "Make a version-control graph of a hotfix: from a main branch with three commits, branch a hotfix, add one fix commit, and merge it back into main.",
+    "Make a version-control graph of two parallel features: from main, branch feature-a and feature-b, add two commits on each, then merge both back into main in turn."
   ],
   "wireframe": [
     "Sketch a wireframe of a mobile login screen: app logo, email and password fields, a \"Sign in\" button, and a \"Forgot password?\" link.",

@@ -1,0 +1,55 @@
+{
+  "id": "feature-branch-history",
+  "label": "Feature-branch git history",
+  "suitsTypes": [
+    "version-control"
+  ],
+  "data": {
+    "branches": [
+      "main",
+      "feature/auth",
+      "hotfix/login"
+    ],
+    "commits": [
+      {
+        "branch": "main",
+        "id": "c1",
+        "label": "init"
+      },
+      {
+        "branch": "main",
+        "id": "c2",
+        "label": "scaffold app"
+      },
+      {
+        "branch": "feature/auth",
+        "from": "c2",
+        "id": "c3",
+        "label": "add login form"
+      },
+      {
+        "branch": "feature/auth",
+        "id": "c4",
+        "label": "wire OAuth"
+      },
+      {
+        "branch": "hotfix/login",
+        "from": "c2",
+        "id": "c5",
+        "label": "fix redirect"
+      },
+      {
+        "branch": "main",
+        "merge": "hotfix/login",
+        "id": "c6",
+        "label": "merge hotfix"
+      },
+      {
+        "branch": "main",
+        "merge": "feature/auth",
+        "id": "c7",
+        "label": "merge auth"
+      }
+    ]
+  }
+}
