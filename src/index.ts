@@ -359,6 +359,7 @@ server.tool(
                 dgmoSource: dgmo,
                 palette: paletteConfig,
                 shareUrl: url,
+                theme: 'light',
               });
               const filePath = writeTempHtml(html, 'dgmo-preview');
               await openInBrowser(filePath);
@@ -535,7 +536,9 @@ server.tool(
       )
       .min(1)
       .describe('One or more diagrams to preview'),
-    theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
+    // Default aligned with render_diagram and the canonical embed block
+    // (BL-114): light across all rendering tools.
+    theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
     palette: z.string().default('slate').describe('Color palette'),
     include_source: z
       .boolean()
@@ -592,6 +595,7 @@ server.tool(
         dgmoSource: include_source ? r.dgmo : undefined,
         palette: paletteConfig,
         shareUrl,
+        theme,
       });
     } else {
       // Multiple diagrams → report layout
@@ -606,6 +610,7 @@ server.tool(
         sections,
         palette: paletteConfig,
         includeSource: include_source,
+        theme,
       });
     }
 
@@ -655,7 +660,9 @@ server.tool(
       )
       .min(1)
       .describe('Report sections, each with a diagram'),
-    theme: z.enum(['light', 'dark']).default('dark').describe('Color theme'),
+    // Default aligned with render_diagram and the canonical embed block
+    // (BL-114): light across all rendering tools.
+    theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
     palette: z.string().default('slate').describe('Color palette'),
     include_source: z
       .boolean()
@@ -717,6 +724,7 @@ server.tool(
       sections,
       palette: paletteConfig,
       includeSource: include_source,
+      theme,
     });
 
     const filePath = writeTempHtml(html, 'dgmo-report');

@@ -1,8 +1,16 @@
 import type { PaletteConfig } from '@diagrammo/dgmo/advanced';
+import { normalizeSvgForEmbed } from '@diagrammo/dgmo';
+import {
+  BLOCK_CSS,
+  buildDgmoBlockHtml,
+  errorBlockHtml,
+} from '@diagrammo/dgmo/block';
 
 // ---------------------------------------------------------------------------
 // Types
 // ---------------------------------------------------------------------------
+
+export type ReportTheme = 'light' | 'dark';
 
 export interface PreviewHtmlOptions {
   svg: string;
@@ -10,6 +18,7 @@ export interface PreviewHtmlOptions {
   dgmoSource?: string | undefined;
   palette: PaletteConfig;
   shareUrl?: string | undefined;
+  theme?: ReportTheme | undefined;
 }
 
 export interface ReportSection {
@@ -29,10 +38,14 @@ export interface ReportHtmlOptions {
   palette: PaletteConfig;
   includeSource: boolean;
   shareUrl?: string | undefined;
+  theme?: ReportTheme | undefined;
 }
 
 // ---------------------------------------------------------------------------
-// CSS
+// CSS — report/page chrome only. All per-diagram chrome (toolbar, source
+// panel, error card, highlight roles) comes from the canonical embed block's
+// BLOCK_CSS (@diagrammo/dgmo/block, BL-114), inlined below so reports stay
+// self-contained.
 // ---------------------------------------------------------------------------
 
 function buildCss(palette: PaletteConfig): string {
@@ -67,37 +80,8 @@ function buildCss(palette: PaletteConfig): string {
     h1 { font-size: 1.75rem; margin-bottom: 0.25rem; }
     h2 { font-size: 1.35rem; margin-top: 2.5rem; margin-bottom: 0.75rem; border-bottom: 1px solid var(--border); padding-bottom: 0.35rem; }
     .subtitle { color: var(--text-muted); margin-bottom: 1.5rem; }
-    .diagram-wrapper { margin: 1rem 0; overflow-x: auto; width: 100%; }
-    .diagram-wrapper svg { max-width: none; height: auto; display: block; }
     .description { color: var(--text-muted); margin-bottom: 0.75rem; }
-    details { margin: 0.75rem 0; }
-    summary { cursor: pointer; color: var(--text-muted); font-size: 0.85rem; user-select: none; }
-    summary:hover { color: var(--primary); }
-    .source-header { display: flex; align-items: center; justify-content: space-between; margin-top: 0.5rem; }
-    .copy-btn {
-      background: var(--surface); border: 1px solid var(--border);
-      color: var(--text-muted); border-radius: 4px;
-      padding: 0.2rem 0.5rem; cursor: pointer; font-size: 0.75rem;
-    }
-    .copy-btn:hover { border-color: var(--primary); color: var(--primary); }
-    pre {
-      background: var(--surface);
-      border: 1px solid var(--border);
-      border-radius: 6px;
-      padding: 1rem;
-      overflow-x: auto;
-      font-size: 0.8rem;
-      line-height: 1.5;
-      margin-top: 0.5rem;
-    }
-    code { font-family: 'SF Mono', SFMono-Regular, Menlo, Monaco, Consolas, monospace; }
-    .error-placeholder {
-      border: 2px solid var(--destructive);
-      border-radius: 6px;
-      padding: 1rem 1.25rem;
-      color: var(--destructive);
-      margin: 1rem 0;
-    }
+    .dgmo { margin: 1rem 0; }
     .toc { margin: 1.5rem 0; padding: 1rem 1.25rem; background: var(--surface); border-radius: 6px; }
     .toc h3 { font-size: 0.9rem; margin-bottom: 0.5rem; color: var(--text-muted); text-transform: uppercase; letter-spacing: 0.05em; }
     .toc ol { padding-left: 1.25rem; }
@@ -118,30 +102,39 @@ function buildCss(palette: PaletteConfig): string {
       body { background: white; color: black; }
       .toc { break-after: page; }
       h2 { break-after: avoid; }
-      .diagram-wrapper { break-inside: avoid; }
+      .dgmo { break-inside: avoid; }
     }
+    ${BLOCK_CSS}
   `;
 }
 
 // ---------------------------------------------------------------------------
-// Copy button script
+// Toolbar script — the standard block's client behavior (remark-dgmo's
+// bindDgmo is the reference): copy button writes data-dgmo-source to the
+// clipboard; clicks on toolbar buttons inside the <summary> must
+// preventDefault so they don't also toggle the source panel, which means the
+// open-in-editor anchor's navigation is re-issued manually.
 // ---------------------------------------------------------------------------
 
-const COPY_SCRIPT = `
+const TOOLBAR_SCRIPT = `
 <script>
 (function() {
   document.addEventListener('click', function(e) {
-    var copyBtn = e.target.closest('.copy-btn');
-    if (!copyBtn) return;
-    var id = copyBtn.getAttribute('data-copy');
-    var pre = document.getElementById(id);
-    if (!pre) return;
-    var text = pre.textContent || '';
-    navigator.clipboard.writeText(text).then(function() {
-      var orig = copyBtn.textContent;
-      copyBtn.textContent = 'Copied!';
-      setTimeout(function() { copyBtn.textContent = orig; }, 1500);
-    });
+    var btn = e.target.closest('.dgmo-toolbar-btn');
+    if (!btn) return;
+    var insideSummary = !!btn.closest('summary');
+    if (insideSummary) e.preventDefault();
+    if (btn.matches('button.dgmo-copy')) {
+      var src = btn.getAttribute('data-dgmo-source') || '';
+      navigator.clipboard.writeText(src).then(function() {
+        btn.classList.add('dgmo-copy--success');
+        setTimeout(function() { btn.classList.remove('dgmo-copy--success'); }, 1500);
+      });
+      return;
+    }
+    if (insideSummary && btn.matches('a.dgmo-open') && btn.href) {
+      window.open(btn.href, btn.target || '_blank', 'noopener,noreferrer');
+    }
   });
 })();
 </script>
@@ -166,13 +159,23 @@ function escapeHtml(text: string): string {
     .replace(/"/g, '&quot;');
 }
 
-function sourceBlock(dgmoSource: string): string {
-  const id = `src-${Math.random().toString(36).slice(2, 8)}`;
-  return `<details><summary>DGMO source</summary><div class="source-header"><span></span><button class="copy-btn" data-copy="${id}">Copy</button></div><pre id="${id}"><code>${escapeHtml(dgmoSource)}</code></pre></details>`;
-}
-
-function errorPlaceholder(error: string): string {
-  return `<div class="error-placeholder">⚠ Render error: ${escapeHtml(error)}</div>`;
+/**
+ * Wrap one rendered diagram in the canonical embed block (BL-114). The MCP
+ * renders single-theme through its own renderPipeline (render gate included),
+ * so the SVG goes in as a `.dgmo-svg` single-mode wrapper; the source chrome
+ * (hover toolbar, hidden source panel, copy, open-in-editor) is the standard
+ * block's.
+ */
+function diagramBlock(
+  svg: string,
+  dgmoSource: string | undefined,
+  title: string | undefined
+): string {
+  const svgsHtml = `<div class="dgmo-svg">${normalizeSvgForEmbed(svg)}</div>`;
+  return buildDgmoBlockHtml(dgmoSource ?? '', svgsHtml, {
+    mode: dgmoSource ? 'showcase' : 'diagram',
+    ...(title ? { title } : {}),
+  });
 }
 
 // ---------------------------------------------------------------------------
@@ -180,32 +183,35 @@ function errorPlaceholder(error: string): string {
 // ---------------------------------------------------------------------------
 
 export function buildPreviewHtml(options: PreviewHtmlOptions): string {
-  const { svg, title, dgmoSource, palette, shareUrl } = options;
+  const {
+    svg,
+    title,
+    dgmoSource,
+    palette,
+    shareUrl,
+    theme = 'light',
+  } = options;
   const pageTitle = title || 'Diagram Preview';
   const openLink = shareUrl
     ? `<a class="open-link" href="${escapeHtml(shareUrl)}" target="_blank" rel="noopener">Open at diagrammo.app ↗</a>`
     : '';
 
   return `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="${theme}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <title>${escapeHtml(pageTitle)}</title>
 <style>${buildCss(palette)}
-.preview-root { display: flex; flex-direction: column; min-height: 100vh; padding: 1rem; }
-.preview-diagram { flex: 1; overflow: auto; display: flex; align-items: flex-start; justify-content: flex-start; }
-.preview-diagram svg { max-width: none; height: auto; display: block; }
-.preview-source { flex-shrink: 0; }
+.preview-root { max-width: 1400px; margin: 0 auto; padding: 1rem 1.5rem; }
 </style>
 </head>
 <body>
 ${openLink}
 <div class="preview-root">
-<div class="preview-diagram">${svg}</div>
-${dgmoSource ? `<div class="preview-source">${sourceBlock(dgmoSource)}</div>` : ''}
+${diagramBlock(svg, dgmoSource, title)}
 </div>
-${COPY_SCRIPT}
+${TOOLBAR_SCRIPT}
 </body>
 </html>`;
 }
@@ -215,8 +221,15 @@ ${COPY_SCRIPT}
 // ---------------------------------------------------------------------------
 
 export function buildReportHtml(options: ReportHtmlOptions): string {
-  const { title, subtitle, sections, palette, includeSource, shareUrl } =
-    options;
+  const {
+    title,
+    subtitle,
+    sections,
+    palette,
+    includeSource,
+    shareUrl,
+    theme = 'light',
+  } = options;
   const showToc = sections.length > 3;
 
   let toc = '';
@@ -238,11 +251,12 @@ export function buildReportHtml(options: ReportHtmlOptions): string {
         ? `<p class="description">${escapeHtml(s.description)}</p>`
         : '';
       const diagram = s.svg
-        ? `<div class="diagram-wrapper">${s.svg}</div>`
-        : errorPlaceholder(s.error || 'Unknown render error');
-      const source =
-        includeSource && s.dgmoSource ? sourceBlock(s.dgmoSource) : '';
-      return `<section id="${id}"><h2>${escapeHtml(s.title)}</h2>${desc}${diagram}${source}</section>`;
+        ? diagramBlock(s.svg, includeSource ? s.dgmoSource : undefined, s.title)
+        : errorBlockHtml(
+            new Error(s.error || 'Unknown render error'),
+            s.dgmoSource ?? ''
+          );
+      return `<section id="${id}"><h2>${escapeHtml(s.title)}</h2>${desc}${diagram}</section>`;
     })
     .join('\n');
 
@@ -252,7 +266,7 @@ export function buildReportHtml(options: ReportHtmlOptions): string {
     : '';
 
   return `<!DOCTYPE html>
-<html lang="en" data-theme="dark">
+<html lang="en" data-theme="${theme}">
 <head>
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
@@ -268,7 +282,7 @@ ${toc}
 ${sectionHtml}
 <footer>Generated by Diagrammo &middot; ${escapeHtml(now)}</footer>
 </div>
-${COPY_SCRIPT}
+${TOOLBAR_SCRIPT}
 </body>
 </html>`;
 }

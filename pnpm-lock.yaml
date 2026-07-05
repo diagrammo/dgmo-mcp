@@ -9,8 +9,11 @@ importers:
   .:
     dependencies:
       '@diagrammo/dgmo':
-        specifier: ^0.44.0
-        version: 0.44.0
+        specifier: ^0.45.0
+        version: 0.45.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)
+      '@lezer/lr':
+        specifier: ^1.4.10
+        version: 1.4.10
       '@modelcontextprotocol/sdk':
         specifier: ^1.29.0
         version: 1.29.0(zod@3.25.76)
@@ -179,8 +182,8 @@ packages:
   '@dagrejs/graphlib@4.0.1':
     resolution: {integrity: sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==}
 
-  '@diagrammo/dgmo@0.44.0':
-    resolution: {integrity: sha512-uyCtxu3eyC/8BUigAS3QyxArM13BiCtHuXumPQ01SKII1ni2waq5Q03RqEAlIRsbCQYXWXpqCnQAdSGbfa5Nzg==}
+  '@diagrammo/dgmo@0.45.0':
+    resolution: {integrity: sha512-erVQi8nGsfKw1yRUyvvbJHp8YXlqoUJ/990P/ER70tNcw4XWYvQteuH+zY+zmzyDAa1jk4ghwG3Ye5W5ng5haQ==}
     engines: {node: '>=20.6'}
     hasBin: true
     peerDependencies:
@@ -523,6 +526,12 @@ packages:
 
   '@jscpd/tokenizer@4.2.4':
     resolution: {integrity: sha512-nM4kGyDvpcevt8t0zOsMQ82ShSc65c3LIQUHClTYwraiOGOmWgUQyen+JIiFCNF8eDCGR2Qa5iI5XBfGWYQzIg==}
+
+  '@lezer/common@1.5.2':
+    resolution: {integrity: sha512-sxQE460fPZyU3sdc8lafxiPwJHBzZRy/udNFynGQky1SePYBdhkBl1kOagA9uT3pxR8K09bOrmTUqA9wb/PjSQ==}
+
+  '@lezer/lr@1.4.10':
+    resolution: {integrity: sha512-rnCpTIBafOx4mRp43xOxDJbFipJm/c0cia/V5TiGlhmMa+wsSdoGmUN3w5Bqrks/09Q/D4tNAmWaT8p6NRi77A==}
 
   '@modelcontextprotocol/sdk@1.29.0':
     resolution: {integrity: sha512-zo37mZA9hJWpULgkRpowewez1y6ML5GsXJPY8FI0tBBCd77HEvza4jDqRKOXgHNn867PVGCyTdzqpz0izu5ZjQ==}
@@ -3145,7 +3154,7 @@ snapshots:
 
   '@dagrejs/graphlib@4.0.1': {}
 
-  '@diagrammo/dgmo@0.44.0':
+  '@diagrammo/dgmo@0.45.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)':
     dependencies:
       '@dagrejs/dagre': 3.0.0
       '@resvg/resvg-js': 2.6.2
@@ -3159,6 +3168,9 @@ snapshots:
       jsdom: 29.1.1
       lz-string: 1.5.0
       topojson-client: 3.1.0
+    optionalDependencies:
+      '@lezer/common': 1.5.2
+      '@lezer/lr': 1.4.10
     transitivePeerDependencies:
       - '@noble/hashes'
       - canvas
@@ -3456,6 +3468,12 @@ snapshots:
     dependencies:
       '@jscpd/core': 4.2.4
       spark-md5: 3.0.2
+
+  '@lezer/common@1.5.2': {}
+
+  '@lezer/lr@1.4.10':
+    dependencies:
+      '@lezer/common': 1.5.2
 
   '@modelcontextprotocol/sdk@1.29.0(zod@3.25.76)':
     dependencies:
