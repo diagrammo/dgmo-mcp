@@ -47,8 +47,6 @@
     "typecheck": "tsc --noEmit",
     "test": "vitest run",
     "test:watch": "vitest",
-    "hub": "pnpm build:fast && node tools/selection-harness/dump-registry.mjs && node tools/guidance-studio/dump-registry.mjs && node tools/guidance-studio/build-gallery.mjs && vite tools --port 5173 --strictPort",
-    "harness": "node tools/selection-harness/dump-registry.mjs && vite tools/selection-harness",
     "studio": "pnpm -C ../dgmo build && node tools/guidance-studio/use-local-dgmo.mjs && pnpm build && node tools/guidance-studio/dump-registry.mjs && node tools/guidance-studio/build-gallery.mjs && vite tools/guidance-studio",
     "studio:npm": "node tools/guidance-studio/dump-registry.mjs && pnpm build && node tools/guidance-studio/build-gallery.mjs && vite tools/guidance-studio",
     "bundle": "bash scripts/bundle.sh",
