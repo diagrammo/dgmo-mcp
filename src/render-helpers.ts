@@ -20,6 +20,11 @@ import { validateFlowchartStructure } from './flowchart-structure.js';
 import { Resvg } from '@resvg/resvg-js';
 import { existsSync } from 'node:fs';
 import { dirname, join } from 'node:path';
+import { createRequire } from 'node:module';
+
+// ESM equivalent of the CJS `require.resolve` this module relied on to locate
+// the installed @diagrammo/dgmo package's bundled fonts/.
+const require = createRequire(import.meta.url);
 
 const DEFAULT_FONT_NAME = 'Inter';
 
