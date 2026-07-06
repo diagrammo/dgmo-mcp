@@ -31,20 +31,20 @@ cp "$ROOT/README.md" "$BUNDLE_DIR/"
 [ -f "$ROOT/LICENSE" ] && cp "$ROOT/LICENSE" "$BUNDLE_DIR/"
 
 echo "→ Writing bundle/package.json (prod deps, npm-resolved dgmo)"
-DGMO_VERSION="$DGMO_VERSION" node -e "
-  const pkg = require('$ROOT/package.json');
-  const dgmoVersion = process.env.DGMO_VERSION || pkg.dependencies['@diagrammo/dgmo'];
-  const out = {
-    name: pkg.name,
-    version: pkg.version,
-    description: pkg.description,
-    main: pkg.main,
-    bin: pkg.bin,
-    license: pkg.license,
-    dependencies: { ...pkg.dependencies, '@diagrammo/dgmo': dgmoVersion },
-  };
-  require('fs').writeFileSync('$BUNDLE_DIR/package.json', JSON.stringify(out, null, 2));
-"
+# ESM-safe: assembled with jq (no `node -e`/`require`). `type` is carried over
+# so the bundled ESM `dist/index.js` is loaded as a module, not CommonJS.
+DGMO_RANGE="$(jq -r '.dependencies["@diagrammo/dgmo"]' "$ROOT/package.json")"
+DGMO_VERSION="${DGMO_VERSION:-$DGMO_RANGE}"
+jq --arg dgmo "$DGMO_VERSION" '{
+  name,
+  version,
+  description,
+  type,
+  main,
+  bin,
+  license,
+  dependencies: (.dependencies + {"@diagrammo/dgmo": $dgmo})
+}' "$ROOT/package.json" > "$BUNDLE_DIR/package.json"
 
 echo "→ Installing prod deps with npm (no workspace resolution)"
 (cd "$BUNDLE_DIR" && npm install --omit=dev --no-audit --no-fund --silent)

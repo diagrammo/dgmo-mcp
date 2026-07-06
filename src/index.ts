@@ -8,6 +8,14 @@ import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { dirname, join } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
+import { createRequire } from 'node:module';
+import { fileURLToPath } from 'node:url';
+
+// ESM equivalents of the CJS globals this module relied on. `require.resolve`
+// locates the installed @diagrammo/dgmo package (to read its bundled docs/
+// gallery/fonts); `__dirname` is the fallback for the local dev workspace.
+const require = createRequire(import.meta.url);
+const __dirname = dirname(fileURLToPath(import.meta.url));
 import {
   parseDgmo,
   parseDgmoChartType,
