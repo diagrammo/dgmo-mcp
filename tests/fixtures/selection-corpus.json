@@ -4,6 +4,24 @@
   "dgmoVersion": "0.43.0",
   "cases": [
     {
+      "prompt": "let me sketch out some boxes on a canvas and connect them",
+      "accept": [
+        "sketch"
+      ]
+    },
+    {
+      "prompt": "a rough whiteboard-style sketch of the architecture",
+      "accept": [
+        "sketch"
+      ]
+    },
+    {
+      "prompt": "drag and drop shapes to place them freely and draw arrows",
+      "accept": [
+        "sketch"
+      ]
+    },
+    {
       "prompt": "show the steps of a user logging in via OAuth",
       "accept": [
         "sequence"

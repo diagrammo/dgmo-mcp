@@ -611,5 +611,17 @@
       "components grid"
     ],
     "concepts": []
+  },
+  "sketch": {
+    "phrases": [
+      "sketch",
+      "whiteboard",
+      "free-form boxes",
+      "canvas diagram",
+      "rough architecture sketch",
+      "drag and drop diagram",
+      "place shapes on a canvas"
+    ],
+    "concepts": []
   }
 }
