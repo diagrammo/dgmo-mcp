@@ -119,11 +119,80 @@ function buildCss(palette: PaletteConfig): string {
 const TOOLBAR_SCRIPT = `
 <script>
 (function() {
+  var REF_ATTRS = ['clip-path','mask','filter','fill','stroke','marker-start','marker-mid','marker-end'];
+  var XLINK = 'http://www.w3.org/1999/xlink';
+  var lbSeq = 0;
+  // Namespace a cloned SVG's ids + url(#id)/href refs so the clone can't clash
+  // with the still-mounted inline copy (WebKit resolves dup ids to the first).
+  function namespaceSvgIds(root, prefix) {
+    var map = {};
+    root.querySelectorAll('[id]').forEach(function(el) {
+      var oldId = el.getAttribute('id');
+      if (!oldId) return;
+      map[oldId] = prefix + oldId;
+      el.setAttribute('id', map[oldId]);
+    });
+    var remap = function(v) {
+      return v.replace(/url\\(#([^)]+)\\)/g, function(m, id) {
+        return map[id] ? 'url(#' + map[id] + ')' : m;
+      });
+    };
+    root.querySelectorAll('*').forEach(function(el) {
+      REF_ATTRS.forEach(function(attr) {
+        var v = el.getAttribute(attr);
+        if (v && v.indexOf('url(#') !== -1) el.setAttribute(attr, remap(v));
+      });
+      var style = el.getAttribute('style');
+      if (style && style.indexOf('url(#') !== -1) el.setAttribute('style', remap(style));
+      var href = el.getAttribute('href');
+      if (href && href.charAt(0) === '#' && map[href.slice(1)]) el.setAttribute('href', '#' + map[href.slice(1)]);
+      var xhref = el.getAttributeNS(XLINK, 'href');
+      if (xhref && xhref.charAt(0) === '#' && map[xhref.slice(1)]) el.setAttributeNS(XLINK, 'href', '#' + map[xhref.slice(1)]);
+    });
+  }
+  function openLightbox(btn) {
+    var block = btn.closest('.dgmo');
+    if (!block) return;
+    var wrappers = block.querySelectorAll('.dgmo-light, .dgmo-dark, .dgmo-svg');
+    var svg = null;
+    for (var i = 0; i < wrappers.length; i++) {
+      if (getComputedStyle(wrappers[i]).display === 'none') continue;
+      svg = wrappers[i].querySelector('svg');
+      if (svg) break;
+    }
+    if (!svg) svg = block.querySelector('svg');
+    if (!svg) return;
+    var clone = svg.cloneNode(true);
+    namespaceSvgIds(clone, 'dgmo-lb-' + (++lbSeq) + '-');
+    var dialog = document.createElement('dialog');
+    dialog.className = 'dgmo-lightbox';
+    dialog.setAttribute('aria-label', 'Diagram, full screen');
+    var closeBtn = document.createElement('button');
+    closeBtn.type = 'button';
+    closeBtn.className = 'dgmo-lightbox-close';
+    closeBtn.setAttribute('aria-label', 'Close full screen');
+    closeBtn.innerHTML = '<svg width="20" height="20" viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.6" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m4 4 8 8"/><path d="m12 4-8 8"/></svg>';
+    var host = document.createElement('div');
+    host.className = 'dgmo-lightbox-svg';
+    host.appendChild(clone);
+    dialog.appendChild(closeBtn);
+    dialog.appendChild(host);
+    document.body.appendChild(dialog);
+    var close = function() { if (dialog.open) dialog.close(); };
+    closeBtn.addEventListener('click', close);
+    dialog.addEventListener('click', function(e) { if (e.target === dialog) close(); });
+    dialog.addEventListener('close', function() { dialog.remove(); });
+    dialog.showModal();
+  }
   document.addEventListener('click', function(e) {
     var btn = e.target.closest('.dgmo-toolbar-btn');
     if (!btn) return;
     var insideSummary = !!btn.closest('summary');
     if (insideSummary) e.preventDefault();
+    if (btn.matches('button.dgmo-expand')) {
+      openLightbox(btn);
+      return;
+    }
     if (btn.matches('button.dgmo-copy')) {
       var src = btn.getAttribute('data-dgmo-source') || '';
       navigator.clipboard.writeText(src).then(function() {
