@@ -25,7 +25,16 @@ import {
   chartTypes,
   CHART_TYPE_DESCRIPTIONS,
   INVALID_COLOR_CODE,
+  parseMap,
+  resolveMap,
+  loadMapData,
 } from '@diagrammo/dgmo/advanced';
+
+// Map name/route resolution needs the bundled gazetteer. `loadMapData` reads it
+// via a Node dynamic import; cache the promise so repeated validate calls in one
+// session don't re-load it.
+let _mapDataPromise: ReturnType<typeof loadMapData> | undefined;
+const getMapData = () => (_mapDataPromise ??= loadMapData());
 // Render-to-raster path, single-sourced in ./render-helpers so the dev-only
 // guidance studio can reuse the EXACT same pipeline (it dynamic-imports the
 // built helper). Re-exported below to preserve the prior public surface.
@@ -766,7 +775,23 @@ server.tool(
   },
   async ({ dgmo }) => {
     const chartType = parseDgmoChartType(dgmo);
-    const { diagnostics } = parseDgmo(dgmo);
+    // Maps need the RESOLVER, not just the parser: place names, route/edge
+    // endpoints, and `as`/label references are all resolved (and errored) in
+    // resolveMap, which the pure parser never runs. Without this, an unknown
+    // place or a broken route leg validates clean here yet fails in the app.
+    // resolveMap seeds its diagnostics with the parse diagnostics, so its list
+    // is the complete set. Fall back to parse-only if the resolver throws.
+    let diagnostics;
+    if (chartType === 'map') {
+      try {
+        const data = await getMapData();
+        diagnostics = resolveMap(parseMap(dgmo), data).diagnostics.slice();
+      } catch {
+        diagnostics = parseDgmo(dgmo).diagnostics;
+      }
+    } else {
+      diagnostics = parseDgmo(dgmo).diagnostics;
+    }
     // Flowcharts get an extra structural gate (orphan nodes, one-way decisions),
     // mirroring the render gate so validate and render agree.
     if (chartType === 'flowchart') {
