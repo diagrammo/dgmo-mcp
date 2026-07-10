@@ -1157,6 +1157,24 @@
       "accept": [
         "family"
       ]
+    },
+    {
+      "prompt": "workout plan for push day showing which muscles to train",
+      "accept": [
+        "body"
+      ]
+    },
+    {
+      "prompt": "physical therapy injury report marking sore muscles on a body",
+      "accept": [
+        "body"
+      ]
+    },
+    {
+      "prompt": "anatomy diagram highlighting the quadriceps and hamstrings",
+      "accept": [
+        "body"
+      ]
     }
   ]
 }
