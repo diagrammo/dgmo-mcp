@@ -512,14 +512,7 @@
       "folder sizes",
       "space breakdown",
       "portfolio allocation",
-      "size by category",
-      "sunburst",
-      "sunburst chart",
-      "hierarchical pie",
-      "multi-level pie",
-      "multi-ring pie",
-      "radial treemap",
-      "nested pie"
+      "size by category"
     ],
     "concepts": []
   },
@@ -635,6 +628,21 @@
       "lineage",
       "bloodline",
       "dynasty"
+    ],
+    "concepts": []
+  },
+  "body": {
+    "phrases": [
+      "anatomy",
+      "human body",
+      "muscle",
+      "muscle groups",
+      "musculature",
+      "muscular system",
+      "workout",
+      "exercise",
+      "fitness",
+      "body diagram"
     ],
     "concepts": []
   }
