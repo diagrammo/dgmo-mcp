@@ -157,6 +157,22 @@
     ],
     "concepts": []
   },
+  "goal": {
+    "phrases": [
+      "goal",
+      "progress toward a target",
+      "how close am i",
+      "percent complete",
+      "completion percentage",
+      "kpi tile",
+      "fundraising thermometer",
+      "quota",
+      "target vs actual",
+      "progress bar"
+    ],
+    "concepts": [],
+    "prior": 3
+  },
   "heatmap": {
     "phrases": [
       "heatmap",
