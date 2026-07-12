@@ -28,11 +28,17 @@ export interface CorpusCase {
   readonly wontfix?: boolean;
   /** Optional reason for parking (shown in the harness, kept in the corpus). */
   readonly note?: string;
+  /** Staged for a chart type whose id isn't in the installed @diagrammo/dgmo
+   *  yet (unpublished). Excluded from the active pass-count/baseline (top-1 can
+   *  never land an unknown id) AND from the accept-id validity check, so the
+   *  case can be committed ahead of the dgmo release. Drop this flag once the
+   *  type ships. */
+  readonly pending?: boolean;
 }
 
-/** Cases we're actively trying to land (everything not parked). */
+/** Cases we're actively trying to land (everything not parked or pending). */
 export function activeCases(corpus: Corpus): readonly CorpusCase[] {
-  return corpus.cases.filter((c) => !c.wontfix);
+  return corpus.cases.filter((c) => !c.wontfix && !c.pending);
 }
 
 export interface Corpus {

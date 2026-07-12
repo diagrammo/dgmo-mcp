@@ -56,11 +56,16 @@ describe('selection corpus — structural integrity', () => {
   });
 
   it('every accept id is a real chart-type id (catches typos/renames)', () => {
-    const bad = corpus.cases.flatMap((c) =>
-      c.accept
-        .filter((id) => !validIds.has(id))
-        .map((id) => `"${id}" (prompt: "${c.prompt}")`)
-    );
+    // `pending` cases target a chart type not yet in the installed
+    // @diagrammo/dgmo (unpublished); their ids are legitimately unknown here, so
+    // they're excluded from this check. Drop the flag once the type ships.
+    const bad = corpus.cases
+      .filter((c) => !c.pending)
+      .flatMap((c) =>
+        c.accept
+          .filter((id) => !validIds.has(id))
+          .map((id) => `"${id}" (prompt: "${c.prompt}")`)
+      );
     expect(bad, `unknown accept ids: ${bad.join(', ')}`).toEqual([]);
   });
 });

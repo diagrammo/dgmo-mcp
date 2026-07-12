@@ -683,7 +683,32 @@
       "count down to",
       "days remaining",
       "launch countdown",
-      "deadline"
+      "deadline",
+      "recurring event",
+      "every year",
+      "every month",
+      "every week",
+      "annually",
+      "monthly reminder",
+      "anniversary",
+      "birthday countdown",
+      "days since"
+    ],
+    "concepts": [],
+    "prior": 3
+  },
+  "clock": {
+    "phrases": [
+      "world clock",
+      "time zones",
+      "what time is it in",
+      "current time",
+      "team hours",
+      "working hours across time zones",
+      "clock",
+      "timezone",
+      "local time",
+      "meeting time overlap"
     ],
     "concepts": [],
     "prior": 3
