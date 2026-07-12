@@ -674,5 +674,18 @@
       "body diagram"
     ],
     "concepts": []
+  },
+  "countdown": {
+    "phrases": [
+      "countdown",
+      "days until",
+      "time until",
+      "count down to",
+      "days remaining",
+      "launch countdown",
+      "deadline"
+    ],
+    "concepts": [],
+    "prior": 3
   }
 }
