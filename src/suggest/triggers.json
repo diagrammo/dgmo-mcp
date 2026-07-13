@@ -171,7 +171,7 @@
       "progress bar"
     ],
     "concepts": [],
-    "prior": 3
+    "prior": 0
   },
   "heatmap": {
     "phrases": [
@@ -683,19 +683,10 @@
       "count down to",
       "days remaining",
       "launch countdown",
-      "deadline",
-      "recurring event",
-      "every year",
-      "every month",
-      "every week",
-      "annually",
-      "monthly reminder",
-      "anniversary",
-      "birthday countdown",
-      "days since"
+      "deadline"
     ],
     "concepts": [],
-    "prior": 3
+    "prior": 0
   },
   "clock": {
     "phrases": [
@@ -711,6 +702,6 @@
       "meeting time overlap"
     ],
     "concepts": [],
-    "prior": 3
+    "prior": 0
   }
 }
