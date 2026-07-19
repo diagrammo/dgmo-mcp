@@ -68,11 +68,25 @@ else
 fi
 
 step "Pre-flight: not already published at this version"
+# This guard assumes the tag-driven CI flow, where the tag push triggers the
+# publish — so the version must still be unpublished when the tag goes out.
+# In the LOCAL-publish flow (canonical for this workspace; CI's NPM_TOKEN has
+# been unreliable) the order is inverted: `npm publish` runs first and the tag
+# is pushed afterwards, so the version is legitimately already on npm. Set
+# ALLOW_PUBLISHED=1 to downgrade this to a warning. It's deliberately narrow —
+# every other preflight check still runs, unlike `git push --no-verify`, which
+# skips the hook wholesale.
 if npm view "@diagrammo/dgmo-mcp@$PKG_VER" version 2>/dev/null | grep -q .; then
-  red "✗ @diagrammo/dgmo-mcp@$PKG_VER is already on npm — bump first"
-  exit 1
+  if [[ "${ALLOW_PUBLISHED:-}" == "1" ]]; then
+    green "✓ $PKG_VER already on npm — allowed (ALLOW_PUBLISHED=1, local-publish flow)"
+  else
+    red "✗ @diagrammo/dgmo-mcp@$PKG_VER is already on npm — bump first"
+    red "  (local-publish flow? re-run with ALLOW_PUBLISHED=1)"
+    exit 1
+  fi
+else
+  green "✓ $PKG_VER is unpublished"
 fi
-green "✓ $PKG_VER is unpublished"
 
 # ──────────────────────────────────────────────────────────────────
 # 2. Build
