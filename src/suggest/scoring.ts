@@ -157,8 +157,9 @@ const STOPWORDS = new Set([
   'help',
 ]);
 
-/** Conservative plural stemmer (plurals only — NOT -ing/-ed). */
-function stemPlural(t: string): string {
+/** Conservative plural stemmer (plurals only — NOT -ing/-ed). Exported so
+ *  external word-tuning tools (console AI Board) stay stem-consistent. */
+export function stemPlural(t: string): string {
   if (t.length > 4 && t.endsWith('ies')) return t.slice(0, -3) + 'y';
   // "-es" plural ONLY after a sibilant (boxes→box, watches→watch, dishes→dish,
   // buzzes→buzz, classes→class). For everything else ending in "es" the 'e' is

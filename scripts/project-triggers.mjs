@@ -32,7 +32,10 @@ const registry = JSON.parse(await readFile(REGISTRY, 'utf8'));
 const current = await readFile(TRIGGERS, 'utf8');
 const triggers = JSON.parse(current);
 
-// type entity id → its keyword phrase list (the shared vocabulary)
+// type entity id → its keyword phrase list (the shared vocabulary).
+// Deliberately ALL keyword kinds — trigger AND synonym both project into scorer
+// phrases (decided 2026-07-23, AI Board spec §10.4.2: keep shipped behavior;
+// uniqueness checks must therefore span both kinds).
 const phrasesByType = new Map(
   registry.entities.filter((e) => e.kind === 'type').map((e) => [e.id, e.keywords.map((k) => k.text)])
 );
