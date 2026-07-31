@@ -7,7 +7,7 @@
 [![license](https://img.shields.io/npm/l/@diagrammo/dgmo-mcp.svg)](./LICENSE)
 
 This MCP server gives Claude (and any MCP-compatible AI tool) the ability to render
-**sequence diagrams, flowcharts, ER diagrams, C4 architecture, gantt charts, and 35+
+**sequence diagrams, flowcharts, ER diagrams, C4 architecture, gantt charts, and 40+
 other chart types** from concise text markup — then hand the result off to a full
 editor for refinement. Ask for a diagram in chat; get a real one back.
 
