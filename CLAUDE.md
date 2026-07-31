@@ -19,6 +19,8 @@ It consumes the **published** `@diagrammo/dgmo` from npm, never the workspace ch
 
 🔴 **The tests pair two generations on purpose**: `chartTypes` comes from the installed package, `language-reference.md` from the workspace source. A chart type added, renamed or consolidated in dgmo source turns `pnpm test` red here — that is real published-vs-source skew, not a stale expectation. Fix it by releasing dgmo and bumping the dep, never by editing dgmo source back. Suite green at 162 tests, verified 2026-07-31.
 
+🔴 **Every dgmo MINOR needs an explicit bump here — the caret does not do it.** On a `0.x` version `^0.56.0` excludes `0.57.0`, and the committed lockfile pins whatever already satisfied the range, so `pnpm install` keeps reporting success while the dep sits a minor behind. That is exactly what happened: dgmo shipped 0.57.0 and this package stayed resolved at 0.56.0 until it was caught on 2026-07-31. After any bump, check what actually **resolved** (`grep -A2 "'@diagrammo/dgmo'" pnpm-lock.yaml`), not what was declared. The same trap bit all five doc-framework wrappers.
+
 ## Tool surface
 
 `src/index.ts` holds one `server.tool(...)` per tool — `grep -n '^server.tool(' src/index.ts` is the live list; `manifest.json`'s `tools` array is hand-maintained and already lags it, so update it when you add one.
