@@ -32,8 +32,25 @@ interface RegistryType {
   readonly id: string;
   readonly description: string;
   readonly fallback?: boolean;
+  /** Routable but never OFFERED — see the filter below. */
+  readonly internal?: boolean;
 }
-const REGISTRY: readonly RegistryType[] = chartTypes as readonly RegistryType[];
+
+/**
+ * The candidate pool, with internal types removed.
+ *
+ * 🔴 An internal type is one nobody hand-authors — `live-link` needs a diagram
+ * id only its publisher can hand out. Leaving it in the pool would let the
+ * assistant propose a pointer to someone who asked for a diagram, which is
+ * worse than useless: the result is a file the user cannot complete.
+ *
+ * If `suggest.test.ts`'s "every type has a trigger phrase" check ever fails on
+ * one of these, adding a trigger is the wrong fix — the exception there names
+ * the type and says so.
+ */
+const REGISTRY: readonly RegistryType[] = (
+  chartTypes as readonly RegistryType[]
+).filter((t) => !t.internal);
 
 /** The trigger vocabulary shape a suggester scores against. */
 export type TriggerMap = Record<string, readonly string[]>;

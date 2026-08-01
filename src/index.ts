@@ -29,6 +29,7 @@ import {
   resolveMap,
   loadMapData,
 } from '@diagrammo/dgmo/advanced';
+import { internalChartTypeIds } from './internal-flag.js';
 
 // Map name/route resolution needs the bundled gazetteer. `loadMapData` reads it
 // via a Node dynamic import; cache the promise so repeated validate calls in one
@@ -460,7 +461,14 @@ server.tool(
     idempotentHint: true,
   },
   async () => {
-    const types = Object.keys(CHART_TYPE_DESCRIPTIONS);
+    // 🔴 `CHART_TYPE_DESCRIPTIONS` is a bare Record and carries no metadata, so
+    // the `internal` flag is invisible from here — cross-look-up into
+    // `chartTypes`. An internal type routes but is never OFFERED: nobody hand-
+    // authors a `live-link`, since it needs a diagram id only its publisher has.
+    const internal = internalChartTypeIds(chartTypes);
+    const types = Object.keys(CHART_TYPE_DESCRIPTIONS).filter(
+      (id) => !internal.has(id)
+    );
     const lines = types.map((id) => {
       const desc = CHART_TYPE_DESCRIPTIONS[id];
       return desc ? `- ${id}: ${desc}` : `- ${id}`;

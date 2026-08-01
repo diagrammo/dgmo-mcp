@@ -22,6 +22,10 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { chartTypes } from '@diagrammo/dgmo';
 import { server } from '../src/index.js';
+import { internalChartTypeIds } from '../src/internal-flag.js';
+
+/** Types that route but are never OFFERED — see src/internal-flag.ts. */
+const internalIds = internalChartTypeIds(chartTypes);
 
 const here = dirname(fileURLToPath(import.meta.url));
 const client = new Client({ name: 'tool-contract-test', version: '1.0.0' });
@@ -107,13 +111,33 @@ describe('validate_diagram', () => {
 });
 
 describe('list_chart_types', () => {
-  it('returns the full chart-type set (parity with dgmo)', async () => {
+  it('returns every OFFERED chart type (parity with dgmo)', async () => {
     const { text, isError } = await call('list_chart_types', {});
     expect(isError).toBe(false);
     expect(text).toMatch(/sequence/);
     expect(text).toMatch(/flowchart/);
-    // every id the bundled dgmo knows should be listed
-    for (const c of chartTypes) expect(text).toContain(c.id);
+    // every id the bundled dgmo OFFERS should be listed. Internal types
+    // (`ChartTypeMeta.internal`, e.g. live-link) route but are never offered —
+    // nobody hand-authors one, so listing it would propose a file the user
+    // cannot complete. The exclusion is asserted below, not assumed.
+    for (const c of chartTypes) {
+      if (internalIds.has(c.id)) continue;
+      expect(text).toContain(c.id);
+    }
+  });
+
+  it('never lists an internal chart type', async () => {
+    const { text } = await call('list_chart_types', {});
+    const internal = [...internalIds];
+    if (internal.length === 0) {
+      // See suggest.test.ts — the installed dgmo predates the flag, and this
+      // guard activates on the dep bump rather than going red before it (F7).
+      console.warn(
+        'installed @diagrammo/dgmo has no internal chart types — this guard is inert until the dep bump'
+      );
+      return;
+    }
+    for (const id of internal) expect(text).not.toContain(id);
   });
 });
 
