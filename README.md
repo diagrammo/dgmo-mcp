@@ -76,7 +76,7 @@ embed anywhere:
   [docusaurus-plugin-dgmo](https://www.npmjs.com/package/docusaurus-plugin-dgmo),
   [fumadocs-dgmo](https://www.npmjs.com/package/fumadocs-dgmo).
 - **Obsidian** — the *Diagrammo Diagrams* community plugin renders DGMO in your vault.
-- **CLI** — `npx @diagrammo/dgmo file.dgmo -o out.png`, or install via Homebrew.
+- **CLI** — `npx @diagrammo/dgmo-cli file.dgmo -o out.png`, or install via Homebrew.
 
 > **One markup, everywhere.** A diagram you generate here renders identically in the
 > app, in your docs, and in Obsidian — because they all speak DGMO.
@@ -87,10 +87,10 @@ embed anywhere:
 
 ### Easiest — one command
 
-Install the [`dgmo`](https://www.npmjs.com/package/@diagrammo/dgmo) CLI and let it wire everything up:
+Install the [`dgmo`](https://www.npmjs.com/package/@diagrammo/dgmo-cli) CLI and let it wire everything up:
 
 ```bash
-npm install -g @diagrammo/dgmo   # or: brew install diagrammo/dgmo/dgmo
+npm install -g @diagrammo/dgmo-cli   # or: brew install diagrammo/dgmo/dgmo
 dgmo install                     # auto-detects Claude Code, Codex, Claude Desktop, Cursor, …
 ```
 
