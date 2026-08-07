@@ -28,8 +28,8 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2
       '@diagrammo/dgmo':
-        specifier: ^0.62.0
-        version: 0.62.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)
+        specifier: ^0.62.1
+        version: 0.62.1(@lezer/common@1.5.2)(@lezer/lr@1.4.10)
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.1(jiti@2.7.0))
@@ -176,14 +176,14 @@ packages:
     resolution: {integrity: sha512-QxULHAm7cNu72w97JUNCBFODFaXpbDg+dP8b/oWFAZ2MTRppA3U00Y2L1HqaS4J6yBqxwa/Y3nMBaxVKbB/NsA==}
     engines: {node: '>=20.19.0'}
 
-  '@dagrejs/dagre@3.0.0':
-    resolution: {integrity: sha512-ZzhnTy1rfuoew9Ez3EIw4L2znPGnYYhfn8vc9c4oB8iw6QAsszbiU0vRhlxWPFnmmNSFAkrYeF1PhM5m4lAN0Q==}
+  '@dagrejs/dagre@3.1.0':
+    resolution: {integrity: sha512-22SWJOfiQVCSFF0qN43SMiYS7Ch9Z6HZoO8+5PycGzGgmtdXIvHoZ2DoT5BweVGf+wwHxBFZu4eO0do0RIYQaw==}
 
-  '@dagrejs/graphlib@4.0.1':
-    resolution: {integrity: sha512-IvcV6FduIIAmLwnH+yun+QtV36SC7mERqa86aClNqmMN09WhmPPYU8ckHrZBozErf+UvHPWOTJYaGYiIcs0DgA==}
+  '@dagrejs/graphlib@4.0.3':
+    resolution: {integrity: sha512-9kvysNliOxG5m3lr1Qq5uCc+SYxx+BaLDM2SDGkgoZvKJ1bSESzbZ3gn4rSxqX1xR07swcSdeuGyKYQhAURxAA==}
 
-  '@diagrammo/dgmo@0.62.0':
-    resolution: {integrity: sha512-obuydeVavGJanoS6pxLzJMXi+hZ80FSKxEJ6uHcfhfNY82uYqUUtYbTGZh5xqTm0WgmKzs7kmNKxzBm7IzUxZg==}
+  '@diagrammo/dgmo@0.62.1':
+    resolution: {integrity: sha512-eOlGZf3hgpc5wspWX5pMnMOQROGcwFKoPPkFeSlxPQi+8uxvu7C2WbtIEgQaSH6M/vq83VjTqdeKHDUz/02vNg==}
     engines: {node: '>=20.6'}
     peerDependencies:
       '@codemirror/language': ^6.12.3
@@ -3147,15 +3147,15 @@ snapshots:
 
   '@csstools/css-tokenizer@4.0.0': {}
 
-  '@dagrejs/dagre@3.0.0':
+  '@dagrejs/dagre@3.1.0':
     dependencies:
-      '@dagrejs/graphlib': 4.0.1
+      '@dagrejs/graphlib': 4.0.3
 
-  '@dagrejs/graphlib@4.0.1': {}
+  '@dagrejs/graphlib@4.0.3': {}
 
-  '@diagrammo/dgmo@0.62.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)':
+  '@diagrammo/dgmo@0.62.1(@lezer/common@1.5.2)(@lezer/lr@1.4.10)':
     dependencies:
-      '@dagrejs/dagre': 3.0.0
+      '@dagrejs/dagre': 3.1.0
       d3-array: 3.2.4
       d3-cloud: 1.2.9
       d3-geo: 3.1.1
