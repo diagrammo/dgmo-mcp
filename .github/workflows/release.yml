@@ -16,6 +16,11 @@ name: Release
 # (The token does still expire ~2026-08-15 — that is a real deadline, unrelated.)
 on:
   workflow_dispatch:
+    inputs:
+      tag:
+        description: 'Tag to release, e.g. v0.19.0. Leave blank when dispatching on a tag ref.'
+        required: false
+        type: string
 
 jobs:
   publish:
@@ -24,8 +29,27 @@ jobs:
       contents: write
       id-token: write
     steps:
+      - name: Resolve the tag being released
+        # A dispatch can name the tag instead of being run ON it. That matters
+        # because a fix to THIS file only exists on main until the next tag is
+        # cut, so `--ref <tag>` would run the old workflow. Dispatching on main
+        # with `-f tag=v0.19.0` runs the current one against the tagged commit.
+        id: target
+        run: |
+          TAG="${{ inputs.tag }}"
+          [ -n "$TAG" ] || TAG="$GITHUB_REF_NAME"
+          case "$TAG" in
+            v[0-9]*) ;;
+            *) echo "::error::'$TAG' is not a version tag. Dispatch on a tag ref, or pass tag=vX.Y.Z."; exit 1 ;;
+          esac
+          echo "tag=$TAG" >> "$GITHUB_OUTPUT"
+          echo "version=${TAG#v}" >> "$GITHUB_OUTPUT"
+          echo "Releasing $TAG"
+
       - name: Checkout
         uses: actions/checkout@v6
+        with:
+          ref: ${{ steps.target.outputs.tag }}
 
       - name: Setup pnpm
         uses: pnpm/action-setup@v5
@@ -41,7 +65,7 @@ jobs:
 
       - name: Verify tag matches package.json / manifest.json / server.json
         run: |
-          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          TAG_VERSION="${{ steps.target.outputs.version }}"
           PKG_VERSION=$(node -p "require('./package.json').version")
           MANIFEST_VERSION=$(node -p "require('./manifest.json').version")
           SERVER_VERSION=$(node -p "require('./server.json').version")
@@ -64,17 +88,36 @@ jobs:
       - name: Build
         run: pnpm build
 
+      - name: Is this version already on npm?
+        # Releases are cut LOCALLY (the tag trigger above is off), so by the time
+        # this workflow is dispatched the tarball is usually already published.
+        # Without this check the npm step fails with "cannot publish over the
+        # previously published versions" and the job stops BEFORE the MCP
+        # registry publish below — which is the only place that publish exists.
+        # That is why the registry sat at 0.12.0 while npm was on 0.18.0.
+        id: npm_state
+        run: |
+          VERSION="${{ steps.target.outputs.version }}"
+          if npm view "@diagrammo/dgmo-mcp@$VERSION" version >/dev/null 2>&1; then
+            echo "already=true" >> "$GITHUB_OUTPUT"
+            echo "✓ npm already has $VERSION — skipping the publish, continuing to the registry"
+          else
+            echo "already=false" >> "$GITHUB_OUTPUT"
+          fi
+
       - name: Publish to npm
         # OIDC via npm Trusted Publishing (configured on npmjs.com). No stored
         # token; the id-token: write permission (already present here for the
         # MCP registry publish below) now also covers npm. Provenance attested.
+        if: steps.npm_state.outputs.already == 'false'
         run: npm publish --access public --provenance
 
       - name: Wait for npm propagation
+        if: steps.npm_state.outputs.already == 'false'
         run: |
           for i in 1 2 3 4 5 6; do
-            if npm view "@diagrammo/dgmo-mcp@${GITHUB_REF_NAME#v}" version >/dev/null 2>&1; then
-              echo "✓ npm shows ${GITHUB_REF_NAME#v}"
+            if npm view "@diagrammo/dgmo-mcp@${{ steps.target.outputs.version }}" version >/dev/null 2>&1; then
+              echo "✓ npm shows ${{ steps.target.outputs.version }}"
               exit 0
             fi
             echo "Waiting for npm registry... ($i/6)"
@@ -101,6 +144,10 @@ jobs:
       - name: Attach .mcpb to GitHub release
         uses: softprops/action-gh-release@v3
         with:
+          # Explicit, because a dispatch on a branch has no tag to infer from.
+          tag_name: ${{ steps.target.outputs.tag }}
           files: dgmo-mcp.mcpb
           fail_on_unmatched_files: true
-          generate_release_notes: true
+          # NOT generate_release_notes — a local release writes its notes by
+          # hand, and regenerating would replace them with a commit list.
+          append_body: true
