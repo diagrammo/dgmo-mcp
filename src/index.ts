@@ -1,6 +1,8 @@
 #!/usr/bin/env node
 
 import { McpServer } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
+import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
 import { exec } from 'node:child_process';
@@ -60,6 +62,8 @@ import {
   extractCategorizeRule,
 } from './reference.js';
 import { version as PACKAGE_VERSION } from '../package.json';
+import { parseRuntimeConfig, USAGE } from './runtime-config.js';
+import { startHttpServer } from './http-transport.js';
 
 // ---------------------------------------------------------------------------
 // Chart-type schema
@@ -119,7 +123,10 @@ function sliceWithColorRule(content: string, chartType: string): string | null {
   // HTML-comment scaffolding rides along to the model — it would echo such a
   // comment verbatim into the generated diagram. The opening TYPE marker is
   // already excluded by extractSection.
-  const section = raw.replace(/[ \t]*<!--\s*TIPS (?:start|end)\s*-->[ \t]*\n?/g, '');
+  const section = raw.replace(
+    /[ \t]*<!--\s*TIPS (?:start|end)\s*-->[ \t]*\n?/g,
+    ''
+  );
   // Universal rules that ride EVERY slice (the STYLING core itself does not):
   // the closed-set color contract, the always-title rule, and the
   // categorize-and-color rule.
@@ -169,18 +176,85 @@ function detectDesktopApp(): { installed: boolean; paths: string[] } {
 // MCP Server
 // ---------------------------------------------------------------------------
 
-// Exported so the test harness can connect it to an in-memory transport
-// (tests/tools.test.ts) instead of stdio. The stdio bootstrap at the bottom is
-// guarded by DGMO_MCP_TEST so importing this module in Vitest does not grab
-// stdin and hang.
-export const server = new McpServer({
-  name: 'dgmo',
-  version: PACKAGE_VERSION,
-});
+// Tool definitions are RECORDED rather than registered, because HTTP mode needs
+// a fresh McpServer per request (see http-transport.ts) and a definition that
+// ran once at import can only ever be attached to one server. `createServer()`
+// at the bottom of this file replays them. Recording keeps each call site's
+// zod-inferred callback types intact, which a loosely-typed collector would
+// lose.
+interface RecordedTool {
+  name: string;
+  description: string;
+  paramsSchema: z.ZodRawShape;
+  annotations?: ToolAnnotations;
+  cb: ToolCallback<z.ZodRawShape>;
+}
+const RECORDED_TOOLS: RecordedTool[] = [];
+
+function tool<Args extends z.ZodRawShape>(
+  name: string,
+  description: string,
+  paramsSchema: Args,
+  annotations: ToolAnnotations,
+  cb: ToolCallback<Args>
+): void;
+function tool<Args extends z.ZodRawShape>(
+  name: string,
+  description: string,
+  paramsSchema: Args,
+  cb: ToolCallback<Args>
+): void;
+function tool<Args extends z.ZodRawShape>(
+  name: string,
+  description: string,
+  paramsSchema: Args,
+  fourth: ToolAnnotations | ToolCallback<Args>,
+  fifth?: ToolCallback<Args>
+): void {
+  const recorded = {
+    name,
+    description,
+    paramsSchema,
+    ...(fifth ? { annotations: fourth as ToolAnnotations } : {}),
+    cb: (fifth ?? fourth) as ToolCallback<Args>,
+  };
+  RECORDED_TOOLS.push(recorded as unknown as RecordedTool);
+}
+
+/**
+ * Tools that act on the machine the server runs on. Over stdio that machine is
+ * the user's, so they are the point; over HTTP it is the server's, where
+ * opening a browser or launching an app helps nobody and looks broken. They are
+ * disabled rather than deleted, so a client that calls one anyway gets a
+ * protocol error naming the tool instead of silence.
+ */
+const MACHINE_LOCAL_TOOLS = [
+  'open_in_app',
+  'check_app_installed',
+  'preview_diagram',
+  'generate_report',
+] as const;
+
+/**
+ * Parsed once: the tools below consult it, and so does the bootstrap.
+ *
+ * Deliberately NOT exported, and the accessor below spells its mode as a
+ * literal union rather than importing `TransportMode`. This file carries the
+ * `#!` line for the published binary, and tsup's declaration bundler hoists an
+ * import of any module whose TYPES reach the public surface to the very top of
+ * the emitted `.d.ts` — above the shebang, which is a syntax error there. Every
+ * type in this module's exported signatures therefore stands on its own.
+ */
+const RUNTIME = parseRuntimeConfig();
+
+/** Which transport this process was started to speak. */
+export function transportMode(): 'stdio' | 'http' {
+  return RUNTIME.mode;
+}
 
 // --- Tool 1: render_diagram ---
 
-server.tool(
+tool(
   'render_diagram',
   'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
   {
@@ -243,7 +317,11 @@ server.tool(
           ? undefined
           : paletteColors[theme === 'dark' ? 'dark' : 'light'].bg;
       const base64 = svgToPngBase64(svg, bg);
-      const pngPath = writeTempPng(base64);
+      // The temp file is a convenience for a caller sitting at this machine.
+      // Over HTTP it lands on the server's disk, where the path names nothing
+      // the caller can open — so don't write it, and don't report one.
+      const pngPath =
+        RUNTIME.mode === 'http' ? undefined : writeTempPng(base64);
       return {
         content: [
           ...paletteNotes,
@@ -252,7 +330,9 @@ server.tool(
             data: base64,
             mimeType: 'image/png' as const,
           },
-          { type: 'text' as const, text: `PNG saved to: ${pngPath}` },
+          ...(pngPath
+            ? [{ type: 'text' as const, text: `PNG saved to: ${pngPath}` }]
+            : []),
         ],
       };
     }
@@ -265,7 +345,7 @@ server.tool(
 
 // --- Tool 2: share_diagram ---
 
-server.tool(
+tool(
   'share_diagram',
   'Generate a shareable diagrammo.app URL for a DGMO diagram.',
   {
@@ -299,7 +379,7 @@ server.tool(
 
 // --- Tool 3: open_in_app ---
 
-server.tool(
+tool(
   'open_in_app',
   'Open a DGMO diagram in the Diagrammo desktop app (macOS only). Falls back to browser preview if the app is not installed. Pass `filePath` to open a saved .dgmo file directly — the app opens THAT file, so in-app edits autosave back to it (one editable source of truth, live re-render). This is the preferred path when the app is installed: write the .dgmo source first, then open it here. Omit `filePath` for an ephemeral diagram (sends a deep link; the app creates its own copy).',
   {
@@ -418,7 +498,7 @@ server.tool(
 
 // --- Tool: check_app_installed ---
 
-server.tool(
+tool(
   'check_app_installed',
   'Check whether the Diagrammo desktop app is installed (macOS). Call this ONCE before choosing how to show a diagram. If installed, the preferred output is to save the .dgmo source and open that file live in the app (open_in_app with filePath) — do NOT default to an online share URL. If not installed, fall back to the online share URL.',
   {},
@@ -440,7 +520,11 @@ server.tool(
         { type: 'text' as const, text },
         {
           type: 'text' as const,
-          text: JSON.stringify({ installed, paths, platform: process.platform }),
+          text: JSON.stringify({
+            installed,
+            paths,
+            platform: process.platform,
+          }),
         },
       ],
     };
@@ -449,7 +533,7 @@ server.tool(
 
 // --- Tool 4: list_chart_types ---
 
-server.tool(
+tool(
   'list_chart_types',
   'List all supported DGMO chart types with descriptions.',
   {},
@@ -486,7 +570,7 @@ server.tool(
 
 // --- Tool 5: get_language_reference ---
 
-server.tool(
+tool(
   'get_language_reference',
   'Get the DGMO language reference documentation. Optionally filter by chart type.',
   {
@@ -541,7 +625,7 @@ server.tool(
 
 // --- Tool 6: preview_diagram ---
 
-server.tool(
+tool(
   'preview_diagram',
   'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
   {
@@ -662,7 +746,7 @@ server.tool(
 
 // --- Tool 7: generate_report ---
 
-server.tool(
+tool(
   'generate_report',
   'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
   {
@@ -775,7 +859,7 @@ server.tool(
 
 // --- Tool 8: validate_diagram ---
 
-server.tool(
+tool(
   'validate_diagram',
   'Validate DGMO markup without rendering. Returns structured parse errors and warnings. Much faster than render_diagram — use this to check syntax before rendering.',
   {
@@ -882,7 +966,9 @@ export function formatSuggestions(
       '⚠️ ASK THE USER — no chart type clearly matches this request.',
       'Do not guess a type. Ask the user which of these general-purpose options fits, or to describe their data/intent in more detail:',
       '',
-      ...fallbacks.map((c, i) => `  [${OPTION_LETTERS[i]}] ${c.id} — ${c.description}`),
+      ...fallbacks.map(
+        (c, i) => `  [${OPTION_LETTERS[i]}] ${c.id} — ${c.description}`
+      ),
       '',
       'If none fit, call `mcp__dgmo__list_chart_types` for the full list. Wait for the user to choose before generating any diagram.',
     ].join('\n');
@@ -898,8 +984,11 @@ export function formatSuggestions(
       '',
     ];
     for (const [i, r] of top3.entries()) {
-      lines.push(`  [${OPTION_LETTERS[i]}] ${r.type.id} — ${r.type.description}`);
-      if (r.matched.length) lines.push(`      matched: ${r.matched.join(', ')}`);
+      lines.push(
+        `  [${OPTION_LETTERS[i]}] ${r.type.id} — ${r.type.description}`
+      );
+      if (r.matched.length)
+        lines.push(`      matched: ${r.matched.join(', ')}`);
     }
     lines.push('');
     lines.push(
@@ -930,7 +1019,7 @@ export function formatSuggestions(
   return lines.join('\n').trimEnd();
 }
 
-server.tool(
+tool(
   'suggest_chart_type',
   "Suggest the best DGMO chart type for a user's plain-English diagram request.\n\nALWAYS CALL THIS FIRST when creating a new diagram — it prevents guessing and is the authoritative selection mechanism.\n\nReturns one of two shapes: (1) a confident pick (high/medium) with the top match's syntax, or (2) an '⚠️ ASK THE USER' directive when the choice is ambiguous or nothing matched. On an ASK-THE-USER directive, do NOT pick a type yourself — present the listed candidates to the user and wait for their choice before generating.",
   {
@@ -995,7 +1084,7 @@ function resolveGalleryPath(): string {
   }
 }
 
-server.tool(
+tool(
   'get_examples',
   'Get example DGMO diagrams for a chart type. Returns real-world examples from the gallery that demonstrate syntax patterns. Use these as few-shot references when generating new diagrams.',
   {
@@ -1085,10 +1174,79 @@ server.tool(
 );
 
 // ---------------------------------------------------------------------------
+// Server construction
+// ---------------------------------------------------------------------------
+
+/**
+ * Build a server carrying every recorded tool. Call it once for stdio, or once
+ * per request for HTTP — nothing is shared between the servers it returns.
+ *
+ * @param mode  which transport this server will speak, since that decides
+ *              whether the machine-local tools are on offer.
+ */
+export function createServer(mode: 'stdio' | 'http' = RUNTIME.mode): McpServer {
+  const server = new McpServer({
+    name: 'dgmo',
+    version: PACKAGE_VERSION,
+  });
+
+  const registered = new Map<string, ReturnType<McpServer['tool']>>();
+  for (const {
+    name,
+    description,
+    paramsSchema,
+    annotations,
+    cb,
+  } of RECORDED_TOOLS) {
+    registered.set(
+      name,
+      annotations
+        ? server.tool(name, description, paramsSchema, annotations, cb)
+        : server.tool(name, description, paramsSchema, cb)
+    );
+  }
+
+  if (mode === 'http') {
+    for (const name of MACHINE_LOCAL_TOOLS) registered.get(name)?.disable();
+  }
+
+  return server;
+}
+
+// Exported so the test harness can connect it to an in-memory transport
+// (tests/tools.test.ts) instead of stdio. The stdio bootstrap below is guarded
+// by DGMO_MCP_TEST so importing this module in Vitest does not grab stdin and
+// hang.
+export const server = createServer('stdio');
+
+// ---------------------------------------------------------------------------
 // Start server
 // ---------------------------------------------------------------------------
 
 async function main() {
+  if (process.argv.includes('--help') || process.argv.includes('-h')) {
+    process.stdout.write(USAGE);
+    return;
+  }
+
+  if (RUNTIME.mode === 'http') {
+    // Anything written to stdout in HTTP mode is just console noise, but in
+    // stdio mode stdout IS the protocol — so every line this server prints
+    // about itself goes to stderr, in both modes, without exception.
+    const handle = await startHttpServer(RUNTIME, () => createServer('http'));
+    process.stderr.write(
+      `dgmo MCP server listening on http://${RUNTIME.host}:${handle.port}${RUNTIME.path}\n`
+    );
+    if (RUNTIME.exposedWithoutAllowList) {
+      process.stderr.write(
+        `dgmo-mcp: warning — bound to ${RUNTIME.host}, which is not loopback, and this server has no ` +
+          `authentication of its own. Requests are accepted only for the loopback Host headers ` +
+          `until you name others with --allow-host. Put your own auth in front of it.\n`
+      );
+    }
+    return;
+  }
+
   const transport = new StdioServerTransport();
   await server.connect(transport);
 }

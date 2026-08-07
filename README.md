@@ -24,8 +24,8 @@ editor for refinement. Ask for a diagram in chat; get a real one back.
 
 ## What you can do
 
-Ask in plain language — *"diagram the auth flow as a sequence"*, *"chart the Q3 plan as
-a gantt"*, *"draw our services as a C4 diagram"* — and Claude writes the markup and
+Ask in plain language — _"diagram the auth flow as a sequence"_, _"chart the Q3 plan as
+a gantt"_, _"draw our services as a C4 diagram"_ — and Claude writes the markup and
 renders it. The markup stays readable and diffable:
 
 ```
@@ -47,18 +47,26 @@ leaves your machine.
 
 ## Tools
 
-| Tool | What it does |
-| --- | --- |
-| `render_diagram` | Render DGMO markup to **SVG or PNG** |
-| `preview_diagram` | Render one or more diagrams and open an **HTML preview** in the browser |
-| `generate_report` | Build a polished **multi-section HTML report** with ToC and optional source |
-| `list_chart_types` | List all supported chart types |
-| `get_language_reference` | Get DGMO syntax documentation for accurate generation |
-| **`share_diagram`** | Get a shareable **diagrammo.app** URL — hand your diagram to the web editor |
-| **`open_in_app`** | Open the diagram **straight into the Diagrammo desktop app** for editing |
+| Tool                     | What it does                                                                | Over HTTP |
+| ------------------------ | --------------------------------------------------------------------------- | --------- |
+| `render_diagram`         | Render DGMO markup to **SVG or PNG**                                        | yes       |
+| `validate_diagram`       | Check markup and report parse errors, without rendering                     | yes       |
+| `suggest_chart_type`     | Suggest the chart types that fit a description                              | yes       |
+| `list_chart_types`       | List all supported chart types                                              | yes       |
+| `get_language_reference` | Get DGMO syntax documentation for accurate generation                       | yes       |
+| `get_examples`           | Fetch worked examples for a chart type                                      | yes       |
+| **`share_diagram`**      | Get a shareable **diagrammo.app** URL — hand your diagram to the web editor | yes       |
+| **`open_in_app`**        | Open the diagram **straight into the Diagrammo desktop app** for editing    | no        |
+| `check_app_installed`    | Report whether the desktop app is installed                                 | no        |
+| `preview_diagram`        | Render one or more diagrams and open an **HTML preview** in the browser     | no        |
+| `generate_report`        | Build a polished **multi-section HTML report** with ToC and optional source | no        |
 
-The last two are the bridge out of chat: a diagram Claude generates becomes something
-you can refine, restyle, and embed — see below.
+`share_diagram` and `open_in_app` are the bridge out of chat: a diagram Claude generates
+becomes something you can refine, restyle, and embed — see below.
+
+The four marked **no** open a browser or launch the desktop app. Over HTTP that would
+happen on the machine running the server rather than on yours, so they are not offered
+there — see [Serving over HTTP](#serving-over-http).
 
 ## Beyond the MCP server
 
@@ -75,7 +83,7 @@ embed anywhere:
   [astro-dgmo](https://www.npmjs.com/package/astro-dgmo),
   [docusaurus-plugin-dgmo](https://www.npmjs.com/package/docusaurus-plugin-dgmo),
   [fumadocs-dgmo](https://www.npmjs.com/package/fumadocs-dgmo).
-- **Obsidian** — the *Diagrammo Diagrams* community plugin renders DGMO in your vault.
+- **Obsidian** — the _Diagrammo Diagrams_ community plugin renders DGMO in your vault.
 - **CLI** — `npx @diagrammo/dgmo-cli file.dgmo -o out.png`, or install via Homebrew.
 
 > **One markup, everywhere.** A diagram you generate here renders identically in the
@@ -114,6 +122,41 @@ Prefer to edit configs yourself? Point any MCP client at the server via `npx` (n
 ```
 
 If you have the `dgmo` CLI installed, `{ "command": "dgmo", "args": ["mcp"] }` works too. Restart the client after saving — the tools appear automatically.
+
+### Serving over HTTP
+
+The setups above launch the server as a child process and talk to it over its standard
+input and output. That needs the server and the client on the same machine. Where they
+are not — a hosted agent platform, a container, one server shared by several people —
+start it as an HTTP endpoint instead:
+
+```bash
+npx -y @diagrammo/dgmo-mcp --http            # http://127.0.0.1:3333/mcp
+MCP_TRANSPORT=http MCP_PORT=8080 npx -y @diagrammo/dgmo-mcp
+```
+
+Every option takes a flag or an environment variable, whichever your setup can express:
+
+| Flag                 | Variable              | Default     | What                                       |
+| -------------------- | --------------------- | ----------- | ------------------------------------------ |
+| `--http`             | `MCP_TRANSPORT=http`  | off         | Serve streamable HTTP instead of stdio     |
+| `--port <n>`         | `MCP_PORT`            | `3333`      | Port to listen on                          |
+| `--host <addr>`      | `MCP_HOST`            | `127.0.0.1` | Interface to bind                          |
+| `--path <path>`      | `MCP_PATH`            | `/mcp`      | Path the endpoint answers on               |
+| `--allow-host <h>`   | `MCP_ALLOWED_HOSTS`   | loopback    | Extra `Host` headers to accept, repeatable |
+| `--allow-origin <o>` | `MCP_ALLOWED_ORIGINS` | unset       | `Origin` headers to accept, repeatable     |
+
+Each request is served independently — no sessions, nothing kept between calls — so one
+endpoint can serve several clients at once.
+
+> **The server has no authentication of its own.** It binds loopback by default and
+> rejects requests carrying a `Host` header it was not told to expect, which is enough
+> for a client on the same machine or inside the same container. Anything reachable from
+> a wider network needs your own authentication in front of it, and `--allow-host` for
+> the hostname it will be reached by. Binding a non-loopback interface without naming a
+> host prints a warning saying so.
+
+`--help` prints all of this from the installed version.
 
 ## Privacy
 
