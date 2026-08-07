@@ -56,7 +56,9 @@ Added 2026-08-06 for `diagrammo/dgmo-mcp#7`, the only feature request this ecosy
 
 ## Releasing
 
-The version lives in **four slots** — `package.json`, `manifest.json`, `server.json` top-level _and_ `server.json` `packages[0].version`. Preflight and the workflow both hard-fail on a mismatch. A release publishes to npm, publishes to the MCP registry, and attaches `dgmo-mcp.mcpb` (built by `scripts/bundle.sh`, which re-resolves dgmo from npm so the bundle never carries the linked source) to the GitHub release.
+The version lives in **four slots** — `package.json`, `manifest.json`, `server.json` top-level _and_ `server.json` `packages[0].version`. Preflight and the workflow both hard-fail on a mismatch. A release publishes to npm, publishes to the MCP registry, and attaches `dgmo-mcp.mcpb` (built by `scripts/bundle.sh`) to the GitHub release.
+
+🔴 **The bundle must NOT declare `@diagrammo/dgmo`** — it is inlined into `dist/`, so naming it makes npm unpack a second, never-loaded copy: precisely the 17 MB the inline move existed to remove. `bundle.sh` used to read the range out of `.dependencies` and inject it; when the library became a devDependency that lookup returned JSON null and the bundle asked npm for a version literally named `"null"`, which is how the 0.20.0 release run died at the *Build .mcpb bundle* step with npm publish already done. The script now carries `dependencies` through untouched and hard-fails if the library reappears in them. Fixed 2026-08-07.
 
 - `release.yml`'s tag trigger was disabled 2026-07-22 to cut Actions minutes — it is `workflow_dispatch` only, so pushing a tag ships nothing. Use the workspace local-publish path. (The reason recorded at the time, "the org npm token is broken", was a **wrong diagnosis** — retracted 2026-07-31 after reading the failing run's own log, which says `You cannot publish over the previously published versions`. The token authenticates; its real risk is the 90-day expiry, ~2026-08-15)
 - In that local flow the publish precedes the tag, so preflight's "already on npm" guard fires; `ALLOW_PUBLISHED=1` downgrades that one check while keeping the rest
