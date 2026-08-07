@@ -13,6 +13,8 @@ pnpm check:triggers   # drift guard: triggers.json vs dgmo-content/registry.json
 pnpm studio           # guidance studio (the README's `pnpm hub` / `pnpm harness` scripts do not exist)
 ```
 
+🔴 **Never run bare `pnpm format` here — it is `prettier --write .` and this repo is not prettier-clean.** 47 files under `tools/`, `tests/` and `src/` fail `pnpm format:check` on main (verified 2026-08-06), so one `pnpm format` rewrites all of them and they land in whatever you were about to commit — a two-line feature arrives as a 43-file diff, and one `judge-engine.ts` even re-encodes into something git reports as binary. Format the files you touched: `npx prettier --write <paths>`. `format:check` is in neither `check:all` nor CI, which is why the drift has gone unnoticed; fixing it is its own commit, not a rider on someone else's.
+
 ## Depending on dgmo
 
 It consumes the **published** `@diagrammo/dgmo` from npm, never the workspace checkout — there is no symlink here, unlike the app. Workspace dgmo edits are invisible until dgmo is published and the dep bumped, or until `pnpm link ../dgmo` (see CONTRIBUTING.md; `pnpm install` undoes it). At runtime `resolveLanguageReference()` / `resolveGalleryPath()` read `docs/language-reference.md` and `gallery/fixtures/` **out of the installed package**, falling back to `../dgmo/` only in this workspace.
