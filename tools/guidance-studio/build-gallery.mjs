@@ -32,7 +32,12 @@ const REPO_ROOT = path.join(here, '../..');
 const FORCE = process.argv.includes('--force');
 const OUT_DIR = path.join(here, 'gallery');
 const GALLERY_JSON = path.join(here, 'gallery.json');
-if (!FORCE && existsSync(GALLERY_JSON) && existsSync(OUT_DIR) && readdirSync(OUT_DIR).some((f) => f.endsWith('.png'))) {
+if (
+  !FORCE &&
+  existsSync(GALLERY_JSON) &&
+  existsSync(OUT_DIR) &&
+  readdirSync(OUT_DIR).some((f) => f.endsWith('.png'))
+) {
   const n = readdirSync(OUT_DIR).filter((f) => f.endsWith('.png')).length;
   console.log(`[gallery] cached (${n} pngs) — pass --force to rebuild`);
   process.exit(0);

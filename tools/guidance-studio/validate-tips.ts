@@ -52,7 +52,11 @@ function typeBlockRange(md: string, type: string): BlockRange | null {
  * after the TYPE marker (top of the block — matches the worked examples). Throws
  * if the type has no block. Pure; returns the new markdown.
  */
-export function applyTipsEdit(md: string, type: string, newBlock: string): string {
+export function applyTipsEdit(
+  md: string,
+  type: string,
+  newBlock: string
+): string {
   const range = typeBlockRange(md, type);
   if (!range) throw new Error(`no TYPE block resolves for "${type}"`);
   const head = md.slice(0, range.markerEnd);
@@ -85,7 +89,10 @@ export function validateTipsEdit(
   }
   const inner = newBlock.match(TIPS_RE)?.[0];
   if (!inner) {
-    return { ok: false, reason: 'TIPS end marker must follow TIPS start marker' };
+    return {
+      ok: false,
+      reason: 'TIPS end marker must follow TIPS start marker',
+    };
   }
   const body = inner
     .replace(/<!--\s*TIPS start\s*-->/, '')
@@ -105,7 +112,10 @@ export function validateTipsEdit(
   try {
     result = applyTipsEdit(md, type, newBlock);
   } catch (err) {
-    return { ok: false, reason: err instanceof Error ? err.message : String(err) };
+    return {
+      ok: false,
+      reason: err instanceof Error ? err.message : String(err),
+    };
   }
 
   // F10: the spliced TIPS must fall inside the sliced TYPE block, or it never
@@ -114,7 +124,8 @@ export function validateTipsEdit(
   if (!TIPS_RE.test(sliced)) {
     return {
       ok: false,
-      reason: 'TIPS block does not land within the sliced TYPE block (stray H2 or TYPE marker?)',
+      reason:
+        'TIPS block does not land within the sliced TYPE block (stray H2 or TYPE marker?)',
     };
   }
   return { ok: true, result };

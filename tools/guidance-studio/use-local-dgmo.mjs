@@ -14,7 +14,14 @@
 //
 // Idempotent: re-running when already linked is a no-op.
 // ============================================================
-import { existsSync, lstatSync, readlinkSync, rmSync, symlinkSync, mkdirSync } from 'node:fs';
+import {
+  existsSync,
+  lstatSync,
+  readlinkSync,
+  rmSync,
+  symlinkSync,
+  mkdirSync,
+} from 'node:fs';
 import { dirname, join, resolve } from 'node:path';
 import { fileURLToPath } from 'node:url';
 
@@ -24,11 +31,15 @@ const dgmoSrc = resolve(mcpRoot, '..', 'dgmo'); // sibling workspace checkout
 const linkPath = join(mcpRoot, 'node_modules', '@diagrammo', 'dgmo');
 
 if (!existsSync(join(dgmoSrc, 'package.json'))) {
-  console.error(`✗ sibling dgmo not found at ${dgmoSrc} — is the workspace laid out as expected?`);
+  console.error(
+    `✗ sibling dgmo not found at ${dgmoSrc} — is the workspace laid out as expected?`
+  );
   process.exit(1);
 }
 if (!existsSync(join(dgmoSrc, 'dist', 'advanced.cjs'))) {
-  console.error(`✗ ${dgmoSrc}/dist is missing — build dgmo first (\`pnpm -C ../dgmo build\`).`);
+  console.error(
+    `✗ ${dgmoSrc}/dist is missing — build dgmo first (\`pnpm -C ../dgmo build\`).`
+  );
   process.exit(1);
 }
 
@@ -44,4 +55,6 @@ if (existsSync(linkPath) && lstatSync(linkPath).isSymbolicLink()) {
 mkdirSync(dirname(linkPath), { recursive: true });
 rmSync(linkPath, { recursive: true, force: true });
 symlinkSync(dgmoSrc, linkPath, 'dir');
-console.log(`✓ linked @diagrammo/dgmo → ${dgmoSrc} (run \`pnpm install\` to revert to npm)`);
+console.log(
+  `✓ linked @diagrammo/dgmo → ${dgmoSrc} (run \`pnpm install\` to revert to npm)`
+);

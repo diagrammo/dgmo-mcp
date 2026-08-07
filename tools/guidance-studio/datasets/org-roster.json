@@ -1,9 +1,7 @@
 {
   "id": "org-roster",
   "label": "Engineering org roster",
-  "suitsTypes": [
-    "org"
-  ],
+  "suitsTypes": ["org"],
   "data": {
     "people": [
       {

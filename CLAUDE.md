@@ -13,7 +13,7 @@ pnpm check:triggers   # drift guard: triggers.json vs dgmo-content/registry.json
 pnpm studio           # guidance studio (the README's `pnpm hub` / `pnpm harness` scripts do not exist)
 ```
 
-🔴 **Never run bare `pnpm format` here — it is `prettier --write .` and this repo is not prettier-clean.** 47 files under `tools/`, `tests/` and `src/` fail `pnpm format:check` on main (verified 2026-08-06), so one `pnpm format` rewrites all of them and they land in whatever you were about to commit — a two-line feature arrives as a 43-file diff, and one `judge-engine.ts` even re-encodes into something git reports as binary. Format the files you touched: `npx prettier --write <paths>`. `format:check` is in neither `check:all` nor CI, which is why the drift has gone unnoticed; fixing it is its own commit, not a rider on someone else's.
+✅ **The repo is prettier-clean, and `check:all` now enforces it** — `format:check` runs first in the gate as of 2026-08-06, so `pnpm format` is safe to run bare and drift cannot accumulate again. It had: 47 files under `tools/`, `tests/` and `src/` were failing, and because nothing checked, one `pnpm format` during unrelated work turned an 8-file change into a 55-file one. If `check:all` fails on formatting, run `pnpm format` and commit that **alone** — never as a rider on a feature.
 
 ## Depending on dgmo
 

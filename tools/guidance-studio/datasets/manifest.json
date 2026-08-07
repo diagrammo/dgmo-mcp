@@ -2,195 +2,131 @@
   {
     "id": "sales-by-quarter-region",
     "label": "Quarterly sales by region ($K)",
-    "suitsTypes": [
-      "bar",
-      "line"
-    ]
+    "suitsTypes": ["bar", "line"]
   },
   {
     "id": "survey-funnel",
     "label": "Signup funnel (visitors → paid)",
-    "suitsTypes": [
-      "funnel",
-      "pie",
-      "pyramid",
-      "treemap"
-    ]
+    "suitsTypes": ["funnel", "pie", "pyramid", "treemap"]
   },
   {
     "id": "org-roster",
     "label": "Engineering org roster",
-    "suitsTypes": [
-      "org"
-    ]
+    "suitsTypes": ["org"]
   },
   {
     "id": "project-tasks",
     "label": "Launch project tasks (timeline)",
-    "suitsTypes": [
-      "gantt",
-      "pert"
-    ]
+    "suitsTypes": ["gantt", "pert"]
   },
   {
     "id": "flight-routes",
     "label": "Hub flight routes (airports)",
-    "suitsTypes": [
-      "map"
-    ]
+    "suitsTypes": ["map"]
   },
   {
     "id": "tech-skills",
     "label": "Team skills matrix (0–5)",
-    "suitsTypes": [
-      "heatmap",
-      "tech-radar"
-    ]
+    "suitsTypes": ["heatmap", "tech-radar"]
   },
   {
     "id": "service-traffic",
     "label": "Service-to-service traffic (req/s)",
-    "suitsTypes": [
-      "sankey",
-      "arc"
-    ]
+    "suitsTypes": ["sankey", "arc"]
   },
   {
     "id": "energy-vs-gdp-americas",
     "label": "Energy use vs GDP per capita (Americas)",
-    "suitsTypes": [
-      "scatter",
-      "quadrant"
-    ]
+    "suitsTypes": ["scatter", "quadrant"]
   },
   {
     "id": "release-milestones",
     "label": "Product release milestones",
-    "suitsTypes": [
-      "timeline",
-      "event-line"
-    ]
+    "suitsTypes": ["timeline", "event-line"]
   },
   {
     "id": "checkout-sequence",
     "label": "Checkout message flow",
-    "suitsTypes": [
-      "sequence",
-      "swimlane"
-    ]
+    "suitsTypes": ["sequence", "swimlane"]
   },
   {
     "id": "api-infra-traffic",
     "label": "API infrastructure traffic (req/s)",
-    "suitsTypes": [
-      "infra"
-    ]
+    "suitsTypes": ["infra"]
   },
   {
     "id": "order-lifecycle",
     "label": "Order lifecycle (states)",
-    "suitsTypes": [
-      "state"
-    ]
+    "suitsTypes": ["state"]
   },
   {
     "id": "payments-c4",
     "label": "Payments platform (C4)",
-    "suitsTypes": [
-      "c4"
-    ]
+    "suitsTypes": ["c4"]
   },
   {
     "id": "blog-schema",
     "label": "Blog database schema",
-    "suitsTypes": [
-      "er",
-      "class"
-    ]
+    "suitsTypes": ["er", "class"]
   },
   {
     "id": "sprint-board",
     "label": "Sprint board (kanban)",
-    "suitsTypes": [
-      "kanban"
-    ]
+    "suitsTypes": ["kanban"]
   },
   {
     "id": "site-structure",
     "label": "Marketing site structure",
-    "suitsTypes": [
-      "sitemap"
-    ]
+    "suitsTypes": ["sitemap"]
   },
   {
     "id": "system-architecture",
     "label": "Web system architecture",
-    "suitsTypes": [
-      "boxes-and-lines",
-      "block"
-    ]
+    "suitsTypes": ["boxes-and-lines", "block"]
   },
   {
     "id": "market-share-shift",
     "label": "Market share shift (2 periods)",
-    "suitsTypes": [
-      "slope"
-    ]
+    "suitsTypes": ["slope"]
   },
   {
     "id": "tech-mentions",
     "label": "Technology mentions (weights)",
-    "suitsTypes": [
-      "wordcloud"
-    ]
+    "suitsTypes": ["wordcloud"]
   },
   {
     "id": "audience-overlap",
     "label": "Audience set overlaps",
-    "suitsTypes": [
-      "venn"
-    ]
+    "suitsTypes": ["venn"]
   },
   {
     "id": "product-ideas",
     "label": "Product idea map",
-    "suitsTypes": [
-      "mindmap"
-    ]
+    "suitsTypes": ["mindmap"]
   },
   {
     "id": "improvement-cycle",
     "label": "Continuous improvement cycle",
-    "suitsTypes": [
-      "cycle"
-    ]
+    "suitsTypes": ["cycle"]
   },
   {
     "id": "onboarding-journey",
     "label": "User onboarding journey",
-    "suitsTypes": [
-      "journey-map"
-    ]
+    "suitsTypes": ["journey-map"]
   },
   {
     "id": "defense-in-depth",
     "label": "Defense-in-depth security layers",
-    "suitsTypes": [
-      "ring"
-    ]
+    "suitsTypes": ["ring"]
   },
   {
     "id": "raci-matrix",
     "label": "Project RACI matrix",
-    "suitsTypes": [
-      "raci"
-    ]
+    "suitsTypes": ["raci"]
   },
   {
     "id": "feature-branch-history",
     "label": "Feature-branch git history",
-    "suitsTypes": [
-      "version-control"
-    ]
+    "suitsTypes": ["version-control"]
   }
 ]

@@ -1,9 +1,7 @@
 {
   "id": "tech-mentions",
   "label": "Technology mentions (weights)",
-  "suitsTypes": [
-    "wordcloud"
-  ],
+  "suitsTypes": ["wordcloud"],
   "data": {
     "terms": [
       {

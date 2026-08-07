@@ -1,17 +1,10 @@
 {
   "id": "raci-matrix",
   "label": "Project RACI matrix",
-  "suitsTypes": [
-    "raci"
-  ],
+  "suitsTypes": ["raci"],
   "data": {
     "legend": "R responsible, A accountable, C consulted, I informed",
-    "roles": [
-      "PM",
-      "Eng Lead",
-      "Designer",
-      "QA"
-    ],
+    "roles": ["PM", "Eng Lead", "Designer", "QA"],
     "tasks": [
       {
         "task": "Define requirements",

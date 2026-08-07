@@ -51,7 +51,9 @@ let helpersPromise: Promise<RenderHelpers> | null = null;
 function loadHelpers(): Promise<RenderHelpers> {
   if (!helpersPromise) {
     if (!existsSync(RENDER_HELPERS_PATH))
-      throw new Error('dist/render-helpers.mjs missing — run `pnpm build` first');
+      throw new Error(
+        'dist/render-helpers.mjs missing — run `pnpm build` first'
+      );
     helpersPromise = import(RENDER_HELPERS) as Promise<RenderHelpers>;
   }
   return helpersPromise;
@@ -130,7 +132,9 @@ function extractDgmo(out: string): string {
   return (fence ? fence[1] : out).trim();
 }
 
-function runClaude(prompt: string): Promise<{ out: string; error: string | null }> {
+function runClaude(
+  prompt: string
+): Promise<{ out: string; error: string | null }> {
   return new Promise((resolve) => {
     execFile(
       'claude',
@@ -139,13 +143,21 @@ function runClaude(prompt: string): Promise<{ out: string; error: string | null 
       (err, stdout) =>
         resolve({
           out: (stdout || '').trim(),
-          error: err ? (err instanceof Error ? err.message : String(err)) : null,
+          error: err
+            ? err instanceof Error
+              ? err.message
+              : String(err)
+            : null,
         })
     );
   });
 }
 
-function sendJson(res: import('node:http').ServerResponse, code: number, body: unknown): void {
+function sendJson(
+  res: import('node:http').ServerResponse,
+  code: number,
+  body: unknown
+): void {
   res.statusCode = code;
   res.setHeader('content-type', 'application/json');
   res.end(JSON.stringify(body));
@@ -255,9 +267,10 @@ export function savePlugin(): Plugin {
       server.middlewares.use('/studio/datasets', (req, res, next) => {
         if (req.method !== 'GET') return next();
         try {
-          const type = new URL(req.url ?? '', 'http://localhost').searchParams.get(
-            'type'
-          );
+          const type = new URL(
+            req.url ?? '',
+            'http://localhost'
+          ).searchParams.get('type');
           const all = readManifest();
           const fitting = type
             ? all.filter((d) => d.suitsTypes.includes(type))
@@ -273,9 +286,10 @@ export function savePlugin(): Plugin {
       server.middlewares.use('/studio/dataset', (req, res, next) => {
         if (req.method !== 'GET') return next();
         try {
-          const id = new URL(req.url ?? '', 'http://localhost').searchParams.get(
-            'id'
-          );
+          const id = new URL(
+            req.url ?? '',
+            'http://localhost'
+          ).searchParams.get('id');
           const ds = id ? readDataset(id) : null;
           if (!ds) {
             sendJson(res, 404, { error: 'dataset not found' });
@@ -322,24 +336,34 @@ export function savePlugin(): Plugin {
             const text = prompt.trim();
             const promptsPath = path.join(here, 'prompts.json');
             const extraPath = path.join(here, 'prompts-extra.json');
-            const prompts = JSON.parse(readFileSync(promptsPath, 'utf8')) as Record<
-              string,
-              string[]
-            >;
+            const prompts = JSON.parse(
+              readFileSync(promptsPath, 'utf8')
+            ) as Record<string, string[]>;
             if (!prompts[type]) throw new Error(`unknown chart type: ${type}`);
             if (prompts[type].includes(text)) {
-              sendJson(res, 200, { ok: true, prompts: prompts[type], added: false });
+              sendJson(res, 200, {
+                ok: true,
+                prompts: prompts[type],
+                added: false,
+              });
               return;
             }
             prompts[type] = [...prompts[type], text];
             writeFileSync(promptsPath, JSON.stringify(prompts, null, 2) + '\n');
             // Mirror to prompts-extra.json (survives build.mjs regeneration).
             const extra = existsSync(extraPath)
-              ? (JSON.parse(readFileSync(extraPath, 'utf8')) as Record<string, string[]>)
+              ? (JSON.parse(readFileSync(extraPath, 'utf8')) as Record<
+                  string,
+                  string[]
+                >)
               : {};
             extra[type] = [...(extra[type] ?? []), text];
             writeFileSync(extraPath, JSON.stringify(extra, null, 2) + '\n');
-            sendJson(res, 200, { ok: true, prompts: prompts[type], added: true });
+            sendJson(res, 200, {
+              ok: true,
+              prompts: prompts[type],
+              added: true,
+            });
           } catch (err) {
             sendJson(res, 400, { ok: false, reason: String(err) });
           }
@@ -419,7 +443,9 @@ export function savePlugin(): Plugin {
               palette: 'slate',
             });
             const svg = result.error ? null : result.svg;
-            const pngBase64 = svg ? helpers.svgToPngBase64(svg, '#ffffff') : null;
+            const pngBase64 = svg
+              ? helpers.svgToPngBase64(svg, '#ffffff')
+              : null;
             sendJson(res, 200, {
               dgmo,
               svg,

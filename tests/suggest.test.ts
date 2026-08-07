@@ -45,7 +45,9 @@ describe('trigger vocabulary integrity (keyed by the dgmo registry)', () => {
   });
   it('every OFFERED chart type has at least one trigger', () => {
     const missing = [...offeredIds].filter((id) => !TRIGGERS[id]?.length);
-    expect(missing, `types with no triggers: ${missing.join(', ')}`).toEqual([]);
+    expect(missing, `types with no triggers: ${missing.join(', ')}`).toEqual(
+      []
+    );
   });
 
   it('no internal type is in the suggester candidate pool', () => {
@@ -65,7 +67,9 @@ describe('trigger vocabulary integrity (keyed by the dgmo registry)', () => {
       expect(TRIGGERS[id], `'${id}' has a trigger phrase`).toBeUndefined();
       // …nor by any prompt at all, since it is filtered from the pool.
       expect(
-        suggestChartTypes(`draw me a ${id}`).ranked.some((r) => r.type.id === id),
+        suggestChartTypes(`draw me a ${id}`).ranked.some(
+          (r) => r.type.id === id
+        ),
         `'${id}' can be suggested`
       ).toBe(false);
     }
@@ -89,7 +93,9 @@ describe('hybrid scorer mechanics', () => {
     expect(score).toBeGreaterThanOrEqual(CONTIGUITY_DOMINANCE);
   });
   it('matchesContiguously is token-based, not substring', () => {
-    expect(matchesContiguously(normalize('water diagram'), normalize('er'))).toBe(false);
+    expect(
+      matchesContiguously(normalize('water diagram'), normalize('er'))
+    ).toBe(false);
   });
   it('confidence: below floor → ambiguous; uncontested → high', () => {
     expect(confidence(0.5, 0)).toBe('ambiguous');
@@ -107,9 +113,15 @@ describe('selection accuracy — natural language', () => {
     { prompt: 'office locations worldwide of Chevron', accept: ['map'] },
     { prompt: 'who is responsible for each task', accept: ['raci'] },
     { prompt: 'database tables for a blog', accept: ['er'] },
-    { prompt: 'system architecture of our microservices', accept: ['c4', 'infra', 'boxes-and-lines'] },
+    {
+      prompt: 'system architecture of our microservices',
+      accept: ['c4', 'infra', 'boxes-and-lines'],
+    },
     { prompt: 'gantt chart for the Q3 launch', accept: ['gantt'] },
-    { prompt: 'layers of needs from basic to self-actualization', accept: ['pyramid'] },
+    {
+      prompt: 'layers of needs from basic to self-actualization',
+      accept: ['pyramid'],
+    },
     { prompt: 'ring diagram of concentric rings', accept: ['ring'] },
   ];
   for (const { prompt, accept } of cases) {

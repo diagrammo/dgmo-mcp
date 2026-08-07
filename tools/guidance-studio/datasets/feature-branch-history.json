@@ -1,15 +1,9 @@
 {
   "id": "feature-branch-history",
   "label": "Feature-branch git history",
-  "suitsTypes": [
-    "version-control"
-  ],
+  "suitsTypes": ["version-control"],
   "data": {
-    "branches": [
-      "main",
-      "feature/auth",
-      "hotfix/login"
-    ],
+    "branches": ["main", "feature/auth", "hotfix/login"],
     "commits": [
       {
         "branch": "main",

@@ -1,10 +1,7 @@
 {
   "id": "blog-schema",
   "label": "Blog database schema",
-  "suitsTypes": [
-    "er",
-    "class"
-  ],
+  "suitsTypes": ["er", "class"],
   "data": {
     "entities": [
       {

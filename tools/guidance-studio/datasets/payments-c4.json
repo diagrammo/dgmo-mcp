@@ -1,15 +1,10 @@
 {
   "id": "payments-c4",
   "label": "Payments platform (C4)",
-  "suitsTypes": [
-    "c4"
-  ],
+  "suitsTypes": ["c4"],
   "data": {
     "system": "Payments Platform",
-    "actors": [
-      "Customer",
-      "Merchant"
-    ],
+    "actors": ["Customer", "Merchant"],
     "containers": [
       {
         "name": "Web Checkout",

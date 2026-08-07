@@ -1,9 +1,7 @@
 {
   "id": "improvement-cycle",
   "label": "Continuous improvement cycle",
-  "suitsTypes": [
-    "cycle"
-  ],
+  "suitsTypes": ["cycle"],
   "data": {
     "stages": [
       {

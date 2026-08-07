@@ -18,7 +18,11 @@ const typeById = (id: string) => {
   return t;
 };
 
-const cand = (id: string, score: number, matched: string[] = []): ChartTypeScore => ({
+const cand = (
+  id: string,
+  score: number,
+  matched: string[] = []
+): ChartTypeScore => ({
   type: typeById(id),
   score,
   matched,
@@ -27,7 +31,10 @@ const cand = (id: string, score: number, matched: string[] = []): ChartTypeScore
 
 describe('formatSuggestions — ask-the-user flow', () => {
   it('ambiguous: asks the user and does not pick a type', () => {
-    const ranked = [cand('bar', 1.2, ['bar chart']), cand('line', 1.0, ['line chart'])];
+    const ranked = [
+      cand('bar', 1.2, ['bar chart']),
+      cand('line', 1.0, ['line chart']),
+    ];
     const out = formatSuggestions(ranked, false, 'ambiguous');
 
     expect(out).toContain('⚠️ ASK THE USER');
@@ -68,7 +75,10 @@ describe('formatSuggestions — ask-the-user flow', () => {
   });
 
   it('medium: proceeds with the top match but flags the runner-up', () => {
-    const ranked = [cand('bar', 2, ['bar chart']), cand('line', 1.2, ['line chart'])];
+    const ranked = [
+      cand('bar', 2, ['bar chart']),
+      cand('line', 1.2, ['line chart']),
+    ];
     const out = formatSuggestions(ranked, false, 'medium');
 
     expect(out).not.toContain('ASK THE USER');

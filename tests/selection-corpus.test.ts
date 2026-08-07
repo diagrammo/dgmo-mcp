@@ -120,7 +120,7 @@ describe('selection accuracy — baseline ratchet', () => {
       return !!got && sameSelectionGroup(c.accept[0], got);
     }).length;
     const pct = ((primaryHits / active.length) * 100).toFixed(1);
-     
+
     console.log(
       `[advisory] primary hit-rate ${primaryHits}/${active.length} (${pct}%) — ` +
         `scorer landed the canonical accept[0]. Membership pass-count is the gate; ` +

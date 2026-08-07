@@ -37,7 +37,9 @@ const triggers = JSON.parse(current);
 // phrases (decided 2026-07-23, AI Board spec §10.4.2: keep shipped behavior;
 // uniqueness checks must therefore span both kinds).
 const phrasesByType = new Map(
-  registry.entities.filter((e) => e.kind === 'type').map((e) => [e.id, e.keywords.map((k) => k.text)])
+  registry.entities
+    .filter((e) => e.kind === 'type')
+    .map((e) => [e.id, e.keywords.map((k) => k.text)])
 );
 
 // Rebuild each entry: clone (preserves concepts + optional prior + key order),
@@ -58,12 +60,22 @@ if (CHECK) {
     console.log('✓ triggers.json phrases in sync with registry.json');
     process.exit(0);
   }
-  console.error('✗ triggers.json is STALE — run: node scripts/project-triggers.mjs');
-  if (missing.length) console.error(`  registry types missing a triggers entry: ${missing.join(', ')}`);
+  console.error(
+    '✗ triggers.json is STALE — run: node scripts/project-triggers.mjs'
+  );
+  if (missing.length)
+    console.error(
+      `  registry types missing a triggers entry: ${missing.join(', ')}`
+    );
   process.exit(1);
 }
 
 await writeFile(TRIGGERS, text, 'utf8');
 const changed = text !== current;
-console.log(`triggers.json projected from registry: ${Object.keys(out).length} types${changed ? '' : ' (no change — already in sync)'}`);
-if (missing.length) console.log(`  note: registry types with no triggers entry: ${missing.join(', ')}`);
+console.log(
+  `triggers.json projected from registry: ${Object.keys(out).length} types${changed ? '' : ' (no change — already in sync)'}`
+);
+if (missing.length)
+  console.log(
+    `  note: registry types with no triggers entry: ${missing.join(', ')}`
+  );

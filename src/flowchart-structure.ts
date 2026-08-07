@@ -16,10 +16,7 @@
 // LLM, this gate guarantees the output.
 // ============================================================
 
-import {
-  parseFlowchart,
-  type DgmoError,
-} from '@diagrammo/dgmo/advanced';
+import { parseFlowchart, type DgmoError } from '@diagrammo/dgmo/advanced';
 
 export const FLOWCHART_STRUCTURE_CODE = 'E_FLOWCHART_STRUCTURE';
 
@@ -80,10 +77,12 @@ export function validateFlowchartStructure(dgmo: string): DgmoError[] {
   // (Topology, not shape — flowcharts that don't use the `()` terminal shape
   // still parse and must not be rejected.)
   const starts = nodes.filter(
-    (n) => (inc.get(n.id)?.length ?? 0) === 0 && (out.get(n.id)?.length ?? 0) > 0
+    (n) =>
+      (inc.get(n.id)?.length ?? 0) === 0 && (out.get(n.id)?.length ?? 0) > 0
   );
   const ends = nodes.filter(
-    (n) => (out.get(n.id)?.length ?? 0) === 0 && (inc.get(n.id)?.length ?? 0) > 0
+    (n) =>
+      (out.get(n.id)?.length ?? 0) === 0 && (inc.get(n.id)?.length ?? 0) > 0
   );
 
   if (starts.length === 0) {

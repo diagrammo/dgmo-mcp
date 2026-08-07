@@ -9,13 +9,22 @@ import { createSuggester } from '../../src/suggest/scoring.ts';
 import { activeCases } from './diff-run.ts';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
-const registry = JSON.parse(readFileSync(path.join(here, 'registry.json'), 'utf8'));
-const triggers = JSON.parse(readFileSync(path.join(here, '../../src/suggest/triggers.json'), 'utf8'));
+const registry = JSON.parse(
+  readFileSync(path.join(here, 'registry.json'), 'utf8')
+);
+const triggers = JSON.parse(
+  readFileSync(path.join(here, '../../src/suggest/triggers.json'), 'utf8')
+);
 const corpus = JSON.parse(
-  readFileSync(path.join(here, '../../tests/fixtures/selection-corpus.json'), 'utf8')
+  readFileSync(
+    path.join(here, '../../tests/fixtures/selection-corpus.json'),
+    'utf8'
+  )
 );
 
-const descriptions = Object.fromEntries(registry.map((r) => [r.id, r.description]));
+const descriptions = Object.fromEntries(
+  registry.map((r) => [r.id, r.description])
+);
 const ids = registry.map((r) => r.id);
 const triggerMap = Object.fromEntries(
   Object.entries(triggers).map(([id, entry]) => [id, entry.phrases])
@@ -52,11 +61,15 @@ const detFails = rows.filter((r) => r.detFail);
 const llmFails = rows.filter((r) => r.llmFail);
 const disagrees = rows.filter((r) => r.disagree);
 
-console.log(`\n===== DETERMINISTIC FAILS (${detFails.length}) — shipped scorer pick ∉ accept =====`);
+console.log(
+  `\n===== DETERMINISTIC FAILS (${detFails.length}) — shipped scorer pick ∉ accept =====`
+);
 detFails.forEach((r) => console.log(fmt(r)));
 console.log(`\n===== LLM FAILS (${llmFails.length}) — LLM pick ∉ accept =====`);
 llmFails.forEach((r) => console.log(fmt(r)));
-console.log(`\n===== DISAGREE (${disagrees.length}) — LLM pick ≠ deterministic pick =====`);
+console.log(
+  `\n===== DISAGREE (${disagrees.length}) — LLM pick ≠ deterministic pick =====`
+);
 disagrees.forEach((r) => console.log(fmt(r)));
 console.log(
   `\nSUMMARY: ${rows.length} active | detFails ${detFails.length} | llmFails ${llmFails.length} | disagree ${disagrees.length}`

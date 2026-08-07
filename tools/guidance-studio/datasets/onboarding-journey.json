@@ -1,9 +1,7 @@
 {
   "id": "onboarding-journey",
   "label": "User onboarding journey",
-  "suitsTypes": [
-    "journey-map"
-  ],
+  "suitsTypes": ["journey-map"],
   "data": {
     "persona": "New user",
     "sentimentScale": "1 (frustrated) – 5 (delighted)",

@@ -1,10 +1,7 @@
 {
   "id": "project-tasks",
   "label": "Launch project tasks (timeline)",
-  "suitsTypes": [
-    "gantt",
-    "pert"
-  ],
+  "suitsTypes": ["gantt", "pert"],
   "data": {
     "start": "2026-01-05",
     "tasks": [

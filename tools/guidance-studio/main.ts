@@ -27,16 +27,22 @@ interface PromptVerdict {
   render: string;
   intent: 'good' | 'weak' | 'no';
 }
-const validationMeta = (promptValidation as { _meta?: { validatedOn?: string } })
-  ._meta;
+const validationMeta = (
+  promptValidation as { _meta?: { validatedOn?: string } }
+)._meta;
 const validationByPrompt = new Map<string, PromptVerdict>();
-for (const [k, v] of Object.entries(promptValidation as Record<string, unknown>)) {
+for (const [k, v] of Object.entries(
+  promptValidation as Record<string, unknown>
+)) {
   if (k === '_meta') continue;
   for (const verdict of v as PromptVerdict[])
     validationByPrompt.set(verdict.prompt, verdict);
 }
 /** Glyph + human label for a prompt's validation status (by exact text). */
-function validationStatus(promptText: string): { glyph: string; label: string } {
+function validationStatus(promptText: string): {
+  glyph: string;
+  label: string;
+} {
   const v = validationByPrompt.get(promptText.trim());
   if (!v)
     return { glyph: '•', label: 'not yet validated (edited or new prompt)' };
@@ -44,7 +50,9 @@ function validationStatus(promptText: string): { glyph: string; label: string } 
     return { glyph: '✗', label: 'failed validation — does not parse/render' };
   if (v.intent !== 'good')
     return { glyph: '⚠', label: `validated, but intent ${v.intent}` };
-  const on = validationMeta?.validatedOn ? ` ${validationMeta.validatedOn}` : '';
+  const on = validationMeta?.validatedOn
+    ? ` ${validationMeta.validatedOn}`
+    : '';
   return { glyph: '✓', label: `validated${on} — parses, renders, intent good` };
 }
 
@@ -65,10 +73,9 @@ let galleryCache: Record<string, GalleryEntry[]> | null = null;
 async function loadGallery(): Promise<Record<string, GalleryEntry[]>> {
   if (galleryCache) return galleryCache;
   try {
-    galleryCache = (await fetch('/studio/gallery').then((r) => r.json())) as Record<
-      string,
-      GalleryEntry[]
-    >;
+    galleryCache = (await fetch('/studio/gallery').then((r) =>
+      r.json()
+    )) as Record<string, GalleryEntry[]>;
   } catch {
     galleryCache = {};
   }
@@ -107,7 +114,11 @@ const $ = <T extends HTMLElement = HTMLElement>(sel: string): T =>
   document.querySelector(sel) as T;
 // props is a loose bag assigned onto the element (value/type/style strings etc.
 // are valid at runtime for the specific element kinds we create).
-const el = (tag: string, props: Record<string, unknown> = {}, html?: string): HTMLElement => {
+const el = (
+  tag: string,
+  props: Record<string, unknown> = {},
+  html?: string
+): HTMLElement => {
   const e = document.createElement(tag);
   Object.assign(e, props);
   if (html != null) e.innerHTML = html;
@@ -160,7 +171,9 @@ function persistTrial(
 /** Hydrate lastRuns from the persisted trial store (called once at boot). */
 async function hydrateTrials(): Promise<void> {
   try {
-    const store = (await fetch('/studio/trials').then((r) => r.json())) as Record<
+    const store = (await fetch('/studio/trials').then((r) =>
+      r.json()
+    )) as Record<
       string,
       Record<string, { sig?: string; ts?: number; result?: RunResult }>
     >;
@@ -169,8 +182,12 @@ async function hydrateTrials(): Promise<void> {
         if (rec?.result) {
           // Surface when this run last executed so a hydrated result still
           // reads as a (prior) live run, not a fresh one.
-          if (rec.ts != null && rec.result.ranAt == null) rec.result.ranAt = rec.ts;
-          lastRuns.set(`${type}::${idx}`, { result: rec.result, sig: rec.sig ?? '' });
+          if (rec.ts != null && rec.result.ranAt == null)
+            rec.result.ranAt = rec.ts;
+          lastRuns.set(`${type}::${idx}`, {
+            result: rec.result,
+            sig: rec.sig ?? '',
+          });
         }
       }
     }
@@ -208,12 +225,18 @@ function renderPicker(): void {
   picker.innerHTML = '';
   const withTips = types.filter((t) => t.hasTips).length;
   picker.appendChild(
-    el('div', { className: 'count' }, `${withTips} / ${types.length} types have tips`)
+    el(
+      'div',
+      { className: 'count' },
+      `${withTips} / ${types.length} types have tips`
+    )
   );
   for (const t of types) {
     const btn = el('button', { title: t.description }) as HTMLButtonElement;
     if (t.id === state.type) btn.classList.add('active');
-    btn.appendChild(el('span', { className: `dot ${t.hasTips ? 'has' : 'empty'}` }));
+    btn.appendChild(
+      el('span', { className: `dot ${t.hasTips ? 'has' : 'empty'}` })
+    );
     btn.appendChild(el('span', {}, t.id));
     btn.onclick = () => selectType(t.id);
     picker.appendChild(btn);
@@ -224,7 +247,10 @@ async function refreshCoverage(): Promise<void> {
   try {
     const r = await fetch('/studio/coverage').then((x) => x.json());
     const map = new Map<string, boolean>(
-      (r.types as { type: string; hasTips: boolean }[]).map((t) => [t.type, t.hasTips])
+      (r.types as { type: string; hasTips: boolean }[]).map((t) => [
+        t.type,
+        t.hasTips,
+      ])
     );
     for (const t of types) if (map.has(t.id)) t.hasTips = map.get(t.id)!;
     renderPicker();
@@ -281,8 +307,12 @@ async function selectType(id: string): Promise<void> {
   await trialsReady; // ensure persisted runs are in lastRuns before we consult it
 
   const [guidance, ds] = await Promise.all([
-    fetch(`/studio/guidance?type=${encodeURIComponent(id)}`).then((r) => r.json()),
-    fetch(`/studio/datasets?type=${encodeURIComponent(id)}`).then((r) => r.json()),
+    fetch(`/studio/guidance?type=${encodeURIComponent(id)}`).then((r) =>
+      r.json()
+    ),
+    fetch(`/studio/datasets?type=${encodeURIComponent(id)}`).then((r) =>
+      r.json()
+    ),
   ]);
   // Edit only the prose — the <!-- TIPS --> markers AND the "Styling tips:"
   // lead-in are managed for you (the lead-in is the box title below).
@@ -296,9 +326,16 @@ async function selectType(id: string): Promise<void> {
   // --- tips editor ---
   const tipsSec = el('section');
   tipsSec.appendChild(
-    el('label', { className: 'fld' }, `Styling tips — how the AI should style a "${id}"`)
+    el(
+      'label',
+      { className: 'fld' },
+      `Styling tips — how the AI should style a "${id}"`
+    )
   );
-  const tips = el('textarea', { id: 'tips', value: savedBody }) as HTMLTextAreaElement;
+  const tips = el('textarea', {
+    id: 'tips',
+    value: savedBody,
+  }) as HTMLTextAreaElement;
   tips.placeholder =
     'e.g. sort bars by value; highlight one series with color; label axes with units';
   tipsSec.appendChild(tips);
@@ -309,9 +346,15 @@ async function selectType(id: string): Promise<void> {
       'Just the guidance text — the “Styling tips:” lead-in and the <!-- TIPS --> markers are added automatically on save.'
     )
   );
-  const saveRow = el('div', { className: 'row', style: 'justify-content:flex-start;margin-top:8px' });
+  const saveRow = el('div', {
+    className: 'row',
+    style: 'justify-content:flex-start;margin-top:8px',
+  });
   saveRow.style.flex = 'none';
-  const saveBtn = el('button', { className: 'btn', textContent: 'Save tips' }) as HTMLButtonElement;
+  const saveBtn = el('button', {
+    className: 'btn',
+    textContent: 'Save tips',
+  }) as HTMLButtonElement;
   saveBtn.style.flex = 'none';
   const unsaved = el('span', { className: 'unsaved', id: 'unsaved' });
   const saveStatus = el('span', { id: 'save-status' });
@@ -335,7 +378,10 @@ async function selectType(id: string): Promise<void> {
     const r = await fetch('/studio/guidance', {
       method: 'POST',
       headers: { 'content-type': 'application/json' },
-      body: JSON.stringify({ type: id, block: wrapTips(composeTips(tips.value)) }),
+      body: JSON.stringify({
+        type: id,
+        block: wrapTips(composeTips(tips.value)),
+      }),
     }).then((x) => x.json());
     if (r.ok) {
       state.savedTips = tips.value;
@@ -355,7 +401,11 @@ async function selectType(id: string): Promise<void> {
   // --- prompts ---
   const runSec = el('section');
   runSec.appendChild(
-    el('label', { className: 'fld' }, 'Prompts — click one to view its saved DGMO + render')
+    el(
+      'label',
+      { className: 'fld' },
+      'Prompts — click one to view its saved DGMO + render'
+    )
   );
 
   // Per-type prompt list ([0] dataset-grounded, rest self-contained scenarios).
@@ -385,12 +435,20 @@ async function selectType(id: string): Promise<void> {
 
   // Per-prompt validation status (persisted) shown under the edit box; refreshes
   // as the edited prompt text changes (an edit → unvalidated).
-  const validNote = el('div', { className: 'count', id: 'prompt-validation', style: 'padding:4px 2px 0' });
+  const validNote = el('div', {
+    className: 'count',
+    id: 'prompt-validation',
+    style: 'padding:4px 2px 0',
+  });
   const refreshValidNote = (): void => {
     const { glyph, label } = validationStatus(prompt.value);
     validNote.textContent = `${glyph} ${label}`;
     validNote.style.color =
-      glyph === '✓' ? 'var(--good)' : glyph === '•' ? 'var(--muted)' : 'var(--warn)';
+      glyph === '✓'
+        ? 'var(--good)'
+        : glyph === '•'
+          ? 'var(--muted)'
+          : 'var(--warn)';
   };
 
   function renderPromptList(): void {
@@ -496,7 +554,13 @@ async function selectType(id: string): Promise<void> {
     updateStale();
   };
   renderPromptList();
-  runSec.appendChild(el('label', { className: 'fld', style: 'margin-top:8px' }, 'Edit the selected prompt (for a live Run)'));
+  runSec.appendChild(
+    el(
+      'label',
+      { className: 'fld', style: 'margin-top:8px' },
+      'Edit the selected prompt (for a live Run)'
+    )
+  );
   runSec.appendChild(prompt);
   runSec.appendChild(validNote);
   refreshValidNote();
@@ -506,16 +570,25 @@ async function selectType(id: string): Promise<void> {
   dsSelect.appendChild(el('option', { value: '', textContent: 'No dataset' }));
   const dsIds = new Set(state.datasets.map((d) => d.id));
   for (const d of state.datasets) {
-    const o = el('option', { value: d.id, textContent: d.label }) as HTMLOptionElement;
+    const o = el('option', {
+      value: d.id,
+      textContent: d.label,
+    }) as HTMLOptionElement;
     dsSelect.appendChild(o);
   }
   // Remembered choice wins (incl. an explicit "No dataset"); otherwise default
   // to a fitting dataset when one exists (Phase-2 O4); "none" is allowed.
-  if (pref.datasetId !== undefined && (pref.datasetId === '' || dsIds.has(pref.datasetId)))
+  if (
+    pref.datasetId !== undefined &&
+    (pref.datasetId === '' || dsIds.has(pref.datasetId))
+  )
     dsSelect.value = pref.datasetId;
   else if (fitting.length) dsSelect.value = fitting[0].id;
   ctl.appendChild(dsSelect);
-  const runBtn = el('button', { className: 'btn narrow', textContent: 'Run' }) as HTMLButtonElement;
+  const runBtn = el('button', {
+    className: 'btn narrow',
+    textContent: 'Run',
+  }) as HTMLButtonElement;
   const cmpBtn = el('button', {
     className: 'btn ghost narrow',
     textContent: 'Compare 3× (no-tips vs tips)',
@@ -574,7 +647,11 @@ async function selectType(id: string): Promise<void> {
 
   // Signature of the inputs that determine a run's output.
   const sigNow = (): string =>
-    JSON.stringify({ p: prompt.value, d: dsSelect.value, t: tips.value.trim() });
+    JSON.stringify({
+      p: prompt.value,
+      d: dsSelect.value,
+      t: tips.value.trim(),
+    });
   const updateStale = (): void => {
     const cached = lastRuns.get(runKey());
     staleNote.style.display =
@@ -638,14 +715,19 @@ function imgEl(pngBase64: string | null): HTMLElement {
     img.src = `data:image/png;base64,${pngBase64}`;
     box.appendChild(img);
   } else {
-    box.appendChild(el('span', { className: 'spinner', textContent: 'no image' }));
+    box.appendChild(
+      el('span', { className: 'spinner', textContent: 'no image' })
+    );
   }
   return box;
 }
 
 /** Split tips prose into checklist items (bullets, or sentence-ish clauses). */
 function checklistItems(tipsBlockOrBody: string): string[] {
-  const body = tipsBodyOf(tipsBlockOrBody).replace(/^\*\*Styling tips:\*\*/, '');
+  const body = tipsBodyOf(tipsBlockOrBody).replace(
+    /^\*\*Styling tips:\*\*/,
+    ''
+  );
   const bullets = body
     .split('\n')
     .map((l) => l.replace(/^[-*]\s*/, '').trim())
@@ -658,7 +740,11 @@ function checklistItems(tipsBlockOrBody: string): string[] {
     .filter((s) => s.length > 4);
 }
 
-function renderSingle(host: HTMLElement, res: RunResult, tipsBlock: string): void {
+function renderSingle(
+  host: HTMLElement,
+  res: RunResult,
+  tipsBlock: string
+): void {
   host.innerHTML = '';
   // Freshness banner: proves the Run actually produced THIS result, so an
   // identical-looking re-run is distinguishable from a no-op. Distinct from the
@@ -684,7 +770,9 @@ function renderSingle(host: HTMLElement, res: RunResult, tipsBlock: string): voi
     className: 'row',
     style: 'align-items:center;gap:8px',
   });
-  srcHead.appendChild(el('label', { className: 'fld', style: 'margin:0' }, 'Generated DGMO'));
+  srcHead.appendChild(
+    el('label', { className: 'fld', style: 'margin:0' }, 'Generated DGMO')
+  );
   const copyBtn = el('button', {
     className: 'btn ghost narrow',
     textContent: '⧉ Copy',
@@ -704,17 +792,33 @@ function renderSingle(host: HTMLElement, res: RunResult, tipsBlock: string): voi
   };
   srcHead.appendChild(copyBtn);
   left.appendChild(srcHead);
-  left.appendChild(el('pre', { style: 'margin-top:4px' }, escapeHtml(res.dgmo || '(no source)')));
-  if (res.error) left.appendChild(el('p', { className: 'diag' }, escapeHtml(res.error)));
+  left.appendChild(
+    el(
+      'pre',
+      { style: 'margin-top:4px' },
+      escapeHtml(res.dgmo || '(no source)')
+    )
+  );
+  if (res.error)
+    left.appendChild(el('p', { className: 'diag' }, escapeHtml(res.error)));
   grid.appendChild(left);
   // right: image + checklist
   const right = el('div');
   right.appendChild(el('label', { className: 'fld' }, 'Rendered'));
   right.appendChild(imgEl(res.pngBase64));
-  right.appendChild(el('label', { className: 'fld', style: 'margin-top:10px' }, 'Tips checklist (tick by eye)'));
+  right.appendChild(
+    el(
+      'label',
+      { className: 'fld', style: 'margin-top:10px' },
+      'Tips checklist (tick by eye)'
+    )
+  );
   const ul = el('ul', { className: 'checklist' });
   const items = checklistItems(tipsBlock);
-  if (!items.length) ul.appendChild(el('li', { className: 'spinner' }, 'no tips yet — add some above'));
+  if (!items.length)
+    ul.appendChild(
+      el('li', { className: 'spinner' }, 'no tips yet — add some above')
+    );
   for (const it of items) {
     const li = el('li');
     const cb = el('input', { type: 'checkbox' }) as HTMLInputElement;
@@ -730,7 +834,9 @@ function renderSingle(host: HTMLElement, res: RunResult, tipsBlock: string): voi
 
   // proof the edit reached the model (F2/F6)
   const det = el('details');
-  det.appendChild(el('summary', {}, 'Injected guidance + resolved prompt (what was sent)'));
+  det.appendChild(
+    el('summary', {}, 'Injected guidance + resolved prompt (what was sent)')
+  );
   det.appendChild(el('label', { className: 'fld' }, 'Injected tips'));
   det.appendChild(el('pre', {}, escapeHtml(res.injectedTips || '(none)')));
   det.appendChild(el('label', { className: 'fld' }, 'Resolved prompt'));
@@ -754,7 +860,11 @@ function renderGalleryEntry(
   const { glyph, label } = validationStatus(promptText);
   const badge = el('div', { className: 'pbadge' }, `${glyph} ${label}`);
   badge.style.color =
-    glyph === '✓' ? 'var(--good)' : glyph === '•' ? 'var(--muted)' : 'var(--warn)';
+    glyph === '✓'
+      ? 'var(--good)'
+      : glyph === '•'
+        ? 'var(--muted)'
+        : 'var(--warn)';
   host.appendChild(badge);
   host.appendChild(
     el(
@@ -778,8 +888,13 @@ function renderGalleryEntry(
   const grid = el('div', { className: 'result' });
   // left: DGMO source + copy
   const left = el('div');
-  const srcHead = el('div', { className: 'row', style: 'align-items:center;gap:8px' });
-  srcHead.appendChild(el('label', { className: 'fld', style: 'margin:0' }, 'Saved DGMO'));
+  const srcHead = el('div', {
+    className: 'row',
+    style: 'align-items:center;gap:8px',
+  });
+  srcHead.appendChild(
+    el('label', { className: 'fld', style: 'margin:0' }, 'Saved DGMO')
+  );
   const copyBtn = el('button', {
     className: 'btn ghost narrow',
     textContent: '⧉ Copy',
@@ -797,8 +912,11 @@ function renderGalleryEntry(
   };
   srcHead.appendChild(copyBtn);
   left.appendChild(srcHead);
-  left.appendChild(el('pre', { style: 'margin-top:4px' }, escapeHtml(entry.dgmo)));
-  if (entry.error) left.appendChild(el('p', { className: 'diag' }, escapeHtml(entry.error)));
+  left.appendChild(
+    el('pre', { style: 'margin-top:4px' }, escapeHtml(entry.dgmo))
+  );
+  if (entry.error)
+    left.appendChild(el('p', { className: 'diag' }, escapeHtml(entry.error)));
   grid.appendChild(left);
   // right: rendered image (served static from /gallery)
   const right = el('div');
@@ -811,7 +929,10 @@ function renderGalleryEntry(
     box.appendChild(im);
   } else {
     box.appendChild(
-      el('span', { className: 'spinner', textContent: entry.error ? 'render failed' : 'no image' })
+      el('span', {
+        className: 'spinner',
+        textContent: entry.error ? 'render failed' : 'no image',
+      })
     );
   }
   right.appendChild(box);
@@ -836,7 +957,9 @@ async function runCompare(
   );
   host.appendChild(note);
 
-  const makeArm = (title: string): { grid: HTMLElement; slots: HTMLElement[] } => {
+  const makeArm = (
+    title: string
+  ): { grid: HTMLElement; slots: HTMLElement[] } => {
     host.appendChild(el('div', { className: 'arm-title' }, title));
     const grid = el('div', { className: 'grid3' });
     const slots: HTMLElement[] = [];
@@ -853,7 +976,10 @@ async function runCompare(
   const before = makeArm('No guidance');
   const after = makeArm('With your tips');
 
-  const fire = (arm: { slots: HTMLElement[] }, overrideTips: string): Promise<void>[] =>
+  const fire = (
+    arm: { slots: HTMLElement[] },
+    overrideTips: string
+  ): Promise<void>[] =>
     arm.slots.map(async (slot, i) => {
       void i;
       try {
@@ -875,7 +1001,8 @@ async function runCompare(
 
   const afterTips = tips.value.trim() ? composeTips(tips.value) : '';
   await Promise.all([...fire(before, ''), ...fire(after, afterTips)]);
-  note.textContent = 'Done. Eyeball the two columns: did your tips make the diagrams better?';
+  note.textContent =
+    'Done. Eyeball the two columns: did your tips make the diagrams better?';
 }
 
 function decorateThumb(res: RunResult): HTMLElement {
@@ -886,16 +1013,18 @@ function decorateThumb(res: RunResult): HTMLElement {
     img.title = res.dgmo;
     box.appendChild(img);
   } else {
-    box.appendChild(el('span', { className: 'spinner', textContent: res.error ? 'parse error' : 'no image' }));
+    box.appendChild(
+      el('span', {
+        className: 'spinner',
+        textContent: res.error ? 'parse error' : 'no image',
+      })
+    );
   }
   return box;
 }
 
 function escapeHtml(s: string): string {
-  return s
-    .replace(/&/g, '&amp;')
-    .replace(/</g, '&lt;')
-    .replace(/>/g, '&gt;');
+  return s.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
 }
 
 // ---- boot ------------------------------------------------------------------

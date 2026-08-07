@@ -1,16 +1,9 @@
 {
   "id": "sprint-board",
   "label": "Sprint board (kanban)",
-  "suitsTypes": [
-    "kanban"
-  ],
+  "suitsTypes": ["kanban"],
   "data": {
-    "columns": [
-      "Backlog",
-      "In Progress",
-      "Review",
-      "Done"
-    ],
+    "columns": ["Backlog", "In Progress", "Review", "Done"],
     "cards": [
       {
         "title": "Login API",

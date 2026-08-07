@@ -57,7 +57,11 @@ const DATASETS = [
       people: [
         { name: 'Dana Ruiz', title: 'VP Engineering', reportsTo: null },
         { name: 'Sam Okafor', title: 'Dir. Platform', reportsTo: 'Dana Ruiz' },
-        { name: 'Priya Nair', title: 'Dir. Product Eng', reportsTo: 'Dana Ruiz' },
+        {
+          name: 'Priya Nair',
+          title: 'Dir. Product Eng',
+          reportsTo: 'Dana Ruiz',
+        },
         { name: 'Leo Park', title: 'EM, Infra', reportsTo: 'Sam Okafor' },
         { name: 'Mara Cohen', title: 'EM, Data', reportsTo: 'Sam Okafor' },
         { name: 'Tariq Bell', title: 'EM, Web', reportsTo: 'Priya Nair' },
@@ -430,10 +434,22 @@ const DATASETS = [
     data: {
       central: 'Mobile App v2',
       branches: [
-        { name: 'Onboarding', children: ['Guided tour', 'Sample data', 'Checklist'] },
-        { name: 'Performance', children: ['Lazy load', 'Caching', 'Smaller bundle'] },
-        { name: 'Collaboration', children: ['Comments', 'Sharing', 'Presence'] },
-        { name: 'Monetization', children: ['Pro tier', 'Team plan', 'Usage limits'] },
+        {
+          name: 'Onboarding',
+          children: ['Guided tour', 'Sample data', 'Checklist'],
+        },
+        {
+          name: 'Performance',
+          children: ['Lazy load', 'Caching', 'Smaller bundle'],
+        },
+        {
+          name: 'Collaboration',
+          children: ['Comments', 'Sharing', 'Presence'],
+        },
+        {
+          name: 'Monetization',
+          children: ['Pro tier', 'Team plan', 'Usage limits'],
+        },
       ],
     },
   },
@@ -508,11 +524,35 @@ const DATASETS = [
       legend: 'R responsible, A accountable, C consulted, I informed',
       roles: ['PM', 'Eng Lead', 'Designer', 'QA'],
       tasks: [
-        { task: 'Define requirements', PM: 'A', 'Eng Lead': 'C', Designer: 'C', QA: 'I' },
-        { task: 'Build feature', PM: 'I', 'Eng Lead': 'R', Designer: 'C', QA: 'I' },
+        {
+          task: 'Define requirements',
+          PM: 'A',
+          'Eng Lead': 'C',
+          Designer: 'C',
+          QA: 'I',
+        },
+        {
+          task: 'Build feature',
+          PM: 'I',
+          'Eng Lead': 'R',
+          Designer: 'C',
+          QA: 'I',
+        },
         { task: 'Design UI', PM: 'C', 'Eng Lead': 'I', Designer: 'R', QA: 'I' },
-        { task: 'Test release', PM: 'I', 'Eng Lead': 'C', Designer: 'I', QA: 'R' },
-        { task: 'Approve launch', PM: 'A', 'Eng Lead': 'C', Designer: 'I', QA: 'C' },
+        {
+          task: 'Test release',
+          PM: 'I',
+          'Eng Lead': 'C',
+          Designer: 'I',
+          QA: 'R',
+        },
+        {
+          task: 'Approve launch',
+          PM: 'A',
+          'Eng Lead': 'C',
+          Designer: 'I',
+          QA: 'C',
+        },
       ],
     },
   },
@@ -525,11 +565,26 @@ const DATASETS = [
       commits: [
         { branch: 'main', id: 'c1', label: 'init' },
         { branch: 'main', id: 'c2', label: 'scaffold app' },
-        { branch: 'feature/auth', from: 'c2', id: 'c3', label: 'add login form' },
+        {
+          branch: 'feature/auth',
+          from: 'c2',
+          id: 'c3',
+          label: 'add login form',
+        },
         { branch: 'feature/auth', id: 'c4', label: 'wire OAuth' },
         { branch: 'hotfix/login', from: 'c2', id: 'c5', label: 'fix redirect' },
-        { branch: 'main', merge: 'hotfix/login', id: 'c6', label: 'merge hotfix' },
-        { branch: 'main', merge: 'feature/auth', id: 'c7', label: 'merge auth' },
+        {
+          branch: 'main',
+          merge: 'hotfix/login',
+          id: 'c6',
+          label: 'merge hotfix',
+        },
+        {
+          branch: 'main',
+          merge: 'feature/auth',
+          id: 'c7',
+          label: 'merge auth',
+        },
       ],
     },
   },
@@ -823,7 +878,8 @@ writeFileSync(
   JSON.stringify(sortedPrompts, null, 2) + '\n'
 );
 
-const extraCount = Object.values(mergedPrompts).flat().length -
+const extraCount =
+  Object.values(mergedPrompts).flat().length -
   Object.values(PROMPTS).flat().length;
 console.log(
   `[datasets] wrote ${manifest.length} datasets + manifest; ${Object.values(mergedPrompts).flat().length} prompts (${extraCount} user-added) → prompts.json`

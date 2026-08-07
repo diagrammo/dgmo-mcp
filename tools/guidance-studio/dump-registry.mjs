@@ -25,7 +25,8 @@ const TIPS_RE = /<!--\s*TIPS start\s*-->[\s\S]*?<!--\s*TIPS end\s*-->/;
 const markerRe = /<!--\s*TYPE:([a-z0-9-]+)\s*-->/g;
 const markers = [];
 let m;
-while ((m = markerRe.exec(md))) markers.push({ id: m[1], end: m.index + m[0].length });
+while ((m = markerRe.exec(md)))
+  markers.push({ id: m[1], end: m.index + m[0].length });
 
 const types = markers.map((mk, i) => {
   const start = mk.end;

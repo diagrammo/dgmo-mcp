@@ -1,10 +1,7 @@
 {
   "id": "energy-vs-gdp-americas",
   "label": "Energy use vs GDP per capita (Americas)",
-  "suitsTypes": [
-    "scatter",
-    "quadrant"
-  ],
+  "suitsTypes": ["scatter", "quadrant"],
   "data": {
     "xUnit": "GDP per capita (USD)",
     "yUnit": "Electricity use per capita (kWh/yr)",

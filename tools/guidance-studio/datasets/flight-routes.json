@@ -1,9 +1,7 @@
 {
   "id": "flight-routes",
   "label": "Hub flight routes (airports)",
-  "suitsTypes": [
-    "map"
-  ],
+  "suitsTypes": ["map"],
   "data": {
     "hub": "JFK",
     "routes": [

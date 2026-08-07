@@ -62,7 +62,12 @@ describe('guidance-studio per-type coverage', () => {
     // prompt-validation.json records the validation pass (parse + render +
     // intent) and the studio surfaces it per prompt. Lock it in sync: every
     // current prompt must have a verdict, keyed by exact text, that passed.
-    type Verdict = { prompt: string; valid: boolean; render: string; intent: string };
+    type Verdict = {
+      prompt: string;
+      valid: boolean;
+      render: string;
+      intent: string;
+    };
     const byText = new Map<string, Verdict>();
     for (const [k, v] of Object.entries(
       promptValidation as Record<string, unknown>

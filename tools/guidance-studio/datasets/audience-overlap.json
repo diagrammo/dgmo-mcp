@@ -1,9 +1,7 @@
 {
   "id": "audience-overlap",
   "label": "Audience set overlaps",
-  "suitsTypes": [
-    "venn"
-  ],
+  "suitsTypes": ["venn"],
   "data": {
     "sets": [
       {
@@ -21,32 +19,19 @@
     ],
     "intersections": [
       {
-        "sets": [
-          "Newsletter",
-          "App Users"
-        ],
+        "sets": ["Newsletter", "App Users"],
         "size": 2400
       },
       {
-        "sets": [
-          "App Users",
-          "Paid"
-        ],
+        "sets": ["App Users", "Paid"],
         "size": 1200
       },
       {
-        "sets": [
-          "Newsletter",
-          "Paid"
-        ],
+        "sets": ["Newsletter", "Paid"],
         "size": 800
       },
       {
-        "sets": [
-          "Newsletter",
-          "App Users",
-          "Paid"
-        ],
+        "sets": ["Newsletter", "App Users", "Paid"],
         "size": 500
       }
     ]

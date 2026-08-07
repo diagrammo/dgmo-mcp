@@ -1,43 +1,25 @@
 {
   "id": "product-ideas",
   "label": "Product idea map",
-  "suitsTypes": [
-    "mindmap"
-  ],
+  "suitsTypes": ["mindmap"],
   "data": {
     "central": "Mobile App v2",
     "branches": [
       {
         "name": "Onboarding",
-        "children": [
-          "Guided tour",
-          "Sample data",
-          "Checklist"
-        ]
+        "children": ["Guided tour", "Sample data", "Checklist"]
       },
       {
         "name": "Performance",
-        "children": [
-          "Lazy load",
-          "Caching",
-          "Smaller bundle"
-        ]
+        "children": ["Lazy load", "Caching", "Smaller bundle"]
       },
       {
         "name": "Collaboration",
-        "children": [
-          "Comments",
-          "Sharing",
-          "Presence"
-        ]
+        "children": ["Comments", "Sharing", "Presence"]
       },
       {
         "name": "Monetization",
-        "children": [
-          "Pro tier",
-          "Team plan",
-          "Usage limits"
-        ]
+        "children": ["Pro tier", "Team plan", "Usage limits"]
       }
     ]
   }

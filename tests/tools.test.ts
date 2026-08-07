@@ -33,7 +33,8 @@ const client = new Client({ name: 'tool-contract-test', version: '1.0.0' });
 let toolNames: string[] = [];
 
 beforeAll(async () => {
-  const [clientTransport, serverTransport] = InMemoryTransport.createLinkedPair();
+  const [clientTransport, serverTransport] =
+    InMemoryTransport.createLinkedPair();
   await server.connect(serverTransport);
   await client.connect(clientTransport);
   toolNames = (await client.listTools()).tools.map((t) => t.name);
@@ -144,7 +145,8 @@ describe('list_chart_types', () => {
 describe('suggest_chart_type', () => {
   it('returns a ranked suggestion naming a real chart type', async () => {
     const { text, isError } = await call('suggest_chart_type', {
-      prompt: 'show the steps of an OAuth login between a user, app, and auth server',
+      prompt:
+        'show the steps of an OAuth login between a user, app, and auth server',
     });
     expect(isError).toBe(false);
     // tolerant: assert it surfaces at least one real chart-type id (ranking
@@ -180,7 +182,9 @@ describe('get_language_reference', () => {
 
 describe('get_examples', () => {
   it('returns example content for a known type', async () => {
-    const { text, isError } = await call('get_examples', { chart_type: 'sequence' });
+    const { text, isError } = await call('get_examples', {
+      chart_type: 'sequence',
+    });
     expect(isError).toBe(false);
     expect(text.length).toBeGreaterThan(20);
   });
@@ -233,9 +237,13 @@ describe('no stale MCP tool references in the dgmo instruction surfaces', () => 
       const p = join(dgmoRoot, rel);
       if (!existsSync(p)) continue;
       const content = readFileSync(p, 'utf8');
-      for (const m of content.matchAll(/mcp__dgmo__([a-z_]+)/g)) referenced.add(m[1]);
+      for (const m of content.matchAll(/mcp__dgmo__([a-z_]+)/g))
+        referenced.add(m[1]);
     }
     const unknown = [...referenced].filter((t) => !toolNames.includes(t));
-    expect(unknown, `surfaces reference non-existent tool(s): ${unknown.join(', ')}`).toEqual([]);
+    expect(
+      unknown,
+      `surfaces reference non-existent tool(s): ${unknown.join(', ')}`
+    ).toEqual([]);
   });
 });

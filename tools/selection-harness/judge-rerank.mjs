@@ -18,13 +18,20 @@ const tr = JSON.parse(
   readFileSync(path.join(here, '../../src/suggest/triggers.json'), 'utf8')
 );
 const corpus = JSON.parse(
-  readFileSync(path.join(here, '../../tests/fixtures/selection-corpus.json'), 'utf8')
+  readFileSync(
+    path.join(here, '../../tests/fixtures/selection-corpus.json'),
+    'utf8'
+  )
 );
 
 const descById = Object.fromEntries(reg.map((r) => [r.id, r.description]));
-const map = Object.fromEntries(Object.entries(tr).map(([id, e]) => [id, e.phrases]));
+const map = Object.fromEntries(
+  Object.entries(tr).map(([id, e]) => [id, e.phrases])
+);
 const priors = Object.fromEntries(
-  Object.entries(tr).map(([id, e]) => [id, e.prior ?? 0]).filter(([, p]) => p > 0)
+  Object.entries(tr)
+    .map(([id, e]) => [id, e.prior ?? 0])
+    .filter(([, p]) => p > 0)
 );
 const { suggestChartTypes } = createSuggester(map, priors);
 
@@ -36,7 +43,9 @@ const active = corpus.cases.filter((c) => !c.wontfix);
 // the answer), OR deterministic top-1 already misses (LLM might rescue it).
 const cases = active
   .map((c) => {
-    const ranked = suggestChartTypes(c.prompt).ranked.filter((x) => x.score > 0);
+    const ranked = suggestChartTypes(c.prompt).ranked.filter(
+      (x) => x.score > 0
+    );
     const shortlist = ranked.slice(0, SHORTLIST).map((x) => x.type.id);
     const det = ranked[0]?.type.id ?? '';
     const gap = (ranked[0]?.score ?? 0) - (ranked[1]?.score ?? 0);
@@ -52,8 +61,12 @@ const miniCatalog = (ids) =>
 
 function runClaude(prompt) {
   return new Promise((resolve) => {
-    execFile('claude', ['-p', prompt], { timeout: 120_000, maxBuffer: 1 << 20 },
-      (err, stdout) => resolve(err ? '' : (stdout || '').trim()));
+    execFile(
+      'claude',
+      ['-p', prompt],
+      { timeout: 120_000, maxBuffer: 1 << 20 },
+      (err, stdout) => resolve(err ? '' : (stdout || '').trim())
+    );
   });
 }
 
@@ -64,13 +77,24 @@ const out = [];
 async function worker() {
   while (queue.length) {
     const c = queue.shift();
-    const raw = await runClaude(judgePrompt(miniCatalog(c.shortlist), c.prompt));
+    const raw = await runClaude(
+      judgePrompt(miniCatalog(c.shortlist), c.prompt)
+    );
     const { pick } = parseVerdict(raw, idSet);
-    out.push({ ...c, llm: pick, llmPass: c.accept.includes(pick), agree: pick === c.det });
+    out.push({
+      ...c,
+      llm: pick,
+      llmPass: c.accept.includes(pick),
+      agree: pick === c.det,
+    });
   }
 }
-console.error(`Re-ranking ${cases.length} contested cases (top-${SHORTLIST}, LLM-constrained)…`);
-await Promise.all(Array.from({ length: Math.min(concurrency, cases.length || 1) }, worker));
+console.error(
+  `Re-ranking ${cases.length} contested cases (top-${SHORTLIST}, LLM-constrained)…`
+);
+await Promise.all(
+  Array.from({ length: Math.min(concurrency, cases.length || 1) }, worker)
+);
 
 const detPass = out.filter((c) => c.detPass).length;
 const llmPass = out.filter((c) => c.llmPass).length;
@@ -83,7 +107,11 @@ console.log(`LLM (top-${SHORTLIST}) pick in accept : ${llmPass}/${out.length}`);
 console.log(`LLM agrees with deterministic  : ${agree}/${out.length}`);
 console.log(`\n----- DISAGREEMENTS (LLM ≠ deterministic) -----`);
 for (const c of disagree) {
-  const verdict = c.llmPass ? (c.detPass ? 'both-ok' : 'LLM-RESCUED') : 'LLM-REGRESSED';
+  const verdict = c.llmPass
+    ? c.detPass
+      ? 'both-ok'
+      : 'LLM-RESCUED'
+    : 'LLM-REGRESSED';
   console.log(
     `  [${verdict}] "${c.prompt}"\n     accept=[${c.accept.join(', ')}] det=${c.det} llm=${c.llm} shortlist=[${c.shortlist.join(', ')}] gap=${c.gap.toFixed(2)}`
   );

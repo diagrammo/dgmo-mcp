@@ -1,15 +1,10 @@
 {
   "id": "market-share-shift",
   "label": "Market share shift (2 periods)",
-  "suitsTypes": [
-    "slope"
-  ],
+  "suitsTypes": ["slope"],
   "data": {
     "unit": "% market share",
-    "periods": [
-      "2024",
-      "2026"
-    ],
+    "periods": ["2024", "2026"],
     "items": [
       {
         "name": "Product A",

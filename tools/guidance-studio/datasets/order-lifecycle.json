@@ -1,9 +1,7 @@
 {
   "id": "order-lifecycle",
   "label": "Order lifecycle (states)",
-  "suitsTypes": [
-    "state"
-  ],
+  "suitsTypes": ["state"],
   "data": {
     "initial": "Cart",
     "states": [

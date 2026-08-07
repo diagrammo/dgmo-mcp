@@ -1,17 +1,9 @@
 {
   "id": "checkout-sequence",
   "label": "Checkout message flow",
-  "suitsTypes": [
-    "sequence",
-    "swimlane"
-  ],
+  "suitsTypes": ["sequence", "swimlane"],
   "data": {
-    "participants": [
-      "User",
-      "Web App",
-      "Payment API",
-      "Bank"
-    ],
+    "participants": ["User", "Web App", "Payment API", "Bank"],
     "messages": [
       {
         "from": "User",

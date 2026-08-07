@@ -1,9 +1,7 @@
 {
   "id": "defense-in-depth",
   "label": "Defense-in-depth security layers",
-  "suitsTypes": [
-    "ring"
-  ],
+  "suitsTypes": ["ring"],
   "data": {
     "ordering": "core (the protected asset) outward to the outermost defense",
     "layers": [

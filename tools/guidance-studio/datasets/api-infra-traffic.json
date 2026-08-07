@@ -1,19 +1,10 @@
 {
   "id": "api-infra-traffic",
   "label": "API infrastructure traffic (req/s)",
-  "suitsTypes": [
-    "infra"
-  ],
+  "suitsTypes": ["infra"],
   "data": {
     "unit": "requests/sec",
-    "nodes": [
-      "CDN",
-      "Gateway",
-      "Auth",
-      "Catalog",
-      "Orders",
-      "Postgres"
-    ],
+    "nodes": ["CDN", "Gateway", "Auth", "Catalog", "Orders", "Postgres"],
     "flows": [
       {
         "from": "CDN",

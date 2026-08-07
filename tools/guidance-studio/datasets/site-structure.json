@@ -1,9 +1,7 @@
 {
   "id": "site-structure",
   "label": "Marketing site structure",
-  "suitsTypes": [
-    "sitemap"
-  ],
+  "suitsTypes": ["sitemap"],
   "data": {
     "root": "Home",
     "pages": [
