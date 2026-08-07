@@ -42,7 +42,8 @@
     "./selection": {
       "types": "./dist/suggest/selection-tools.d.ts",
       "import": "./dist/suggest/selection-tools.js"
-    }
+    },
+    "./dist/index.js": "./dist/index.js"
   },
   "scripts": {
     "build": "tsup src/index.ts src/suggest/scoring.ts src/suggest/selection-tools.ts src/render-helpers.ts --format esm --dts",
