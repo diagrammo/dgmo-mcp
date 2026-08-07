@@ -7,7 +7,7 @@
 // JSON-RPC id 1 would otherwise collide. So the unit of isolation is a request,
 // and nothing survives it.
 //
-// Stateless is also the right shape for what this server does: all six tools
+// Stateless is also the right shape for what this server does: all seven tools
 // offered over HTTP are pure functions of their arguments. There is no session
 // worth keeping, no server-initiated message to push down a standing stream,
 // and therefore no session table to leak in a process nobody is watching.
