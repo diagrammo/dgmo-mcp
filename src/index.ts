@@ -34,7 +34,11 @@ const getMapData = () => (_mapDataPromise ??= loadMapData());
 // Render-to-raster path, single-sourced in ./render-helpers so the dev-only
 // guidance studio can reuse the EXACT same pipeline (it dynamic-imports the
 // built helper). Re-exported below to preserve the prior public surface.
-import { svgToPngBase64, renderPipeline } from './render-helpers.js';
+import {
+  svgToPngBase64,
+  renderPipeline,
+  fontCoverageWarning,
+} from './render-helpers.js';
 export { renderPipeline } from './render-helpers.js';
 import { validateFlowchartStructure } from './flowchart-structure.js';
 // Public entry: the shared resolve·fallback·warn seam (Story 110.2). Imported
@@ -306,6 +310,11 @@ tool(
           ? undefined
           : paletteColors[theme === 'dark' ? 'dark' : 'light'].bg;
       const base64 = svgToPngBase64(svg, bg);
+      // Rasterising is the only path where a missing glyph is fatal — the SVG
+      // branch below hands the text to a viewer that has its own fonts. Say so
+      // here rather than dropping it: the image looks fine on this machine and
+      // silently loses that text on one without a font for the script.
+      const fontNote = fontCoverageWarning(svg);
       // The temp file is a convenience for a caller sitting at this machine.
       // Over HTTP it lands on the server's disk, where the path names nothing
       // the caller can open — so don't write it, and don't report one.
@@ -314,6 +323,9 @@ tool(
       return {
         content: [
           ...paletteNotes,
+          ...(fontNote
+            ? [{ type: 'text' as const, text: `Warning: ${fontNote}` }]
+            : []),
           {
             type: 'image' as const,
             data: base64,

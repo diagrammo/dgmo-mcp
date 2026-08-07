@@ -56,6 +56,9 @@ const ASSETS = [
   ['fonts/Inter-Regular.ttf', 'fonts/Inter-Regular.ttf'],
   ['fonts/Inter-Bold.ttf', 'fonts/Inter-Bold.ttf'],
   ['fonts/LICENSE-Inter.txt', 'fonts/LICENSE-Inter.txt'],
+  // Which codepoints those TTFs actually contain, so a render can warn about
+  // text no bundled glyph can draw. Generated from the subset output.
+  ['fonts/coverage.json', 'fonts/coverage.json'],
   ['docs/language-reference.md', 'docs/language-reference.md'],
   ['gallery/fixtures', 'gallery/fixtures'],
 ];

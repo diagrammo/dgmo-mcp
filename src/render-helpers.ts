@@ -16,10 +16,14 @@ import {
   formatDgmoError,
   loadMapData,
   INVALID_COLOR_CODE,
+  textFromSvg,
+  uncoveredCharacters,
+  fontPortabilityWarning,
+  type FontCoverage,
 } from '@diagrammo/dgmo/advanced';
 import { validateFlowchartStructure } from './flowchart-structure.js';
 import { Resvg } from '@resvg/resvg-js';
-import { existsSync } from 'node:fs';
+import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { assetRoots } from './asset-roots.js';
 
@@ -47,12 +51,45 @@ function resolveBundledFonts(): string[] {
 
 const BUNDLED_FONT_FILES = resolveBundledFonts();
 
+/**
+ * The characters the bundled Inter cannot draw, for the caller to report.
+ *
+ * Returns `undefined` when everything is covered, or when the coverage manifest
+ * is missing — an odd install layout is not worth a warning of its own.
+ */
+export function fontCoverageWarning(svg: string): string | undefined {
+  for (const root of assetRoots()) {
+    const manifest = join(root, 'fonts', 'coverage.json');
+    if (!existsSync(manifest)) continue;
+    try {
+      const coverage = JSON.parse(
+        readFileSync(manifest, 'utf-8')
+      ) as FontCoverage;
+      return fontPortabilityWarning(
+        uncoveredCharacters(textFromSvg(svg), coverage)
+      );
+    } catch {
+      return undefined;
+    }
+  }
+  return undefined;
+}
+
 export function svgToPngBase64(svg: string, background?: string): string {
   const resvg = new Resvg(svg, {
     fitTo: { mode: 'zoom' as const, value: 2 },
     ...(background ? { background } : {}),
     font: {
-      loadSystemFonts: BUNDLED_FONT_FILES.length === 0,
+      // 🔴 Always on, even when the bundled Inter was found. It used to be
+      // `BUNDLED_FONT_FILES.length === 0` — system fonts off precisely BECAUSE
+      // we had our own — which made the `system-ui, …, sans-serif` tail of the
+      // library's FONT_FAMILY inert, so every script Inter lacks drew NOTHING:
+      // no box, no warning. Measured 2026-08-07 through the CLI's identical
+      // call site, where 日本語 rasterised the same as an unassigned Private
+      // Use codepoint. Latin output is byte-identical across the change,
+      // because Inter is still loaded explicitly and named as both the default
+      // and the sans-serif family.
+      loadSystemFonts: true,
       ...(BUNDLED_FONT_FILES.length > 0
         ? { fontFiles: BUNDLED_FONT_FILES }
         : {}),
