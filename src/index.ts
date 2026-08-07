@@ -7,17 +7,10 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { exec } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { dirname, join } from 'node:path';
+import { join } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
-import { createRequire } from 'node:module';
-import { fileURLToPath } from 'node:url';
-
-// ESM equivalents of the CJS globals this module relied on. `require.resolve`
-// locates the installed @diagrammo/dgmo package (to read its bundled docs/
-// gallery/fonts); `__dirname` is the fallback for the local dev workspace.
-const require = createRequire(import.meta.url);
-const __dirname = dirname(fileURLToPath(import.meta.url));
+import { assetRoots } from './asset-roots.js';
 import {
   parseDgmo,
   parseDgmoChartType,
@@ -86,25 +79,21 @@ const chartTypeIdSchema = z.string().refine(
 // ---------------------------------------------------------------------------
 
 function resolveLanguageReference(): string {
-  // Try 1: resolve from @diagrammo/dgmo package (works when docs/ is published)
-  try {
-    const dgmoMain = require.resolve('@diagrammo/dgmo');
-    const pkgRoot = dirname(dirname(dgmoMain));
-    const docsPath = join(pkgRoot, 'docs', 'language-reference.md');
-    return readFileSync(docsPath, 'utf-8');
-  } catch {
-    // Try 2: resolve from sibling dgmo/ directory (local dev workspace)
-    // __dirname is dist/, go up to dgmo-mcp/ then up to workspace root
-    const workspacePath = join(
-      __dirname,
-      '..',
-      '..',
-      'dgmo',
-      'docs',
-      'language-reference.md'
-    );
-    return readFileSync(workspacePath, 'utf-8');
+  // Staged into our own dist/ at build time; see src/asset-roots.ts for why
+  // this is no longer a `require.resolve('@diagrammo/dgmo')`.
+  let lastErr: unknown;
+  for (const root of assetRoots()) {
+    try {
+      return readFileSync(join(root, 'docs', 'language-reference.md'), 'utf-8');
+    } catch (err) {
+      lastErr = err;
+    }
   }
+  throw new Error(
+    'language-reference.md not found in any asset root. It is staged into ' +
+      'dist/ by scripts/stage-assets.mjs — this build is incomplete. ' +
+      `(last error: ${lastErr instanceof Error ? lastErr.message : String(lastErr)})`
+  );
 }
 
 // Per-type reference slicing lives in ./reference.ts (pure + unit-tested).
@@ -1063,25 +1052,20 @@ tool(
 // --- Tool 10: get_examples ---
 
 function resolveGalleryPath(): string {
-  // Try 1: resolve from @diagrammo/dgmo package
-  try {
-    const dgmoMain = require.resolve('@diagrammo/dgmo');
-    const pkgRoot = dirname(dirname(dgmoMain));
-    const galleryPath = join(pkgRoot, 'gallery', 'fixtures');
-    readdirSync(galleryPath); // throws if not found
-    return galleryPath;
-  } catch {
-    // Try 2: resolve from sibling dgmo/ directory (local dev workspace)
-    const workspacePath = join(
-      __dirname,
-      '..',
-      '..',
-      'dgmo',
-      'gallery',
-      'fixtures'
-    );
-    return workspacePath;
+  // Staged into our own dist/ at build time; see src/asset-roots.ts.
+  for (const root of assetRoots()) {
+    const galleryPath = join(root, 'gallery', 'fixtures');
+    try {
+      readdirSync(galleryPath); // throws if not found
+      return galleryPath;
+    } catch {
+      /* try the next root */
+    }
   }
+  throw new Error(
+    'gallery/fixtures not found in any asset root. It is staged into dist/ ' +
+      'by scripts/stage-assets.mjs — this build is incomplete.'
+  );
 }
 
 tool(

@@ -17,7 +17,16 @@ pnpm studio           # guidance studio (the README's `pnpm hub` / `pnpm harness
 
 ## Depending on dgmo
 
-It consumes the **published** `@diagrammo/dgmo` from npm, never the workspace checkout — there is no symlink here, unlike the app. Workspace dgmo edits are invisible until dgmo is published and the dep bumped, or until `pnpm link ../dgmo` (see CONTRIBUTING.md; `pnpm install` undoes it). At runtime `resolveLanguageReference()` / `resolveGalleryPath()` read `docs/language-reference.md` and `gallery/fixtures/` **out of the installed package**, falling back to `../dgmo/` only in this workspace.
+It consumes the **published** `@diagrammo/dgmo` from npm, never the workspace checkout — there is no symlink here, unlike the app. Workspace dgmo edits are invisible until dgmo is published and the dep bumped, or until `pnpm link ../dgmo` (see CONTRIBUTING.md; `pnpm install` undoes it).
+
+🔴 **Since 2026-08-07 the library is a devDependency and is INLINED into the bundle** (`noExternal` in `tsup.config.ts`), exactly as `@diagrammo/dgmo-cli` does it. Declaring it at runtime meant every install of this server — and every `npm i -g @diagrammo/dgmo-cli`, which spawns it — unpacked the library plus its d3, dagre and lz-string trees: **17,028 KB**, on top of a CLI bundle that already inlines the same library and never loads that copy. A CLI install measured 73,956 KB before and 63,344 KB after.
+
+Two things follow, and both are load-bearing:
+
+- **There is no version tracking any more.** A library fix reaches MCP users only when this package is republished. That cuts both ways: five of the imports here come from `@diagrammo/dgmo/advanced`, which carries no semver guarantee, so tracking meant a library patch could break an already-installed server. The bump discipline below still applies — it is now about what gets *baked in*, not what a consumer resolves.
+- **The runtime data files travel with us.** `scripts/stage-assets.mjs` copies the basemaps, the two Inter TTFs, `language-reference.md` and `gallery/fixtures` into `dist/` at build time, and `src/asset-roots.ts` is where `resolveLanguageReference()` / `resolveGalleryPath()` / the font lookup now look — our own `dist/` first, a sibling `../dgmo/` checkout second. 🔴 `map-data` **must** land at `dist/map-data`, because the inlined `load-data.ts` searches directories relative to its own module.
+
+🔴 **`pnpm build` is not enough to know this package works — `node scripts/prepack-mcp.mjs` is.** It renders one gallery fixture per chart type through the built `dist/render-helpers.js`, rasterises one to PNG, and asserts the library is not imported at runtime. It exists because the identical change to the CLI shipped a version that rendered 20 of 20 non-map fixtures and **0 of 18 maps** while the binary ran and `--version` answered (issue #121). It is wired as `prepack`, so `npm publish` cannot get past it.
 
 🔴 **The tests pair two generations on purpose**: `chartTypes` comes from the installed package, `language-reference.md` from the workspace source. A chart type added, renamed or consolidated in dgmo source turns `pnpm test` red here — that is real published-vs-source skew, not a stale expectation. Fix it by releasing dgmo and bumping the dep, never by editing dgmo source back. Suite green at 162 tests, verified 2026-07-31.
 

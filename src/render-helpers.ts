@@ -14,41 +14,35 @@ import {
   parseDgmo,
   parseDgmoChartType,
   formatDgmoError,
+  loadMapData,
   INVALID_COLOR_CODE,
 } from '@diagrammo/dgmo/advanced';
 import { validateFlowchartStructure } from './flowchart-structure.js';
 import { Resvg } from '@resvg/resvg-js';
 import { existsSync } from 'node:fs';
-import { dirname, join } from 'node:path';
-import { createRequire } from 'node:module';
-
-// ESM equivalent of the CJS `require.resolve` this module relied on to locate
-// the installed @diagrammo/dgmo package's bundled fonts/.
-const require = createRequire(import.meta.url);
+import { join } from 'node:path';
+import { assetRoots } from './asset-roots.js';
 
 const DEFAULT_FONT_NAME = 'Inter';
 
 /**
- * dgmo bundles Inter TTFs under its `fonts/` directory (see dgmo/src/cli.ts
- * for the same pattern). Resolving them through `require.resolve` ensures
- * we pick up the bundled copy whether @diagrammo/dgmo is installed from npm
- * or linked from the local workspace.
+ * The Inter TTFs resvg rasterises with. They ship in our own `dist/fonts/`,
+ * staged there at build time — see src/asset-roots.ts for why this is no longer
+ * a `require.resolve('@diagrammo/dgmo')`.
  *
  * Falls back to system fonts if the TTFs aren't found (e.g. in an odd
  * install layout) — resvg will then use whatever sans-serif it finds.
  */
 function resolveBundledFonts(): string[] {
-  try {
-    const dgmoMain = require.resolve('@diagrammo/dgmo');
-    const pkgRoot = dirname(dirname(dgmoMain));
+  for (const root of assetRoots()) {
     const candidates = [
-      join(pkgRoot, 'fonts', 'Inter-Regular.ttf'),
-      join(pkgRoot, 'fonts', 'Inter-Bold.ttf'),
+      join(root, 'fonts', 'Inter-Regular.ttf'),
+      join(root, 'fonts', 'Inter-Bold.ttf'),
     ];
-    return candidates.filter((f) => existsSync(f));
-  } catch {
-    return [];
+    const found = candidates.filter((f) => existsSync(f));
+    if (found.length > 0) return found;
   }
+  return [];
 }
 
 const BUNDLED_FONT_FILES = resolveBundledFonts();
@@ -113,6 +107,14 @@ export async function renderPipeline(
     const { svg } = await render(dgmo, {
       theme: opts.theme,
       palette: opts.palette,
+      // `render()` takes basemaps by dependency injection and draws nothing at
+      // all without them — it does not load them itself. Omitting this is why
+      // every map chart returned an empty SVG through this path, in every
+      // version up to and including 0.19.0: `render_diagram`, `preview_diagram`
+      // and `generate_report` all come through here, so the server could not
+      // draw a map at all. The CLI passes the same loader (`dgmo/src/cli.ts`).
+      // Nothing caught it because no test rendered every chart type.
+      mapData: loadMapData,
     });
     if (!svg) {
       return { svg: null, diagnostics, error: 'Render returned empty SVG.' };

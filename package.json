@@ -46,7 +46,7 @@
     "./dist/index.js": "./dist/index.js"
   },
   "scripts": {
-    "build": "tsup src/index.ts src/suggest/scoring.ts src/suggest/selection-tools.ts src/render-helpers.ts --format esm --dts",
+    "build": "tsup",
     "build:fast": "tsup src/index.ts src/suggest/scoring.ts src/suggest/selection-tools.ts src/render-helpers.ts --format esm",
     "dev": "tsup src/index.ts src/suggest/scoring.ts src/suggest/selection-tools.ts src/render-helpers.ts --format esm --dts --watch",
     "typecheck": "tsc --noEmit",
@@ -65,10 +65,10 @@
     "check:duplication": "jscpd ./src",
     "check:deps": "depcheck --ignores='jsdom,@anthropic-ai/mcpb,@lezer/lr'",
     "check:all": "pnpm format:check && pnpm check:deadcode && pnpm check:duplication && pnpm check:deps && pnpm test",
-    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true"
+    "prepare": "git config core.hooksPath .githooks 2>/dev/null || true",
+    "prepack": "node scripts/prepack-mcp.mjs"
   },
   "dependencies": {
-    "@diagrammo/dgmo": "^0.62.0",
     "@lezer/lr": "^1.4.10",
     "@modelcontextprotocol/sdk": "^1.29.0",
     "@resvg/resvg-js": "^2.6.2",
@@ -77,6 +77,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
+    "@diagrammo/dgmo": "^0.62.0",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.8",
