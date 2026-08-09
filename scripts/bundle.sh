@@ -44,6 +44,7 @@ jq '{
   type,
   main,
   bin,
+  author,
   license,
   dependencies
 }' "$ROOT/package.json" > "$BUNDLE_DIR/package.json"
