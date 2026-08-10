@@ -48,7 +48,8 @@ for (const [rel, why] of [
 // 2. The library must be INLINED, not imported. If this regressed, the package
 //    would work perfectly here and fail wherever the library is absent.
 const entry = join(DIST, 'index.js');
-if (!existsSync(entry)) fail('dist/index.js is missing — run `pnpm build` first');
+if (!existsSync(entry))
+  fail('dist/index.js is missing — run `pnpm build` first');
 if (/from\s*["']@diagrammo\/dgmo/.test(readFileSync(entry, 'utf8'))) {
   fail(
     'dist/index.js still imports @diagrammo/dgmo at runtime — it is a ' +
@@ -65,7 +66,9 @@ for (const f of readdirSync(FIXTURES).sort()) {
   if (!byType.has(type)) byType.set(type, join(FIXTURES, f));
 }
 if (byType.size < 20) {
-  fail(`only ${byType.size} chart types found in the staged gallery — that is not a full copy`);
+  fail(
+    `only ${byType.size} chart types found in the staged gallery — that is not a full copy`
+  );
 }
 
 const { renderPipeline, svgToPngBase64 } = await import(
@@ -77,11 +80,16 @@ let mapSvg = null;
 for (const [type, file] of byType) {
   const source = readFileSync(file, 'utf8');
   try {
-    const res = await renderPipeline(source, { theme: 'light', palette: 'nord' });
+    const res = await renderPipeline(source, {
+      theme: 'light',
+      palette: 'nord',
+    });
     if (!res.svg) broken.push(`${type} (${res.error ?? 'empty svg'})`);
     else if (type === 'map') mapSvg = res.svg;
   } catch (err) {
-    broken.push(`${type} (${err instanceof Error ? err.message : String(err)})`);
+    broken.push(
+      `${type} (${err instanceof Error ? err.message : String(err)})`
+    );
   }
 }
 
@@ -96,10 +104,21 @@ if (broken.length > 0) {
 // 4. Fonts, on their own path. A map is the strongest case — it is the chart
 //    type that broke last time and it carries the most text.
 try {
-  const png = svgToPngBase64(mapSvg ?? (await renderPipeline('pie A 1\nB 2', { theme: 'light', palette: 'nord' })).svg);
-  if (!png || png.length < 1000) fail('PNG rasterisation produced no meaningful output');
+  const png = svgToPngBase64(
+    mapSvg ??
+      (
+        await renderPipeline('pie A 1\nB 2', {
+          theme: 'light',
+          palette: 'nord',
+        })
+      ).svg
+  );
+  if (!png || png.length < 1000)
+    fail('PNG rasterisation produced no meaningful output');
 } catch (err) {
-  fail(`PNG rasterisation threw: ${err instanceof Error ? err.message : String(err)}`);
+  fail(
+    `PNG rasterisation threw: ${err instanceof Error ? err.message : String(err)}`
+  );
 }
 
 console.log(
