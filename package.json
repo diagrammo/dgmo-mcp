@@ -1,6 +1,6 @@
 {
   "name": "@diagrammo/dgmo-mcp",
-  "version": "0.24.0",
+  "version": "0.25.0",
   "description": "MCP server for rendering DGMO diagrams — SVG/PNG output, browser preview, HTML reports, and 40+ chart types. Works with Claude Desktop, Claude Code, and any MCP client.",
   "keywords": [
     "mcp",
@@ -77,7 +77,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
-    "@diagrammo/dgmo": ">=0.68.0 <1",
+    "@diagrammo/dgmo": ">=0.69.0 <1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.8",
