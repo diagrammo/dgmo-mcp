@@ -1,19 +1,36 @@
 name: Release
 
-# Tag trigger disabled 2026-07-22 to cut Actions minutes. Releases are done
-# locally (see the workspace release skill / release checklist), so a tag-driven
-# run was spending minutes repeating work already done by hand.
+# 🔴 THIS WORKFLOW IS THE PUBLISHER as of 2026-08-14 — npm, the MCP registry and
+# the .mcpb bundle, all three. It authenticates to npm over Trusted Publishing
+# (OIDC) and to the MCP registry over `mcp-publisher login github-oidc`, so
+# there is no stored credential on either side. The local `npm publish` path it
+# replaced is going away: npm strips direct publish from bypass-2FA tokens in
+# January 2027.
+# https://github.blog/changelog/2026-07-31-restricting-npm-bypass-2fa-granular-access-tokens/
 #
-# 🔴 The reason recorded here originally — "the org NPM_TOKEN is broken" — was a
-# WRONG DIAGNOSIS, retracted 2026-07-31. The token authenticates fine, for scoped
-# and unscoped packages alike. The CI runs that looked like auth failures say
-# "You cannot publish over the previously published versions", because a local
-# publish had already gone out. Read the failing run own log before re-deriving
-# it; a red run kept confirming the story for weeks.
+# 🔴 This is also the only path that does not need an interactive MCP-registry
+# login. That login mints a JWT lasting about five minutes and can never be a
+# stored secret, so publishing from here removes a manual step as well as a
+# credential.
 #
-# So: rotating the token will NOT restore this trigger and is not a precondition
-# for it. Restoring it is a deliberate choice about spending Actions minutes.
-# (The token does still expire ~2026-08-15 — that is a real deadline, unrelated.)
+# 🔴 The trusted-publisher registration on npmjs.com names this REPO and this
+# FILENAME. Renaming or moving this file stops publishing until someone updates
+# the registration by hand at npmjs.com → the package → Settings → Trusted
+# publisher. A token cannot do it — npm removed that power from bypass-2FA
+# tokens on 2026-07-31.
+#
+# Dispatch-only on purpose: `scripts/release.sh` in the workspace bumps, tags,
+# pushes, and then dispatches this workflow at the tag. By hand:
+#   gh workflow run release.yml -R diagrammo/dgmo-mcp --ref vX.Y.Z
+#
+# Actions minutes: this repo is PUBLIC, so runs are free. The tag trigger came
+# off 2026-07-22 to save minutes that were never being billed (verified
+# 2026-08-14) — the cost worth avoiding is a run firing twice, not its minutes.
+#
+# 🔴 The note that used to sit here — "the org NPM_TOKEN is broken" — was a WRONG
+# DIAGNOSIS, retracted 2026-07-31. No workflow in this repo has read a token
+# since. A red run saying "cannot publish over the previously published
+# versions" means a local publish beat CI to it; read the run's own log.
 on:
   workflow_dispatch:
     inputs:
