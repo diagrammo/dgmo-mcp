@@ -52,7 +52,7 @@ leaves your machine.
 | `render_diagram`         | Render DGMO markup to **SVG or PNG**                                        | yes       |
 | `validate_diagram`       | Check markup and report parse errors, without rendering                     | yes       |
 | `suggest_chart_type`     | Suggest the chart types that fit a description                              | yes       |
-| `list_chart_types`       | List all supported chart types                                              | yes       |
+| `list_chart_types`       | List all supported chart types, marking the beta ones                       | yes       |
 | `get_language_reference` | Get DGMO syntax documentation for accurate generation                       | yes       |
 | `get_examples`           | Fetch worked examples for a chart type                                      | yes       |
 | **`share_diagram`**      | Get a shareable **diagrammo.app** URL — hand your diagram to the web editor | yes       |
