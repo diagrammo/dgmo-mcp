@@ -18,6 +18,7 @@
 export interface FlaggedChartType {
   readonly id: string;
   readonly internal?: boolean;
+  readonly beta?: boolean;
 }
 
 /** Ids of every chart type that routes but is never offered. */
@@ -28,5 +29,24 @@ export function internalChartTypeIds(
     (types as readonly FlaggedChartType[])
       .filter((t) => t.internal)
       .map((t) => t.id)
+  );
+}
+
+/**
+ * Ids of every chart type that is offered but not finished (dgmo issue #221).
+ *
+ * ⚠️ NOT a filter, unlike `internal` — a beta type is still offered and still
+ * suggested; `list_chart_types` only says so beside it, because a model that
+ * picks one on a user's behalf should be able to mention what it picked.
+ *
+ * Read through the same local view and for the same reason: until the
+ * installed `@diagrammo/dgmo` carries the flag this returns an empty set,
+ * which degrades to today's behaviour rather than failing to compile.
+ */
+export function betaChartTypeIds(
+  types: readonly { readonly id: string }[]
+): Set<string> {
+  return new Set(
+    (types as readonly FlaggedChartType[]).filter((t) => t.beta).map((t) => t.id)
   );
 }

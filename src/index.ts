@@ -24,7 +24,10 @@ import {
   resolveMap,
   loadMapData,
 } from '@diagrammo/dgmo/advanced';
-import { internalChartTypeIds } from './internal-flag.js';
+import {
+  betaChartTypeIds,
+  internalChartTypeIds,
+} from './internal-flag.js';
 
 // Map name/route resolution needs the bundled gazetteer. `loadMapData` reads it
 // via a Node dynamic import; cache the promise so repeated validate calls in one
@@ -554,9 +557,14 @@ tool(
     const types = Object.keys(CHART_TYPE_DESCRIPTIONS).filter(
       (id) => !internal.has(id)
     );
+    // Beta is a MARK, not a filter — the type is still offered and still
+    // suggested. It is said out loud so a model choosing one on somebody's
+    // behalf can mention that it is unfinished (dgmo issue #221).
+    const beta = betaChartTypeIds(chartTypes);
     const lines = types.map((id) => {
       const desc = CHART_TYPE_DESCRIPTIONS[id];
-      return desc ? `- ${id}: ${desc}` : `- ${id}`;
+      const mark = beta.has(id) ? ' [beta — expect rough edges]' : '';
+      return desc ? `- ${id}${mark}: ${desc}` : `- ${id}${mark}`;
     });
     return {
       content: [
