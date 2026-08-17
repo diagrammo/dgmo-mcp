@@ -77,7 +77,7 @@
   },
   "devDependencies": {
     "@anthropic-ai/mcpb": "^2.1.2",
-    "@diagrammo/dgmo": ">=0.70.0 <1",
+    "@diagrammo/dgmo": ">=0.71.0 <1",
     "@eslint/js": "^10.0.1",
     "@types/node": "^24.0.0",
     "@vitest/coverage-v8": "^4.1.8",
