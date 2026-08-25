@@ -47,6 +47,8 @@ export function betaChartTypeIds(
   types: readonly { readonly id: string }[]
 ): Set<string> {
   return new Set(
-    (types as readonly FlaggedChartType[]).filter((t) => t.beta).map((t) => t.id)
+    (types as readonly FlaggedChartType[])
+      .filter((t) => t.beta)
+      .map((t) => t.id)
   );
 }

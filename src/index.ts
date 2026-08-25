@@ -24,10 +24,7 @@ import {
   resolveMap,
   loadMapData,
 } from '@diagrammo/dgmo/advanced';
-import {
-  betaChartTypeIds,
-  internalChartTypeIds,
-} from './internal-flag.js';
+import { betaChartTypeIds, internalChartTypeIds } from './internal-flag.js';
 
 // Map name/route resolution needs the bundled gazetteer. `loadMapData` reads it
 // via a Node dynamic import; cache the promise so repeated validate calls in one
