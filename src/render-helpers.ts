@@ -117,7 +117,20 @@ export type RenderPipelineResult =
 
 export async function renderPipeline(
   dgmo: string,
-  opts: { theme: 'light' | 'dark' | 'transparent'; palette: string }
+  opts: {
+    theme: 'light' | 'dark' | 'transparent';
+    palette: string;
+    /**
+     * Canvas width in px. Exact for a chart type that lays its content out
+     * into the canvas (the data charts); an upper bound for one that fits a
+     * finished layout to it. A chart that sizes itself from its own content —
+     * org, sitemap, class, er, infra and the rest of the structured family —
+     * cannot go below its content and says so in its diagnostics.
+     */
+    width?: number | undefined;
+    /** Canvas height in px. Most chart types derive it from the content. */
+    height?: number | undefined;
+  }
 ): Promise<RenderPipelineResult> {
   const { diagnostics } = parseDgmo(dgmo);
   // Flowcharts get an extra structural gate (orphan nodes, one-way decisions);
@@ -152,6 +165,8 @@ export async function renderPipeline(
       // draw a map at all. The CLI passes the same loader (`dgmo/src/cli.ts`).
       // Nothing caught it because no test rendered every chart type.
       mapData: loadMapData,
+      ...(opts.width !== undefined && { width: opts.width }),
+      ...(opts.height !== undefined && { height: opts.height }),
     });
     if (!svg) {
       return { svg: null, diagnostics, error: 'Render returned empty SVG.' };

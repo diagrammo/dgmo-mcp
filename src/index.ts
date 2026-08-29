@@ -267,6 +267,22 @@ tool(
       .describe(
         'Color palette (slate, atlas, blueprint, tidewater, nord, catppuccin, tokyo-night)'
       ),
+    width: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe(
+        'Canvas width in px. Omit to let the diagram size itself from its content. Honoured exactly by the chart types that lay their content out into the canvas (bar, line, pie and the other data charts). A chart that sizes itself from its own nodes — org, sitemap, class, er, infra and the rest of the structured family — cannot go below its content and will return a wider canvas than asked for.'
+      ),
+    height: z
+      .number()
+      .int()
+      .positive()
+      .optional()
+      .describe(
+        'Canvas height in px. Most chart types derive height from their content and ignore this; the data charts honour it.'
+      ),
   },
   {
     title: 'Render Diagram',
@@ -275,7 +291,7 @@ tool(
     openWorldHint: false,
     idempotentHint: true,
   },
-  async ({ dgmo, format, theme, palette }) => {
+  async ({ dgmo, format, theme, palette, width, height }) => {
     // Resolve the palette here (not only inside render) so the fallback warning
     // that render() swallows is surfaced to the caller (Story 110.2 AC3).
     const paletteNotes: { type: 'text'; text: string }[] = [];
@@ -283,7 +299,12 @@ tool(
       paletteNotes.push({ type: 'text' as const, text: message })
     );
 
-    const result = await renderPipeline(dgmo, { theme, palette });
+    const result = await renderPipeline(dgmo, {
+      theme,
+      palette,
+      ...(width !== undefined && { width }),
+      ...(height !== undefined && { height }),
+    });
     if (result.error !== null) {
       // Parse errors keep the "Diagram has errors:" lead-in; a render failure
       // (empty svg / thrown) surfaces its raw message.
@@ -304,6 +325,16 @@ tool(
     }
     const svg = result.svg;
 
+    // Render warnings were dropped on success until 2026-08-29, so a caller
+    // could ask for a 400px canvas, get 672, and never be told. `render()`
+    // returns them; pass them on the way palette fallbacks already are.
+    const renderNotes = result.diagnostics
+      .filter((d) => d.severity === 'warning')
+      .map((d) => ({
+        type: 'text' as const,
+        text: `Warning: ${formatDgmoError(d)}`,
+      }));
+
     if (format === 'png') {
       const bg =
         theme === 'transparent'
@@ -323,6 +354,7 @@ tool(
       return {
         content: [
           ...paletteNotes,
+          ...renderNotes,
           ...(fontNote
             ? [{ type: 'text' as const, text: `Warning: ${fontNote}` }]
             : []),
@@ -339,7 +371,11 @@ tool(
     }
 
     return {
-      content: [...paletteNotes, { type: 'text' as const, text: svg }],
+      content: [
+        ...paletteNotes,
+        ...renderNotes,
+        { type: 'text' as const, text: svg },
+      ],
     };
   }
 );
