@@ -11,6 +11,12 @@
     "bar Revenue by Product Line\ny-label Revenue ($K)\nWidgets 420\nGadgets 380\nGizmos 290\nDoohickeys 510\nContraptions 175\n",
     "bar Average Commute Time\ny-label Minutes\nNew York 41\nLos Angeles 34\nChicago 36\nHouston 28\nPhoenix 27\nPhiladelphia 33\n"
   ],
+  "block": [
+    "block Web System Architecture\n\ntag Tier as t\n  Client blue\n  Serving green\n  Data orange\n\n[Client] t: Client\n  [Browser]\n\n[Serving] t: Serving\n  [Load Balancer] [Web Server] [App Server]\n\n[Data] t: Data\n  [Cache] [Database] [Object Store]\n",
+    "block Computer Architecture\n\ntag Unit as u\n  Processing blue\n  Storage orange\n  Peripheral green\n\n[CPU] u: Processing\n  [ALU] [Control Unit]\n\n[Memory] u: Storage\n  [RAM] [Cache]\n\n[I/O] u: Peripheral\n  [Keyboard] [Display] [Disk]\n\n[System Bus]\n  [Address Bus] [Data Bus] [Control Bus]\n",
+    "block Three-Tier Web Application\n\ntag Tier as t\n  Presentation blue\n  Application green\n  Data orange\n\n[Presentation] t: Presentation\n  [Web Client] [Mobile Client]\n\n[Application] t: Application\n  [API Server] [Background Workers]\n\n[Data] t: Data\n  [Primary Database] [Cache]\n",
+    "block Audio Signal Chain\n\n[Signal Path]\n  [Input] [Preamp] [Equalizer] [Compressor] [Amplifier] [Output]\n"
+  ],
   "boxes-and-lines": [
     "boxes-and-lines Web System Architecture\n\nBrowser\n  -> Load Balancer\nLoad Balancer\n  -> Web Server\nWeb Server\n  -> App Server\nApp Server\n  -> Cache\n  -> Database\n  -> Object Store\n",
     "boxes-and-lines Microservices Backend\ndirection LR\n\nAPI Gateway\n  -> Auth Service\n  -> Catalog Service\n  -> Orders Service\n  -> Payments Service\n\nAuth Service -> Auth DB\nCatalog Service -> Catalog DB\nOrders Service -> Orders DB\nPayments Service -> Payments DB\n",
@@ -46,6 +52,12 @@
     "er E-commerce Schema\n\ncustomers\n  id int pk\n  name varchar\n  email string unique\n  1-places-* orders\n\norders\n  id int pk\n  customer_id int fk\n  total decimal\n  created_at timestamp\n  1-contains-* order_items\n\norder_items\n  id int pk\n  order_id int fk\n  product_id int fk\n  quantity int\n  *-references-1 products\n\nproducts\n  id int pk\n  name varchar\n  price decimal\n  sku string unique\n",
     "er Library Schema\n\nmembers\n  id int pk\n  name varchar\n  email string unique\n  1-borrows-* loans\n\nbooks\n  id int pk\n  title varchar\n  author varchar\n  isbn string unique\n  1-has-* copies\n\ncopies\n  id int pk\n  book_id int fk\n  barcode string unique\n  1-tracked_in-* loans\n\nloans\n  id int pk\n  member_id int fk\n  copy_id int fk\n  due_date timestamp\n",
     "er University Schema\n\nstudents\n  id int pk\n  name varchar\n  email string unique\n  1-enrolls-* enrollments\n\ncourses\n  id int pk\n  title varchar\n  instructor_id int fk\n  credits int\n  1-has-* enrollments\n\nenrollments\n  id int pk\n  student_id int fk\n  course_id int fk\n  grade varchar\n\ninstructors\n  id int pk\n  name varchar\n  department varchar\n  1-teaches-* courses\n"
+  ],
+  "event-line": [
+    "event-line Product Release Milestones\n\n2026-02 Beta opens\n2026-04 Public launch\n2026-07 Mobile app\n2026-10 Enterprise tier\n2027-01 Marketplace\n",
+    "event-line A Startup's First Year\n\n2025-01-14 Incorporated\n  Two founders and one registered company.\n\n2025-03-27 MVP shipped\n  The first version customers could actually use.\n\n2025-06-09 Seed round closed\n  Enough runway for eighteen months.\n\n2025-09-02 First five engineers hired\n  The team goes from two people to seven.\n\n2025-12-15 Ten thousand users\n  Growth stops depending on the founders' own network.\n",
+    "event-line Apollo 11\n\ntag Phase as p\n  Outbound blue\n  Lunar purple\n  Return green\n\n1969-07-16 Launch  p: Outbound\n  Saturn V lifts off from Kennedy Space Center.\n\n1969-07-16 Earth parking orbit  p: Outbound\n  One and a half orbits while the systems are checked.\n\n1969-07-16 Trans-lunar injection  p: Outbound\n  The third stage reignites and the stack leaves Earth orbit.\n\n1969-07-19 Lunar orbit  p: Lunar\n  Insertion burn behind the Moon, out of radio contact.\n\n1969-07-20 Landing  p: Lunar\n  Eagle touches down at Tranquility Base with seconds of fuel left.\n\n1969-07-21 First steps  p: Lunar\n  Armstrong descends the ladder; Aldrin follows.\n\n1969-07-21 Ascent  p: Return\n  The ascent stage lifts off and rejoins Columbia.\n\n1969-07-24 Splashdown  p: Return\n  Recovery in the Pacific after eight days.\n",
+    "event-line From Draft to Launch Day\n\n2025-01-20 Draft finished\n  The first complete manuscript, ninety thousand words.\n\n2025-03-06 Agent signed\n  Representation after eleven queries.\n\n2025-06-18 Manuscript sold\n  A two-book deal with a mid-sized publisher.\n\n2025-10-02 Edits completed\n  Structural pass, line edit and copy edit all closed.\n\n2026-01-15 Cover revealed\n  The jacket goes public a quarter before release.\n\n2026-04-07 Launch day\n  On sale, with a six-city tour to follow.\n"
   ],
   "flowchart": [
     "flowchart User Login\n\n(Start) -> /Enter credentials/ -> <Valid?>\n  -no-> <3 failed attempts?>\n    -yes-> [Lock account] -> (End)\n    -no-> /Enter credentials/\n  -yes-> /Enter 2FA code/ -> <2FA ok?>\n    -yes-> [Grant access] -> (End)\n    -no-> /Enter 2FA code/\n",
@@ -179,6 +191,12 @@
     "state Network Connection\n[*] -> Disconnected\nDisconnected -connect-> Connecting\nConnecting -established-> Connected\nConnecting -timeout-> Failed\nConnected -drop-> Reconnecting\nReconnecting -restored-> Connected\nReconnecting -give up-> Failed\nFailed -retry-> Connecting\nConnected -disconnect-> Disconnected\n",
     "state Support Ticket\n[*] -> Open\nOpen -assign-> In Progress\nIn Progress -need info-> Waiting on Customer\nWaiting on Customer -reply-> In Progress\nIn Progress -resolve-> Resolved\nResolved -confirm-> Closed\nClosed -reopen-> Reopened\nReopened -reassign-> In Progress\n"
   ],
+  "swimlane": [
+    "swimlane Checkout Message Flow\n\nlane User gray\nlane Web App blue\nlane Payment API green\nlane Bank purple\n\n[Order]\n  User\n    Place Order\n  Web App\n    Charge 42.00\n[Authorize]\n  Payment API\n    Authorize\n  Bank\n    Approved\n[Confirm]\n  Payment API\n    Payment OK\n  Web App\n    Order Confirmed\n\nPlace Order -> Charge 42.00 -> Authorize -> Approved\nApproved -> Payment OK -> Order Confirmed\n",
+    "swimlane Expense Approval\n\nlane Employee gray\nlane Manager blue\nlane Finance green\n\n[Submit]\n  Employee\n    Submit Report\n[Review]\n  Manager\n    <Review Report>\n  Employee\n    (!Returned)\n[Reimburse]\n  Finance\n    Issue Reimbursement\n  Employee\n    (Notified) success\n\nSubmit Report -> <Review Report>\n<Review Report>\n  -reject-> (!Returned)\n  -approve-> Issue Reimbursement -> (Notified)\n",
+    "swimlane Bug Lifecycle\n\nlane Reporter gray\nlane Triage blue\nlane Engineering purple\n\n[Report]\n  Reporter\n    File Bug\n[Triage]\n  Triage\n    Label and Prioritize\n    <Reproducible?>\n    (!Not a Bug)\n[Fix]\n  Engineering\n    Fix Bug\n    Verify Fix\n[Close]\n  Triage\n    (Closed) success\n\nFile Bug -> Label and Prioritize -> <Reproducible?>\n<Reproducible?>\n  -no-> (!Not a Bug)\n  -yes-> Fix Bug -> Verify Fix\nVerify Fix\n  -reopen-> Fix Bug\n  -> (Closed)\n",
+    "swimlane Online Order\n\nlane Customer gray\nlane Warehouse orange\nlane Courier blue\n\n[Order]\n  Customer\n    Place Order\n[Fulfil]\n  Warehouse\n    Pick Items\n    Pack Parcel\n[Deliver]\n  Courier\n    Ship Parcel\n    [[Deliver Parcel]]\n[Confirm]\n  Customer\n    (Receipt Confirmed) success\n\nPlace Order -> Pick Items -> Pack Parcel -> Ship Parcel\nShip Parcel -> [[Deliver Parcel]]\n[[Deliver Parcel]]\n  -missed-> Ship Parcel\n  -> (Receipt Confirmed)\n"
+  ],
   "tech-radar": [
     "tech-radar Team Skills Radar\n\nrings\n  Adopt\n  Trial\n  Assess\n  Hold\n\nLanguages & Frameworks quadrant: top-right\n  TypeScript ring: Adopt\n  Rust ring: Trial\n\nTools quadrant: top-left\n  Ops ring: Adopt\n\nPlatforms quadrant: bottom-left\n  SQL ring: Adopt\n\nTechniques quadrant: bottom-right\n  Design ring: Assess\n",
     "tech-radar Frontend Tech Radar\n\nrings\n  Adopt\n  Trial\n  Assess\n  Hold\n\nFrameworks quadrant: top-right\n  React ring: Adopt, trend: stable\n  Svelte ring: Trial, trend: up\n  Solid ring: Assess, trend: new\n\nBuild Tools quadrant: top-left\n  Vite ring: Adopt, trend: up\n  Webpack ring: Hold, trend: down\n  Turbopack ring: Assess, trend: new\n\nStyling quadrant: bottom-left\n  Tailwind CSS ring: Adopt, trend: stable\n  CSS Modules ring: Trial, trend: stable\n  Sass ring: Hold, trend: down\n\nState Management quadrant: bottom-right\n  Zustand ring: Adopt, trend: up\n  Redux ring: Trial, trend: down\n  Signals ring: Assess, trend: new\n",
@@ -191,11 +209,23 @@
     "timeline Company History\n2014-03 Founding\n2015-06 First product launch\n2016-09 Series A funding\n2020-11 IPO\n2024-05 Acquisition\n",
     "timeline The Apollo Program\n1961-05 Kennedy sets Moon goal\n1961 -> 1966 Mercury and Gemini groundwork\n1967-01 Apollo 1 fire\n1968-12 Apollo 8 orbits the Moon\n1969-07 Apollo 11 first Moon landing\n1970-04 Apollo 13 safe return\n1972-12 Apollo 17 final mission\n"
   ],
+  "treemap": [
+    "treemap Signup Funnel (visitors)\n\nVisited site 48000\nSigned up 12400\nActivated 6100\nSubscribed 2300\nPaid annual 940\n",
+    "treemap Monthly Household Budget\n\ntag Kind as k\n  Fixed blue\n  Variable orange\n  Future green\n\nHousing 1800 k: Fixed\nFood 600 k: Variable\nSavings 550 k: Future\nTransport 400 k: Variable\nUtilities 250 k: Fixed\nEntertainment 200 k: Variable\n",
+    "treemap Headcount by Department\n\nEngineering 120\nSales 80\nSupport 60\nMarketing 40\nOperations 30\n",
+    "treemap Global Energy Supply (% share)\n\ntag Source as s\n  Fossil orange\n  Low-carbon green\n\nOil 31 s: Fossil\nCoal 27 s: Fossil\nGas 24 s: Fossil\nRenewables 8 s: Low-carbon\nHydro 6 s: Low-carbon\nNuclear 4 s: Low-carbon\n"
+  ],
   "venn": [
     "venn Audience Overlap\n\nNewsletter as news\nApp Users as app\nPaid as paid\n\nnews + app 2400\napp + paid 1200\nnews + paid 800\nnews + app + paid 500\n",
     "venn Shared Skills\n\nFrontend as fe blue\nBackend as be green\nDesign as ds red\n\nfe + be APIs\nfe + ds UX Engineering\nbe + ds Design Systems\nfe + be + ds Product Sense\n",
     "venn Customer Channels\n\nMobile as mob blue\nWeb as web green\n\nmob + web Both Channels\n",
     "venn Subscription Tiers\n\nBasic as ba blue\nPro as pr green\nEnterprise as en red\n\nba + pr Priority Support\npr + en Advanced Analytics\nba + pr + en Core Features\n"
+  ],
+  "version-control": [
+    "version-control Feature-Branch History\n\nmain\n  init\n  scaffold app\n\nfeature/auth from main\n  add login form\n  wire OAuth\n\nhotfix/login from main\n  fix redirect\n\nmain\n  merge hotfix/login\n  merge feature/auth\n",
+    "version-control Git-Flow Release\n\nmain\n  Initial commit\n\ndevelop from main\n  Set up CI\n\nfeature/checkout from develop\n  Cart page\n  Payment form\n\ndevelop\n  merge feature/checkout\n\nrelease/1.2 from develop\n  Bump version\n  Fix changelog\n\nmain\n  merge release/1.2 tag: v1.2.0\n\ndevelop\n  merge release/1.2\n",
+    "version-control Hotfix\n\nmain\n  Initial commit\n  Add login\n  Add billing\n\nhotfix/session-leak from main\n  Close leaked sessions\n\nmain\n  merge hotfix/session-leak tag: v1.0.1\n",
+    "version-control Two Parallel Features\n\nmain\n  Initial commit\n\nfeature-a from main\n  Add exporter\n  Export tests\n\nfeature-b from main\n  Add importer\n  Import tests\n\nmain\n  merge feature-a\n  merge feature-b\n"
   ],
   "wireframe": [
     "wireframe Login\nmobile\n\nimage round\n# Sign In\n[Email]\n[Password] password\n(Sign in) primary\n- Forgot password?\n",
