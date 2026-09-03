@@ -8,7 +8,7 @@
 //        ▼
 //   gallery/<type>-<idx>.png  +  gallery.json  (index the studio reads)
 //
-// Uses the EXACT shipped render path (dist/render-helpers.mjs, theme light /
+// Uses the EXACT shipped render path (dist/render-helpers.js, theme light /
 // palette slate — same as /studio/run) so the gallery image matches a live run.
 // Run after `pnpm build`:  node tools/guidance-studio/build-gallery.mjs
 // ============================================================
@@ -43,9 +43,9 @@ if (
   process.exit(0);
 }
 
-const RENDER_HELPERS = path.join(REPO_ROOT, 'dist/render-helpers.mjs');
+const RENDER_HELPERS = path.join(REPO_ROOT, 'dist/render-helpers.js');
 if (!existsSync(RENDER_HELPERS)) {
-  console.error('dist/render-helpers.mjs missing — run `pnpm build` first.');
+  console.error('dist/render-helpers.js missing — run `pnpm build` first.');
   process.exit(1);
 }
 const { renderPipeline, svgToPngBase64 } = await import(

@@ -42,7 +42,7 @@ const DATASETS_DIR = path.join(here, 'datasets');
 const TRIALS_PATH = path.join(here, 'trial-runs.json');
 // Target the ESM build (.mjs) explicitly — robust regardless of Node's CJS
 // named-export interop. `pnpm studio` runs `pnpm build` first so this exists.
-const RENDER_HELPERS_PATH = path.join(REPO_ROOT, 'dist/render-helpers.mjs');
+const RENDER_HELPERS_PATH = path.join(REPO_ROOT, 'dist/render-helpers.js');
 const RENDER_HELPERS = pathToFileURL(RENDER_HELPERS_PATH).href;
 
 type RenderHelpers = typeof import('../../src/render-helpers');
@@ -52,7 +52,7 @@ function loadHelpers(): Promise<RenderHelpers> {
   if (!helpersPromise) {
     if (!existsSync(RENDER_HELPERS_PATH))
       throw new Error(
-        'dist/render-helpers.mjs missing — run `pnpm build` first'
+        'dist/render-helpers.js missing — run `pnpm build` first'
       );
     helpersPromise = import(RENDER_HELPERS) as Promise<RenderHelpers>;
   }
