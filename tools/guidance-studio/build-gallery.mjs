@@ -26,8 +26,11 @@ import path from 'node:path';
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(here, '../..');
 
-// The gallery is committed (137 PNGs + gallery.json). Re-rendering it on every
-// `pnpm hub` cost a minute for no gain, so skip when it's already present.
+// The gallery is a LOCAL artifact, not committed: no PNG under gallery/ is
+// tracked and gallery.json is gitignored (.gitignore:12). Re-rendering it on
+// every `pnpm hub` cost a minute for no gain, so skip when it's already
+// present -- which is also why a missing source shows up as a render failure
+// on a fresh checkout and nowhere else.
 // Pass --force to regenerate after editing gallery-sources.json.
 const FORCE = process.argv.includes('--force');
 const OUT_DIR = path.join(here, 'gallery');
