@@ -36,9 +36,13 @@ if (!existsSync(join(dgmoSrc, 'package.json'))) {
   );
   process.exit(1);
 }
-if (!existsSync(join(dgmoSrc, 'dist', 'advanced.cjs'))) {
+// dgmo is ESM-only — every tsup entry in its config is `format: ['esm']`, and
+// its own `exports['./advanced']` resolves to dist/advanced.js. This guard
+// looked for advanced.cjs, a file that build has never produced, so `pnpm
+// studio` failed on every machine AFTER paying for a full dgmo build.
+if (!existsSync(join(dgmoSrc, 'dist', 'advanced.js'))) {
   console.error(
-    `✗ ${dgmoSrc}/dist is missing — build dgmo first (\`pnpm -C ../dgmo build\`).`
+    `✗ ${dgmoSrc}/dist/advanced.js is missing — build dgmo first (\`pnpm -C ../dgmo build\`).`
   );
   process.exit(1);
 }
