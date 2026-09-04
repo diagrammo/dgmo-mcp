@@ -28,8 +28,8 @@ importers:
         specifier: ^2.1.2
         version: 2.1.2
       '@diagrammo/dgmo':
-        specifier: '>=0.81.0 <1'
-        version: 0.81.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)
+        specifier: '>=0.83.0 <1'
+        version: 0.83.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)
       '@eslint/js':
         specifier: ^10.0.1
         version: 10.0.1(eslint@10.4.1(jiti@2.7.0))
@@ -182,8 +182,8 @@ packages:
   '@dagrejs/graphlib@4.0.5':
     resolution: {integrity: sha512-7xrBTqIts3o+PMUZX97wSc+7TUbW+/rULzGNCTP6yooNVDXbzw4Wutg/H/xOutTB/c/k0YqOAavgPh4/Zk9PFA==}
 
-  '@diagrammo/dgmo@0.81.0':
-    resolution: {integrity: sha512-6iz8gZiNYNHzjrJ5SzQHost4Qf5wpj7kJbZmLgqSUUY4RwZB0XKMM2/zfRa0192G3PvVdlx5wY9C8kPRp8/SNQ==}
+  '@diagrammo/dgmo@0.83.0':
+    resolution: {integrity: sha512-THAHIY71BFxj9WfG9ar3BHvAOTdO0Bmlgw9CHg+7p+p4oCKEUOkW/Gst1d8e/PZA5tec7sUH/6mLmXhErM7Seg==}
     engines: {node: '>=20.6'}
     peerDependencies:
       '@codemirror/language': ^6.12.3
@@ -3153,7 +3153,7 @@ snapshots:
 
   '@dagrejs/graphlib@4.0.5': {}
 
-  '@diagrammo/dgmo@0.81.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)':
+  '@diagrammo/dgmo@0.83.0(@lezer/common@1.5.2)(@lezer/lr@1.4.10)':
     dependencies:
       '@dagrejs/dagre': 3.1.1
       d3-array: 3.2.4
