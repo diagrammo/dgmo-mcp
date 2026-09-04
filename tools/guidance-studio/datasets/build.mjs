@@ -13,10 +13,29 @@
 // truth) — it lists chart-type ids for which the dataset is a natural fit, and
 // drives the studio's per-type dataset suggestions (Phase 2).
 import { writeFileSync, mkdirSync, readFileSync } from 'node:fs';
+import prettier from 'prettier';
 import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 
 const here = path.dirname(fileURLToPath(import.meta.url));
+
+// 🔴 Write through prettier, not through bare JSON.stringify.
+//
+// The committed fixtures are prettier-formatted, because `format:check` covers
+// the whole repo — but this generator used to write raw `JSON.stringify(x, 2)`,
+// which prettier disagrees with (it collapses a short array like
+// `"suitsTypes": ["org"]` onto one line). So ANY regeneration dirtied all ~30
+// fixtures with pure whitespace and turned `pnpm check:all` red, while the
+// comment above promised "byte-identical files". True of the generator's own
+// output; not true of what is in git. Found 2026-09-04 while fixing #686.
+const prettierOptions = await prettier.resolveConfig(here);
+async function writeFormatted(filePath, contents) {
+  const formatted = await prettier.format(contents, {
+    ...prettierOptions,
+    filepath: filePath,
+  });
+  writeFileSync(filePath, formatted);
+}
 
 /** Each entry: manifest metadata + the literal data payload injected into prompts. */
 const DATASETS = [
@@ -588,6 +607,149 @@ const DATASETS = [
       ],
     },
   },
+  {
+    id: 'monarch-family',
+    label: 'Three generations of a family, with a remarriage and an adoption',
+    suitsTypes: ['family'],
+    data: {
+      people: [
+        { name: 'Alice Brennan', born: 1938, died: 2011, sex: 'f' },
+        { name: 'Thomas Brennan', born: 1935, died: 2004, sex: 'm' },
+        { name: 'Margaret Brennan', born: 1961, sex: 'f' },
+        { name: 'Peter Brennan', born: 1964, sex: 'm' },
+        { name: 'Rosa Delgado', born: 1966, sex: 'f' },
+        { name: 'Helen Vance', born: 1963, sex: 'f' },
+        { name: 'Owen Brennan', born: 1992, sex: 'm' },
+        { name: 'Nina Brennan', born: 1995, sex: 'f', adopted: true },
+        { name: 'Clara Brennan', born: 2001, sex: 'f' },
+      ],
+      unions: [
+        {
+          partners: ['Thomas Brennan', 'Alice Brennan'],
+          married: 1959,
+          children: ['Margaret Brennan', 'Peter Brennan'],
+        },
+        {
+          partners: ['Peter Brennan', 'Rosa Delgado'],
+          married: 1990,
+          children: ['Owen Brennan', 'Nina Brennan'],
+        },
+        {
+          partners: ['Peter Brennan', 'Helen Vance'],
+          married: 1999,
+          children: ['Clara Brennan'],
+        },
+      ],
+    },
+  },
+  {
+    id: 'workout-split',
+    label: 'Which muscle groups each training day targets',
+    suitsTypes: ['body'],
+    data: {
+      days: [
+        {
+          day: 'Push',
+          view: 'front',
+          groups: ['chest', 'shoulders', 'triceps'],
+        },
+        { day: 'Pull', view: 'back', groups: ['lats', 'traps', 'biceps'] },
+        { day: 'Legs', view: 'front', groups: ['quads', 'calves'] },
+      ],
+    },
+  },
+  {
+    id: 'fundraiser-progress',
+    label: 'Community fundraiser: raised so far against the target (GBP)',
+    suitsTypes: ['goal'],
+    data: {
+      campaign: 'Village Hall Roof Fund',
+      unit: 'GBP',
+      raised: 41250,
+      target: 60000,
+    },
+  },
+  {
+    id: 'crew-timezones',
+    label: 'Where each member of a distributed team works',
+    suitsTypes: ['clock'],
+    data: {
+      people: [
+        { name: 'Priya', city: 'Bangalore' },
+        { name: 'Tomas', city: 'Lisbon' },
+        { name: 'Ada', city: 'London' },
+        { name: 'Wes', city: 'Chicago' },
+        { name: 'Mika', city: 'Tokyo' },
+      ],
+    },
+  },
+  {
+    id: 'cup-quarterfinals',
+    label: 'An eight-team knockout cup, seeded, with results through the final',
+    suitsTypes: ['bracket'],
+    data: {
+      rounds: ['Quarterfinals', 'Semifinals', 'Final'],
+      seeds: [
+        { seed: 1, team: 'Harbour Rovers' },
+        { seed: 2, team: 'Ashford Town' },
+        { seed: 3, team: 'Kestrel United' },
+        { seed: 4, team: 'Marlow Athletic' },
+        { seed: 5, team: 'Brackley Wanderers' },
+        { seed: 6, team: 'Denby City' },
+        { seed: 7, team: 'Fenwick Albion' },
+        { seed: 8, team: 'Glenmore FC' },
+      ],
+      results: [
+        {
+          winner: 'Harbour Rovers',
+          loser: 'Glenmore FC',
+          round: 'Quarterfinals',
+        },
+        {
+          winner: 'Marlow Athletic',
+          loser: 'Brackley Wanderers',
+          round: 'Quarterfinals',
+        },
+        {
+          winner: 'Kestrel United',
+          loser: 'Denby City',
+          round: 'Quarterfinals',
+        },
+        {
+          winner: 'Ashford Town',
+          loser: 'Fenwick Albion',
+          round: 'Quarterfinals',
+        },
+        {
+          winner: 'Harbour Rovers',
+          loser: 'Marlow Athletic',
+          round: 'Semifinals',
+        },
+        {
+          winner: 'Ashford Town',
+          loser: 'Kestrel United',
+          round: 'Semifinals',
+        },
+        { winner: 'Harbour Rovers', loser: 'Ashford Town', round: 'Final' },
+      ],
+    },
+  },
+  {
+    id: 'expedition-dates',
+    label: 'Dated milestones on a long-planned trip',
+    // ⚠️ Fixed literal dates, like every fixture here — `countdown` is the one
+    // dynamic chart, so a date is the variable a fixture has to remove. These
+    // sit far enough out to still read as a countdown rather than an expiry.
+    suitsTypes: ['countdown'],
+    data: {
+      trip: 'Patagonia crossing',
+      milestones: [
+        { event: 'Visas lodged', date: '2027-01-15' },
+        { event: 'Flights booked', date: '2027-03-02' },
+        { event: 'Depart', date: '2027-11-04' },
+      ],
+    },
+  },
 ];
 
 // Per-chart-type starter PROMPTS — a LIST of valid, type-appropriate
@@ -598,6 +760,37 @@ const DATASETS = [
 // (no dataset needed). The studio lets you pick among them per type. Emitted to
 // prompts.json (as string arrays), imported by main.ts as each type's prompts.
 const PROMPTS = {
+  // ── Added 2026-09-04 (#686) ──────────────────────────────────────────────
+  // The 2026-09-03 registry refresh picked up eight types the studio could not
+  // teach. `live-link` is now excluded at the source (dump-registry.mjs — the
+  // language reference says it is offered in no picker), `sketch` is
+  // DATASETLESS, and these seven carry one prompt each.
+  //
+  // ⚠️ ONE prompt each, where the older types carry four. Every prompt here has
+  // a real verdict in prompt-validation.json — authored, parsed, rendered with
+  // the WORKSPACE dgmo (0.83.0), and the image looked at. Padding these to four
+  // means doing that seven more times, not typing seven more sentences.
+  family: [
+    'Draw a family tree of the three generations in the sample data — declare each person with their birth year and sex, join the couples with their marriage years, and indent the children under each union. One parent remarries, so reuse their name; mark the adopted child.',
+  ],
+  body: [
+    'Draw a body diagram of the push day in the sample data: a front male figure with the primary muscle groups in one tag colour and the secondary ones in another, and the working set noted under each primary.',
+  ],
+  goal: [
+    'Draw a goal chart of the fundraiser in the sample data as a thermometer — the amount raised against the target, with the currency in the title.',
+  ],
+  countdown: [
+    'Make a countdown to the departure date in the sample data, titled for the trip, counting in whole days, with celebration text for after it passes.',
+  ],
+  clock: [
+    'Make a world clock board for the distributed team in the sample data — one panel per person, each labelled with their name and resolved from their city.',
+  ],
+  bracket: [
+    'Draw a single-elimination bracket of the cup in the sample data: name the three rounds, then list each result so the winners advance to the final.',
+  ],
+  sketch: [
+    'Draw a small sketch of a morning standup flow: a standup bot prompts a team board, the board feeds a follow-ups group holding a blocker-notes sticky and an action-log document. Tag who owns each shape.',
+  ],
   sequence: [
     'Draw a sequence diagram of the checkout flow in the sample data — show each message between the participants in order.',
     'Draw a sequence diagram of an OAuth login: the Browser asks the App to sign in, the App redirects to the Identity Provider, the user authenticates, the Identity Provider returns an authorization code, the App exchanges the code for an access token, and the App confirms the user is signed in.',
@@ -838,13 +1031,13 @@ mkdirSync(here, { recursive: true });
 
 const manifest = [];
 for (const { id, label, suitsTypes, data } of DATASETS) {
-  writeFileSync(
+  await writeFormatted(
     path.join(here, `${id}.json`),
     JSON.stringify({ id, label, suitsTypes, data }, null, 2) + '\n'
   );
   manifest.push({ id, label, suitsTypes });
 }
-writeFileSync(
+await writeFormatted(
   path.join(here, 'manifest.json'),
   JSON.stringify(manifest, null, 2) + '\n'
 );
@@ -873,7 +1066,7 @@ const sortedPrompts = Object.fromEntries(
     .sort()
     .map((k) => [k, mergedPrompts[k]])
 );
-writeFileSync(
+await writeFormatted(
   path.join(here, '..', 'prompts.json'),
   JSON.stringify(sortedPrompts, null, 2) + '\n'
 );

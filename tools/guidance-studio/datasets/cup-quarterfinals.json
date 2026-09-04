@@ -1,0 +1,79 @@
+{
+  "id": "cup-quarterfinals",
+  "label": "An eight-team knockout cup, seeded, with results through the final",
+  "suitsTypes": ["bracket"],
+  "data": {
+    "rounds": ["Quarterfinals", "Semifinals", "Final"],
+    "seeds": [
+      {
+        "seed": 1,
+        "team": "Harbour Rovers"
+      },
+      {
+        "seed": 2,
+        "team": "Ashford Town"
+      },
+      {
+        "seed": 3,
+        "team": "Kestrel United"
+      },
+      {
+        "seed": 4,
+        "team": "Marlow Athletic"
+      },
+      {
+        "seed": 5,
+        "team": "Brackley Wanderers"
+      },
+      {
+        "seed": 6,
+        "team": "Denby City"
+      },
+      {
+        "seed": 7,
+        "team": "Fenwick Albion"
+      },
+      {
+        "seed": 8,
+        "team": "Glenmore FC"
+      }
+    ],
+    "results": [
+      {
+        "winner": "Harbour Rovers",
+        "loser": "Glenmore FC",
+        "round": "Quarterfinals"
+      },
+      {
+        "winner": "Marlow Athletic",
+        "loser": "Brackley Wanderers",
+        "round": "Quarterfinals"
+      },
+      {
+        "winner": "Kestrel United",
+        "loser": "Denby City",
+        "round": "Quarterfinals"
+      },
+      {
+        "winner": "Ashford Town",
+        "loser": "Fenwick Albion",
+        "round": "Quarterfinals"
+      },
+      {
+        "winner": "Harbour Rovers",
+        "loser": "Marlow Athletic",
+        "round": "Semifinals"
+      },
+      {
+        "winner": "Ashford Town",
+        "loser": "Kestrel United",
+        "round": "Semifinals"
+      },
+      {
+        "winner": "Harbour Rovers",
+        "loser": "Ashford Town",
+        "round": "Final"
+      }
+    ]
+  }
+}

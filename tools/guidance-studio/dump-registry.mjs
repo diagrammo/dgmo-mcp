@@ -28,20 +28,35 @@ let m;
 while ((m = markerRe.exec(md)))
   markers.push({ id: m[1], end: m.index + m[0].length });
 
-const types = markers.map((mk, i) => {
-  const start = mk.end;
-  const rest = md.slice(start);
-  const nextType = rest.search(/<!--\s*TYPE:[a-z0-9-]+\s*-->/);
-  const nextH2 = rest.search(/^## /m);
-  const ends = [nextType, nextH2].filter((n) => n !== -1);
-  const blockEnd = ends.length ? start + Math.min(...ends) : md.length;
-  const block = md.slice(start, blockEnd);
-  return {
-    id: mk.id,
-    description: descById.get(mk.id) ?? '',
-    hasTips: TIPS_RE.test(block),
-  };
-});
+// 🔴 Types the studio must not carry, however the language reference documents
+// them. The studio exists to tune AUTHORING guidance, so a type nobody authors
+// has no prompt to tune and no dataset that would fit.
+//
+// `live-link` is a pointer to a diagram published at Diagrammo Cloud. The
+// language reference is explicit: "Do not author one from scratch. A pointer
+// needs a diagram id only the publisher can hand out, so it arrives by being
+// saved from a shared link. It is not offered in any chart-type picker for
+// that reason." It first reached this file in the 2026-09-03 registry refresh
+// and put main red for a day (#686), because it can have neither of the two
+// things the coverage test requires.
+const NOT_AUTHORED = new Set(['live-link']);
+
+const types = markers
+  .filter((mk) => !NOT_AUTHORED.has(mk.id))
+  .map((mk, i) => {
+    const start = mk.end;
+    const rest = md.slice(start);
+    const nextType = rest.search(/<!--\s*TYPE:[a-z0-9-]+\s*-->/);
+    const nextH2 = rest.search(/^## /m);
+    const ends = [nextType, nextH2].filter((n) => n !== -1);
+    const blockEnd = ends.length ? start + Math.min(...ends) : md.length;
+    const block = md.slice(start, blockEnd);
+    return {
+      id: mk.id,
+      description: descById.get(mk.id) ?? '',
+      hasTips: TIPS_RE.test(block),
+    };
+  });
 
 writeFileSync(
   path.join(here, 'registry.json'),

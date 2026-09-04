@@ -1,0 +1,29 @@
+{
+  "id": "crew-timezones",
+  "label": "Where each member of a distributed team works",
+  "suitsTypes": ["clock"],
+  "data": {
+    "people": [
+      {
+        "name": "Priya",
+        "city": "Bangalore"
+      },
+      {
+        "name": "Tomas",
+        "city": "Lisbon"
+      },
+      {
+        "name": "Ada",
+        "city": "London"
+      },
+      {
+        "name": "Wes",
+        "city": "Chicago"
+      },
+      {
+        "name": "Mika",
+        "city": "Tokyo"
+      }
+    ]
+  }
+}

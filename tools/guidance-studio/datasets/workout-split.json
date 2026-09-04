@@ -1,0 +1,24 @@
+{
+  "id": "workout-split",
+  "label": "Which muscle groups each training day targets",
+  "suitsTypes": ["body"],
+  "data": {
+    "days": [
+      {
+        "day": "Push",
+        "view": "front",
+        "groups": ["chest", "shoulders", "triceps"]
+      },
+      {
+        "day": "Pull",
+        "view": "back",
+        "groups": ["lats", "traps", "biceps"]
+      },
+      {
+        "day": "Legs",
+        "view": "front",
+        "groups": ["quads", "calves"]
+      }
+    ]
+  }
+}

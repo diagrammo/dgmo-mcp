@@ -15,7 +15,13 @@ import promptValidation from '../tools/guidance-studio/prompt-validation.json';
 
 // Types whose content is fully specified by the prompt itself, so no injected
 // dataset is needed (logic/structure the model builds from the instruction).
-const DATASETLESS = new Set(['flowchart', 'function', 'wireframe']);
+//
+// `sketch` joined them 2026-09-04. It is not a data chart at all — the language
+// reference calls it "a GUI-authored format — the desktop and web canvas
+// editors generate this markup, so hand-writing it is the exception", and the
+// same block caps a good sketch at ~15 shapes. That is the identical reason
+// `wireframe` has always been here.
+const DATASETLESS = new Set(['flowchart', 'function', 'wireframe', 'sketch']);
 
 // The studio shows exactly the TYPE-block ids in registry.json, not the full
 // chartTypes registry (which includes grouped data-chart ids like line/pie).

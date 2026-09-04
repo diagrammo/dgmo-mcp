@@ -1,8 +1,8 @@
 {
   "_meta": {
-    "validatedOn": "2026-07-04",
+    "validatedOn": "2026-09-04",
     "method": "Each prompt authored by a competent model (per-type subagent), parsed through the renderPipeline gate (VALID), rendered to PNG via the dgmo render path, and the image judged against the prompt intent. The persisted DGMO + render for each is browsable in the studio gallery.",
-    "summary": "35 types x 4 prompts = 140 validated: all parse, render, and match intent. The 3 new ring prompts were reframed from proportional-allocation (wrong for ring) to nested/core-out concepts per spec section 24; the 3 new sitemap prompts were reworded to steer toward the connected-arrow form (indentation alone renders disconnected boxes). 2026-07-04: added event-line, swimlane, block, treemap, and version-control (5 types x 4 prompts) after the dgmo 0.44 chart-type sync + chord removal; each authored to DGMO and rendered through the CLI (parse+render VALID), intent judged against the prompt."
+    "summary": "35 types x 4 prompts = 140 validated: all parse, render, and match intent. The 3 new ring prompts were reframed from proportional-allocation (wrong for ring) to nested/core-out concepts per spec section 24; the 3 new sitemap prompts were reworded to steer toward the connected-arrow form (indentation alone renders disconnected boxes). 2026-07-04: added event-line, swimlane, block, treemap, and version-control (5 types x 4 prompts) after the dgmo 0.44 chart-type sync + chord removal; each authored to DGMO and rendered through the CLI (parse+render VALID), intent judged against the prompt. 2026-09-04 (#686): added family, body, goal, countdown, clock, bracket and sketch (7 types x 1 prompt). Each was authored here, parsed through validate_diagram, rendered with the WORKSPACE CLI at dgmo 0.83.0 (NOT the installed `dgmo`, which was 0.62.1 and drew a stale glyph that briefly read as a rendering bug), and the PNG looked at. One prompt each rather than four: a fourth costs another render-and-look, not another sentence. Two dgmo defects were found and filed rather than worked around in the prompts \u2014 sketch `shape: cloud` is in the language reference but rejected by the parser, and the `goal` gauge face collides its value with the 250k/750k axis labels, which is why goal uses thermometer here."
   },
   "arc": [
     {
@@ -84,7 +84,7 @@
   ],
   "c4": [
     {
-      "prompt": "Create a C4 context diagram of the payments platform in the sample data — show the actors, the system, and their relationships. (Static renders show the context level; containers appear only in the interactive drill-down.)",
+      "prompt": "Create a C4 context diagram of the payments platform in the sample data \u2014 show the actors, the system, and their relationships. (Static renders show the context level; containers appear only in the interactive drill-down.)",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -136,7 +136,7 @@
   ],
   "class": [
     {
-      "prompt": "Create a class diagram of the domain model in the sample data, with each class’s fields and the relationships between classes.",
+      "prompt": "Create a class diagram of the domain model in the sample data, with each class\u2019s fields and the relationships between classes.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -376,19 +376,19 @@
       "intent": "good"
     },
     {
-      "prompt": "Make a customer journey map of booking a flight — search, compare, book, check in, and fly — with the sentiment at each stage.",
+      "prompt": "Make a customer journey map of booking a flight \u2014 search, compare, book, check in, and fly \u2014 with the sentiment at each stage.",
       "valid": true,
       "render": "ok",
       "intent": "good"
     },
     {
-      "prompt": "Make a customer journey map of a patient visit — scheduling, arrival, waiting, consult, checkout, and follow-up — with the sentiment at each stage.",
+      "prompt": "Make a customer journey map of a patient visit \u2014 scheduling, arrival, waiting, consult, checkout, and follow-up \u2014 with the sentiment at each stage.",
       "valid": true,
       "render": "ok",
       "intent": "good"
     },
     {
-      "prompt": "Make a customer journey map of a first-time grocery-delivery user — discover, sign up, first order, delivery, and reorder — with the sentiment at each stage.",
+      "prompt": "Make a customer journey map of a first-time grocery-delivery user \u2014 discover, sign up, first order, delivery, and reorder \u2014 with the sentiment at each stage.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -538,13 +538,13 @@
       "intent": "good"
     },
     {
-      "prompt": "Make a pyramid chart of content-marketing stages — awareness, engagement, conversion, loyalty — widest at the base.",
+      "prompt": "Make a pyramid chart of content-marketing stages \u2014 awareness, engagement, conversion, loyalty \u2014 widest at the base.",
       "valid": true,
       "render": "ok",
       "intent": "good"
     },
     {
-      "prompt": "Make a pyramid chart of a workforce structure — executives, managers, senior staff, and individual contributors — widest at the base.",
+      "prompt": "Make a pyramid chart of a workforce structure \u2014 executives, managers, senior staff, and individual contributors \u2014 widest at the base.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -578,7 +578,7 @@
   ],
   "raci": [
     {
-      "prompt": "Make a RACI matrix from the sample data, mapping each role’s responsibility for each task.",
+      "prompt": "Make a RACI matrix from the sample data, mapping each role\u2019s responsibility for each task.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -682,7 +682,7 @@
   ],
   "sequence": [
     {
-      "prompt": "Draw a sequence diagram of the checkout flow in the sample data — show each message between the participants in order.",
+      "prompt": "Draw a sequence diagram of the checkout flow in the sample data \u2014 show each message between the participants in order.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -734,19 +734,19 @@
   ],
   "slope": [
     {
-      "prompt": "Make a slope chart comparing each item’s value between the two periods in the sample data.",
+      "prompt": "Make a slope chart comparing each item\u2019s value between the two periods in the sample data.",
       "valid": true,
       "render": "ok",
       "intent": "good"
     },
     {
-      "prompt": "Make a slope chart of each region’s market share in 2020 vs 2025.",
+      "prompt": "Make a slope chart of each region\u2019s market share in 2020 vs 2025.",
       "valid": true,
       "render": "ok",
       "intent": "good"
     },
     {
-      "prompt": "Make a slope chart of five products’ satisfaction scores before vs after a redesign.",
+      "prompt": "Make a slope chart of five products\u2019 satisfaction scores before vs after a redesign.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -824,7 +824,7 @@
       "intent": "good"
     },
     {
-      "prompt": "Make a timeline of a company’s history: founding, first product, Series A, IPO, and acquisition.",
+      "prompt": "Make a timeline of a company\u2019s history: founding, first product, Series A, IPO, and acquisition.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -916,7 +916,7 @@
   ],
   "event-line": [
     {
-      "prompt": "Make an event line of the product milestones in the sample data — one card per dated event, in order.",
+      "prompt": "Make an event line of the product milestones in the sample data \u2014 one card per dated event, in order.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -942,7 +942,7 @@
   ],
   "swimlane": [
     {
-      "prompt": "Make a swimlane diagram of the checkout flow in the sample data — one lane per participant, each message a step in that lane.",
+      "prompt": "Make a swimlane diagram of the checkout flow in the sample data \u2014 one lane per participant, each message a step in that lane.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -968,7 +968,7 @@
   ],
   "block": [
     {
-      "prompt": "Make a block diagram of the system in the sample data — lay the components out as a grid of labeled blocks.",
+      "prompt": "Make a block diagram of the system in the sample data \u2014 lay the components out as a grid of labeled blocks.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -1000,7 +1000,7 @@
       "intent": "good"
     },
     {
-      "prompt": "Make a treemap of a monthly household budget: Housing 1800, Food 600, Transport 400, Utilities 250, Entertainment 200, and Savings 550 — size each block by its amount.",
+      "prompt": "Make a treemap of a monthly household budget: Housing 1800, Food 600, Transport 400, Utilities 250, Entertainment 200, and Savings 550 \u2014 size each block by its amount.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -1020,7 +1020,7 @@
   ],
   "version-control": [
     {
-      "prompt": "Make a version-control graph of the branch history in the sample data — show the commits on each branch and where they merge.",
+      "prompt": "Make a version-control graph of the branch history in the sample data \u2014 show the commits on each branch and where they merge.",
       "valid": true,
       "render": "ok",
       "intent": "good"
@@ -1039,6 +1039,62 @@
     },
     {
       "prompt": "Make a version-control graph of two parallel features: from main, branch feature-a and feature-b, add two commits on each, then merge both back into main in turn.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "family": [
+    {
+      "prompt": "Draw a family tree of the three generations in the sample data \u2014 declare each person with their birth year and sex, join the couples with their marriage years, and indent the children under each union. One parent remarries, so reuse their name; mark the adopted child.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "body": [
+    {
+      "prompt": "Draw a body diagram of the push day in the sample data: a front male figure with the primary muscle groups in one tag colour and the secondary ones in another, and the working set noted under each primary.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "goal": [
+    {
+      "prompt": "Draw a goal chart of the fundraiser in the sample data as a thermometer \u2014 the amount raised against the target, with the currency in the title.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "countdown": [
+    {
+      "prompt": "Make a countdown to the departure date in the sample data, titled for the trip, counting in whole days, with celebration text for after it passes.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "clock": [
+    {
+      "prompt": "Make a world clock board for the distributed team in the sample data \u2014 one panel per person, each labelled with their name and resolved from their city.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "bracket": [
+    {
+      "prompt": "Draw a single-elimination bracket of the cup in the sample data: name the three rounds, then list each result so the winners advance to the final.",
+      "valid": true,
+      "render": "ok",
+      "intent": "good"
+    }
+  ],
+  "sketch": [
+    {
+      "prompt": "Draw a small sketch of a morning standup flow: a standup bot prompts a team board, the board feeds a follow-ups group holding a blocker-notes sticky and an action-log document. Tag who owns each shape.",
       "valid": true,
       "render": "ok",
       "intent": "good"

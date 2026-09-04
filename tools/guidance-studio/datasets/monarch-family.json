@@ -1,0 +1,74 @@
+{
+  "id": "monarch-family",
+  "label": "Three generations of a family, with a remarriage and an adoption",
+  "suitsTypes": ["family"],
+  "data": {
+    "people": [
+      {
+        "name": "Alice Brennan",
+        "born": 1938,
+        "died": 2011,
+        "sex": "f"
+      },
+      {
+        "name": "Thomas Brennan",
+        "born": 1935,
+        "died": 2004,
+        "sex": "m"
+      },
+      {
+        "name": "Margaret Brennan",
+        "born": 1961,
+        "sex": "f"
+      },
+      {
+        "name": "Peter Brennan",
+        "born": 1964,
+        "sex": "m"
+      },
+      {
+        "name": "Rosa Delgado",
+        "born": 1966,
+        "sex": "f"
+      },
+      {
+        "name": "Helen Vance",
+        "born": 1963,
+        "sex": "f"
+      },
+      {
+        "name": "Owen Brennan",
+        "born": 1992,
+        "sex": "m"
+      },
+      {
+        "name": "Nina Brennan",
+        "born": 1995,
+        "sex": "f",
+        "adopted": true
+      },
+      {
+        "name": "Clara Brennan",
+        "born": 2001,
+        "sex": "f"
+      }
+    ],
+    "unions": [
+      {
+        "partners": ["Thomas Brennan", "Alice Brennan"],
+        "married": 1959,
+        "children": ["Margaret Brennan", "Peter Brennan"]
+      },
+      {
+        "partners": ["Peter Brennan", "Rosa Delgado"],
+        "married": 1990,
+        "children": ["Owen Brennan", "Nina Brennan"]
+      },
+      {
+        "partners": ["Peter Brennan", "Helen Vance"],
+        "married": 1999,
+        "children": ["Clara Brennan"]
+      }
+    ]
+  }
+}

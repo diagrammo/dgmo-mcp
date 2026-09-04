@@ -1,0 +1,11 @@
+{
+  "id": "fundraiser-progress",
+  "label": "Community fundraiser: raised so far against the target (GBP)",
+  "suitsTypes": ["goal"],
+  "data": {
+    "campaign": "Village Hall Roof Fund",
+    "unit": "GBP",
+    "raised": 41250,
+    "target": 60000
+  }
+}

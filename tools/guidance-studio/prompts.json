@@ -17,11 +17,17 @@
     "Make a block diagram of a three-tier web app as rows: a presentation row (web and mobile clients), an application row (API and workers), and a data row (primary database and cache).",
     "Make a block diagram of an audio signal chain arranged left to right: input, preamp, equalizer, compressor, amplifier, output."
   ],
+  "body": [
+    "Draw a body diagram of the push day in the sample data: a front male figure with the primary muscle groups in one tag colour and the secondary ones in another, and the working set noted under each primary."
+  ],
   "boxes-and-lines": [
     "Draw a boxes-and-lines architecture diagram of the components in the sample data and how they connect.",
     "Draw a boxes-and-lines diagram of a microservices backend: an API gateway routing to auth, catalog, orders, and payments services, each with its own database.",
     "Draw a boxes-and-lines diagram of a data pipeline: sources feed an ingest layer, which lands in a data lake, then a transform step writes to a warehouse that powers BI dashboards.",
     "Draw a boxes-and-lines diagram of an ML system: a data store feeds a feature pipeline, which feeds training, which writes to a model registry, which is loaded by a serving API."
+  ],
+  "bracket": [
+    "Draw a single-elimination bracket of the cup in the sample data: name the three rounds, then list each result so the winners advance to the final."
   ],
   "c4": [
     "Create a C4 context diagram of the payments platform in the sample data — show the actors, the system, and their relationships. (Static renders show the context level; containers appear only in the interactive drill-down.)",
@@ -34,6 +40,12 @@
     "Create a class diagram of a media library: an abstract MediaItem base class with Book, Movie, and Album subclasses, and a Library class that holds many MediaItems.",
     "Create a class diagram of a shape hierarchy: an abstract Shape class with an area() method, subclassed by Circle, Rectangle, and Triangle.",
     "Create a class diagram of an e-commerce cart: Cart, CartItem, Product, and Customer classes with their fields and the relationships between them."
+  ],
+  "clock": [
+    "Make a world clock board for the distributed team in the sample data — one panel per person, each labelled with their name and resolved from their city."
+  ],
+  "countdown": [
+    "Make a countdown to the departure date in the sample data, titled for the trip, counting in whole days, with celebration text for after it passes."
   ],
   "cycle": [
     "Make a cycle diagram of the continuous-improvement stages in the sample data.",
@@ -52,6 +64,9 @@
     "Make an event line of a startup's first year: incorporate in January, ship the MVP in March, close a seed round in June, hire the first five engineers in September, and reach 10k users in December.",
     "Make an event line of the Apollo 11 mission: launch, Earth orbit, trans-lunar injection, lunar orbit, landing, first steps, ascent, and splashdown.",
     "Make an event line of a book's publishing timeline: draft finished, agent signed, manuscript sold, edits completed, cover revealed, and launch day."
+  ],
+  "family": [
+    "Draw a family tree of the three generations in the sample data — declare each person with their birth year and sex, join the couples with their marriage years, and indent the children under each union. One parent remarries, so reuse their name; mark the adopted child."
   ],
   "flowchart": [
     "Make a flowchart of a user login flow: enter credentials, validate them, prompt for a 2FA code, lock the account after 3 failed attempts, otherwise grant access.",
@@ -76,6 +91,9 @@
     "Make a Gantt chart of a three-month website redesign with phases for discovery, design, development, content migration, QA, and launch.",
     "Make a Gantt chart for planning a conference with phases for booking the venue, confirming speakers, marketing, registration, and the event itself.",
     "Make a Gantt chart for a mobile MVP with phases for research, wireframes, build, beta, and app-store submission."
+  ],
+  "goal": [
+    "Draw a goal chart of the fundraiser in the sample data as a thermometer — the amount raised against the target, with the currency in the title."
   ],
   "heatmap": [
     "Make a heatmap of the team skills matrix in the sample data.",
@@ -172,6 +190,9 @@
     "Create a sitemap of an e-commerce store with a Home page that links to Shop, Cart, Checkout, Account, and Support, and a Shop page that links to Categories and a Product page. (Draw each link as an arrow from the parent page so the pages are connected, not a flat list.)",
     "Create a sitemap of a SaaS app with a Landing page that links to Pricing, Docs, a Dashboard, and Login, and a Dashboard that links to Projects, Settings, and Billing. (Draw each link as an arrow from the parent page so the pages are connected, not a flat list.)",
     "Create a sitemap of a restaurant website with a Home page that links to Menu, Reservations, About, and Contact. (Draw each link as an arrow from the Home page so the pages are connected, not a flat list.)"
+  ],
+  "sketch": [
+    "Draw a small sketch of a morning standup flow: a standup bot prompts a team board, the board feeds a follow-ups group holding a blocker-notes sticky and an action-log document. Tag who owns each shape."
   ],
   "slope": [
     "Make a slope chart comparing each item’s value between the two periods in the sample data.",

@@ -128,5 +128,35 @@
     "id": "feature-branch-history",
     "label": "Feature-branch git history",
     "suitsTypes": ["version-control"]
+  },
+  {
+    "id": "monarch-family",
+    "label": "Three generations of a family, with a remarriage and an adoption",
+    "suitsTypes": ["family"]
+  },
+  {
+    "id": "workout-split",
+    "label": "Which muscle groups each training day targets",
+    "suitsTypes": ["body"]
+  },
+  {
+    "id": "fundraiser-progress",
+    "label": "Community fundraiser: raised so far against the target (GBP)",
+    "suitsTypes": ["goal"]
+  },
+  {
+    "id": "crew-timezones",
+    "label": "Where each member of a distributed team works",
+    "suitsTypes": ["clock"]
+  },
+  {
+    "id": "cup-quarterfinals",
+    "label": "An eight-team knockout cup, seeded, with results through the final",
+    "suitsTypes": ["bracket"]
+  },
+  {
+    "id": "expedition-dates",
+    "label": "Dated milestones on a long-planned trip",
+    "suitsTypes": ["countdown"]
   }
 ]

@@ -1,0 +1,22 @@
+{
+  "id": "expedition-dates",
+  "label": "Dated milestones on a long-planned trip",
+  "suitsTypes": ["countdown"],
+  "data": {
+    "trip": "Patagonia crossing",
+    "milestones": [
+      {
+        "event": "Visas lodged",
+        "date": "2027-01-15"
+      },
+      {
+        "event": "Flights booked",
+        "date": "2027-03-02"
+      },
+      {
+        "event": "Depart",
+        "date": "2027-11-04"
+      }
+    ]
+  }
+}
