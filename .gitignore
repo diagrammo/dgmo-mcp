@@ -21,3 +21,12 @@ tools/guidance-studio/trial-runs.json.tmp-*
 .env
 .env.*
 !.env.example
+
+# The pre-push gate's ownership marker (#561). It is written INSIDE the gate
+# worktree, and that worktree is where a tag push then runs preflight.sh —
+# whose first check is `git status --porcelain`, which counts untracked files.
+# So the gate's own marker made the tree look dirty and the release was refused
+# by the very hook meant to protect it. This repo is the only one that runs a
+# clean-tree check inside its gate, which is why only it could hit this.
+# Observed 2026-09-20, stopping a full ecosystem release at level 1.
+.gate-owner
