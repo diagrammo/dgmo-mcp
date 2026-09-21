@@ -3,13 +3,20 @@
 // `tests/` — so a test that imports one needs a declaration or it is an
 // implicit `any`, which `strict` refuses.
 
+export interface Diagnostic {
+  message: string;
+  /** 1-based line in the trial's own DGMO, where the pipeline gave one. */
+  line: number | null;
+  severity: string | null;
+}
+
 export interface TrialSummary {
   idx: number;
   prompt: string;
   ts: number | null;
   rendered: boolean;
   error: string | null;
-  diagnostics: string[];
+  diagnostics: Diagnostic[];
   dgmo: string;
 }
 
@@ -27,6 +34,8 @@ export interface RunSummary {
   knownTypeCount: number;
   /** Offered types the session never exercised, sorted. */
   uncovered: string[];
+  /** When the trials ran — not when the report was written. */
+  ran: { from: number; to: number } | null;
   totals: {
     types: number;
     trials: number;
@@ -41,7 +50,18 @@ export function summariseTrials(
   knownTypes?: string[]
 ): RunSummary;
 
+export function sessionDate(summary: RunSummary, generatedAt: string): string;
+
 export function renderMarkdown(
   summary: RunSummary,
   generatedAt: string
 ): string;
+
+export interface ReportPaths {
+  trialsPath?: string;
+  registryPath?: string;
+  resultsDir?: string;
+}
+
+/** The command. Returns the process exit code; 0 only when a file was written. */
+export function main(argv: string[], paths?: ReportPaths): number;

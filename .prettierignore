@@ -1,3 +1,4 @@
 dist
 node_modules
 pnpm-lock.yaml
+tools/guidance-studio/results/

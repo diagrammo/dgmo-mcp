@@ -7,17 +7,30 @@
 // refresh on the machine that made it and reached nobody else, which is why
 // the instrument has been repaired four times and read never (#847).
 //
-// This writes the same session out WITHOUT the images: a dated markdown file
-// under `results/`, carrying the verdict per trial, the diagnostics the
-// pipeline returned, the DGMO the model actually produced, and — the headline
-// the studio never stated — how many chart types the session covered at all.
+// This writes the same session out WITHOUT the images: a markdown file under
+// `results/`, carrying the verdict per trial, the diagnostics the pipeline
+// returned, the DGMO the model actually produced, and — the headline the
+// studio never stated — how many chart types the session covered at all.
 //
 // Run: node tools/guidance-studio/report.mjs   (or `pnpm studio:report`)
 //      node tools/guidance-studio/report.mjs --out <path>
 //
-// 🔴 It refuses rather than reporting an empty session. A result file saying
-// "0 trials" is indistinguishable from a run nobody made, and the whole point
-// of the file is that somebody else can trust what it says.
+// 🔴 It refuses rather than report a number it cannot stand behind: an empty
+// session, an unreadable trial store, and an unreadable registry all exit 1.
+// A result file saying "0 trials" cannot be told from a run nobody made, and
+// "2 of 0 chart types" reads as a coverage measurement while being the
+// registry's absence. Being trustworthy is the whole point of a file somebody
+// else reads.
+//
+// 🔴 The file is DATED BY ITS TRIALS, never by when this script ran. The stale
+// 404 KB store #847 describes is three months old and two types wide, and the
+// decision on that row says in as many words that it must not be mistaken for
+// a baseline — which a report titled with today's date is exactly how to do.
+//
+// 🔴 `results/` is in .prettierignore. `format:check` is the first step of
+// `check:all`, prettier pads markdown table cells, and this generator does
+// not — so without the ignore, committing the file this script exists to
+// produce turns the gate red, and `pnpm format` un-does the next run.
 // ============================================================
 import { readFileSync, writeFileSync, mkdirSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
@@ -36,10 +49,11 @@ const RESULTS_DIR = path.join(here, 'results');
  * @param {string[]} knownTypes every chart type the studio offers, for coverage
  */
 export function summariseTrials(trials, knownTypes = []) {
-  const types = Object.keys(trials)
+  const types = Object.keys(trials ?? {})
     .filter((t) => Object.keys(trials[t] ?? {}).length > 0)
     .sort();
 
+  const stamps = [];
   const rows = types.map((type) => {
     const byIdx = trials[type] ?? {};
     const trialList = Object.keys(byIdx)
@@ -52,15 +66,27 @@ export function summariseTrials(trials, knownTypes = []) {
         // they are the fields this report exists to leave behind.
         const error = result.error ? String(result.error) : null;
         const dgmo = typeof result.dgmo === 'string' ? result.dgmo.trim() : '';
+        // 🔴 `line` and `severity` are kept, not flattened to the message.
+        // A diagnostic that names a line is the only way a reader can point
+        // at the offending line of the DGMO printed below it.
         const diagnostics = Array.isArray(result.diagnostics)
           ? result.diagnostics.map((d) =>
-              typeof d === 'string' ? d : (d?.message ?? JSON.stringify(d))
+              typeof d === 'string'
+                ? { message: d, line: null, severity: null }
+                : {
+                    message: String(d?.message ?? JSON.stringify(d)),
+                    line: typeof d?.line === 'number' ? d.line : null,
+                    severity:
+                      typeof d?.severity === 'string' ? d.severity : null,
+                  }
             )
           : [];
+        const ts = typeof trial.ts === 'number' ? trial.ts : null;
+        if (ts !== null) stamps.push(ts);
         return {
           idx: Number(idx),
           prompt: typeof trial.prompt === 'string' ? trial.prompt : '',
-          ts: typeof trial.ts === 'number' ? trial.ts : null,
+          ts,
           rendered: !error && dgmo.length > 0,
           error,
           diagnostics,
@@ -84,6 +110,10 @@ export function summariseTrials(trials, knownTypes = []) {
     // of forty-six has not measured the guidance, whatever its trials say.
     knownTypeCount: knownTypes.length,
     uncovered: knownTypes.filter((t) => !covered.has(t)).sort(),
+    // When the trials ran, which is not when this file was written.
+    ran: stamps.length
+      ? { from: Math.min(...stamps), to: Math.max(...stamps) }
+      : null,
     totals: {
       types: rows.length,
       trials: rows.reduce((n, r) => n + r.trials.length, 0),
@@ -96,30 +126,50 @@ export function summariseTrials(trials, knownTypes = []) {
 
 const stamp = (ts) => (ts ? new Date(ts).toISOString() : 'no timestamp');
 
+/** The date this session was RUN, for the title and the filename. */
+export function sessionDate(summary, generatedAt) {
+  return summary.ran
+    ? new Date(summary.ran.to).toISOString().slice(0, 10)
+    : generatedAt.slice(0, 10);
+}
+
 /** Render a summary as the committed markdown result file. */
 export function renderMarkdown(summary, generatedAt) {
-  const { totals, types, uncovered, knownTypeCount } = summary;
+  const { totals, types, uncovered, knownTypeCount, ran } = summary;
   const out = [];
+  // 🔴 Blank lines are managed here rather than by collapsing the finished
+  // document. A `\n{3,}` pass over the whole string reaches inside the ```dgmo
+  // fences and silently renumbers the model's own output, which is the one
+  // thing in this file that has to be verbatim.
+  const blank = () => {
+    if (out.length && out[out.length - 1] !== '') out.push('');
+  };
 
-  out.push(`# Guidance studio run — ${generatedAt.slice(0, 10)}`);
-  out.push('');
+  out.push(`# Guidance studio run — ${sessionDate(summary, generatedAt)}`);
+  blank();
   out.push(
     "Written by `pnpm studio:report` from the studio's `trial-runs.json`.",
     'The rendered PNG of each trial is deliberately not here — inline base64 is',
     'what keeps the scratch file out of git, and what kept every run before this',
     'one unreadable by anybody but the machine that made it.'
   );
-  out.push('');
-  out.push(`Generated: ${generatedAt}`);
-  out.push('');
+  blank();
   out.push(
-    `Coverage: **${totals.types} of ${knownTypeCount} chart types** carry a trial.`
+    ran
+      ? `Trials ran: ${stamp(ran.from)} to ${stamp(ran.to)} · report written ${generatedAt}`
+      : `Trials ran: no trial carries a timestamp · report written ${generatedAt}`
   );
-  out.push('');
+  blank();
+  out.push(
+    knownTypeCount > 0
+      ? `Coverage: **${totals.types} of ${knownTypeCount} chart types** carry a trial.`
+      : `Coverage: ${totals.types} chart types carry a trial; the studio registry was unreadable, so the total is unknown.`
+  );
+  blank();
   out.push(
     `Trials: ${totals.trials} · rendered ${totals.rendered} · failed ${totals.failed} · returned diagnostics ${totals.withDiagnostics}`
   );
-  out.push('');
+  blank();
   out.push('| chart type | trials | rendered | failed | with diagnostics |');
   out.push('|---|---|---|---|---|');
   for (const row of types) {
@@ -127,72 +177,89 @@ export function renderMarkdown(summary, generatedAt) {
       `| ${row.type} | ${row.trials.length} | ${row.rendered} | ${row.failed} | ${row.withDiagnostics} |`
     );
   }
-  out.push('');
+  blank();
 
   if (uncovered.length > 0) {
     out.push(`## Not exercised (${uncovered.length})`);
-    out.push('');
+    blank();
     out.push(uncovered.join(', '));
-    out.push('');
+    blank();
   }
 
   for (const row of types) {
     out.push(`## ${row.type}`);
-    out.push('');
+    blank();
     for (const trial of row.trials) {
       out.push(
         `### trial ${trial.idx} — ${trial.rendered ? 'rendered' : 'FAILED'} — ${stamp(trial.ts)}`
       );
-      out.push('');
+      blank();
       if (trial.prompt) {
         out.push(`Prompt: ${trial.prompt}`);
-        out.push('');
+        blank();
       }
       if (trial.error) {
         out.push(`Error: ${trial.error}`);
-        out.push('');
+        blank();
       }
       if (trial.diagnostics.length > 0) {
         out.push('Diagnostics:');
-        out.push('');
-        for (const d of trial.diagnostics) out.push(`- ${d}`);
-        out.push('');
+        blank();
+        for (const d of trial.diagnostics) {
+          const where = d.line !== null ? `line ${d.line}: ` : '';
+          const how = d.severity ? `[${d.severity}] ` : '';
+          out.push(`- ${how}${where}${d.message}`);
+        }
+        blank();
       }
       if (trial.dgmo) {
+        // Verbatim, fence to fence. Nothing below reformats this.
         out.push('```dgmo');
         out.push(trial.dgmo);
         out.push('```');
-        out.push('');
+        blank();
       }
     }
   }
 
-  return (
-    out
-      .join('\n')
-      .replace(/\n{3,}/g, '\n\n')
-      .trimEnd() + '\n'
-  );
+  return out.join('\n').trimEnd() + '\n';
 }
 
-/** Chart-type ids the studio offers, from the registry it seeds itself with. */
-function knownTypes() {
+/**
+ * Chart-type ids the studio offers, from the registry it seeds itself with,
+ * or `null` when it could not be read.
+ *
+ * 🔴 Absence is not emptiness. `dump-registry.mjs` rewrites this file with a
+ * bare `writeFileSync` on every `pnpm studio`, so a report taken while the
+ * studio is launching can read a half-written one — and an empty list would
+ * turn the coverage headline into "2 of 0" without anything saying so.
+ */
+function knownTypes(registryPath) {
   try {
-    const registry = JSON.parse(readFileSync(REGISTRY_PATH, 'utf8'));
-    return (registry.types ?? []).map((t) => t.id);
+    const registry = JSON.parse(readFileSync(registryPath, 'utf8'));
+    const ids = (registry.types ?? []).map((t) => t.id);
+    return ids.length > 0 ? ids : null;
   } catch {
-    return [];
+    return null;
   }
 }
 
-function main(argv) {
+/**
+ * The command. `paths` exists so the test can drive the whole thing against a
+ * scratch directory: the real trial store is a developer's own session and a
+ * test that wrote to it would destroy the thing this script reports on.
+ */
+export function main(argv, paths = {}) {
+  const trialsPath = paths.trialsPath ?? TRIALS_PATH;
+  const registryPath = paths.registryPath ?? REGISTRY_PATH;
+  const resultsDir = paths.resultsDir ?? RESULTS_DIR;
   const outFlag = argv.indexOf('--out');
   let raw;
   try {
-    raw = readFileSync(TRIALS_PATH, 'utf8');
+    raw = readFileSync(trialsPath, 'utf8');
   } catch {
     console.error(
-      `report: no trials at ${TRIALS_PATH} — run \`pnpm studio\` and save at least one trial first.`
+      `report: no trials at ${trialsPath} — run \`pnpm studio\` and save at least one trial first.`
     );
     return 1;
   }
@@ -204,11 +271,25 @@ function main(argv) {
     // The studio itself treats a corrupt store as empty so the UI survives.
     // A report must not: reporting zero runs off an unreadable file is the one
     // outcome a reader cannot tell from an honest one.
-    console.error(`report: ${TRIALS_PATH} is not readable JSON — ${err}`);
+    console.error(`report: ${trialsPath} is not readable JSON — ${err}`);
+    return 1;
+  }
+  if (trials === null || typeof trials !== 'object' || Array.isArray(trials)) {
+    console.error(
+      `report: ${trialsPath} is not a trial store — ${raw.slice(0, 40)}`
+    );
     return 1;
   }
 
-  const summary = summariseTrials(trials, knownTypes());
+  const known = knownTypes(registryPath);
+  if (known === null) {
+    console.error(
+      `report: ${registryPath} could not be read — the coverage number would be meaningless. Run \`node tools/guidance-studio/dump-registry.mjs\` first.`
+    );
+    return 1;
+  }
+
+  const summary = summariseTrials(trials, known);
   if (summary.totals.trials === 0) {
     console.error(
       'report: the trial store holds no trials — nothing to report.'
@@ -220,7 +301,7 @@ function main(argv) {
   const target =
     outFlag >= 0 && argv[outFlag + 1]
       ? path.resolve(argv[outFlag + 1])
-      : path.join(RESULTS_DIR, `${generatedAt.slice(0, 10)}.md`);
+      : path.join(resultsDir, `${sessionDate(summary, generatedAt)}.md`);
 
   mkdirSync(path.dirname(target), { recursive: true });
   writeFileSync(target, renderMarkdown(summary, generatedAt));
@@ -229,7 +310,7 @@ function main(argv) {
   console.log(
     `report: ${target}\n` +
       `  ${totals.types} of ${knownTypeCount} chart types covered, ` +
-      `${totals.trials} trials — ${totals.rendered} rendered, ${totals.failed} failed, ` +
+      `${totals.trials} trial${totals.trials === 1 ? '' : 's'} — ${totals.rendered} rendered, ${totals.failed} failed, ` +
       `${totals.withDiagnostics} with diagnostics`
   );
   return 0;
