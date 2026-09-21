@@ -1,9 +1,10 @@
 // ============================================================
 // guidance-studio-datasets.test.ts — coverage invariants for the studio's
-// per-type datasets + starter prompts. Locks two guarantees:
+// per-type datasets + starter prompts. Locks three guarantees:
 //   1. Every chart type has a starter prompt.
 //   2. Every chart type has a fitting dataset EXCEPT the handful of pure-logic
 //      types whose prompt is fully self-contained (a dataset adds no value).
+//   3. Every starter prompt has a gallery source, and that source renders.
 // Regenerate fixtures with `node tools/guidance-studio/datasets/build.mjs`.
 // ============================================================
 
@@ -12,6 +13,8 @@ import registry from '../tools/guidance-studio/registry.json';
 import manifest from '../tools/guidance-studio/datasets/manifest.json';
 import prompts from '../tools/guidance-studio/prompts.json';
 import promptValidation from '../tools/guidance-studio/prompt-validation.json';
+import gallerySources from '../tools/guidance-studio/gallery-sources.json';
+import { renderPipeline } from '../src/render-helpers.js';
 
 // Types whose content is fully specified by the prompt itself, so no injected
 // dataset is needed (logic/structure the model builds from the instruction).
@@ -29,6 +32,7 @@ const typeIds = (registry as { types: { id: string }[] }).types.map(
   (t) => t.id
 );
 const promptMap = prompts as Record<string, string[]>;
+const sourceMap = gallerySources as Record<string, string[]>;
 const suited = new Set(
   (manifest as { suitsTypes: string[] }[]).flatMap((d) => d.suitsTypes)
 );
@@ -92,6 +96,57 @@ describe('guidance-studio per-type coverage', () => {
     }
     expect(problems).toEqual([]);
   });
+
+  // gallery-sources.json is the by-hand half of the studio. registry.json
+  // regenerates itself on every `pnpm studio` run, so it cannot drift for
+  // longer than one run; the gallery cannot regenerate, and the gap it grows
+  // is invisible — build-gallery.mjs reports a missing source as "a render
+  // failure on a fresh checkout and nowhere else". It had regrown to seven
+  // types (body, bracket, clock, countdown, family, goal, sketch) after
+  // `1a82b1b` closed the last one. These two assertions are what stop it
+  // regrowing a third time.
+  it('every starter prompt has an index-aligned gallery source', () => {
+    const problems: string[] = [];
+    for (const id of typeIds) {
+      const want = promptMap[id] ?? [];
+      const got = sourceMap[id] ?? [];
+      if (got.length !== want.length) {
+        problems.push(
+          `${id}: ${want.length} prompt(s), ${got.length} source(s)`
+        );
+        continue;
+      }
+      got.forEach((dgmo, i) => {
+        if (typeof dgmo !== 'string' || !dgmo.trim())
+          problems.push(`${id}[${i}]: empty source`);
+      });
+    }
+    expect(problems).toEqual([]);
+  });
+
+  it('every gallery source renders through the shipped pipeline', async () => {
+    // The same call build-gallery.mjs makes — theme light, palette slate — so
+    // a source that passes here is one the gallery can actually draw. It is
+    // the render only, never the rasterisation, which is what keeps a
+    // whole-corpus check affordable.
+    const problems: string[] = [];
+    for (const id of typeIds) {
+      const got = sourceMap[id] ?? [];
+      for (let i = 0; i < got.length; i++) {
+        const r = await renderPipeline(got[i], {
+          theme: 'light',
+          palette: 'slate',
+        });
+        if (r.error || !r.svg)
+          problems.push(`${id}[${i}]: ${r.error ?? 'no svg'}`);
+        else if (r.diagnostics.some((d) => d.severity === 'error'))
+          problems.push(
+            `${id}[${i}]: ${r.diagnostics.find((d) => d.severity === 'error')?.message}`
+          );
+      }
+    }
+    expect(problems).toEqual([]);
+  }, 60_000);
 
   it('every dataset suitsTypes entry maps to a real chart type (no typos)', () => {
     // Datasets may also list non-registry aliases (line, pie); allow those two.
