@@ -11,6 +11,7 @@ pnpm check:all        # deadcode + duplication + deps + test — what CI runs, a
 pnpm check:triggers   # drift guard: triggers.json vs dgmo-content/registry.json — NOT in check:all, NOT in CI
 ./preflight.sh        # version sync, pack, fresh-install MCP probe. Runs on tag push (.githooks/pre-push). Runs NO tests
 pnpm studio           # guidance studio (the README's `pnpm hub` / `pnpm harness` scripts do not exist)
+pnpm studio:report    # write the studio session out to a committed results/<date>.md — the run's only shareable output
 ```
 
 ✅ **The repo is prettier-clean, and `check:all` now enforces it** — `format:check` runs first in the gate as of 2026-08-06, so `pnpm format` is safe to run bare and drift cannot accumulate again. It had: 47 files under `tools/`, `tests/` and `src/` were failing, and because nothing checked, one `pnpm format` during unrelated work turned an 8-file change into a 55-file one. If `check:all` fails on formatting, run `pnpm format` and commit that **alone** — never as a rider on a feature.
