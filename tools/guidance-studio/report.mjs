@@ -27,6 +27,14 @@
 // decision on that row says in as many words that it must not be mistaken for
 // a baseline — which a report titled with today's date is exactly how to do.
 //
+// 🔴 Nothing stored is echoed unbounded, and nothing stored can open a fence.
+// A failed `claude -p` is persisted as `claude failed: Command failed: claude
+// -p <the entire resolved prompt>`, so the FAILURE path was re-introducing the
+// 12 KB prompt echo this file exists to leave out — with the literal ```dgmo
+// the studio tells the model it may use, which inverted every fence after it.
+// Prompts, errors and diagnostics are capped and indented; the DGMO keeps its
+// bytes and gets a fence sized to hold them.
+//
 // 🔴 `results/` is in .prettierignore. `format:check` is the first step of
 // `check:all`, prettier pads markdown table cells, and this generator does
 // not — so without the ignore, committing the file this script exists to
@@ -104,12 +112,21 @@ export function summariseTrials(trials, knownTypes = []) {
   });
 
   const covered = new Set(types);
+  const known = new Set(knownTypes);
   return {
     types: rows,
     // The coverage line is the point: a session that exercised two types out
     // of forty-six has not measured the guidance, whatever its trials say.
+    //
+    // 🔴 The numerator counts only types the registry still lists. A store is
+    // cumulative and the registry is not — `live-link` was in it and is now
+    // excluded (`NOT_AUTHORED`, dump-registry.mjs), and a rename does the
+    // same — so counting session types against the registry total produced a
+    // fraction whose parts did not add up: 2 of 4, above `Not exercised (3)`.
     knownTypeCount: knownTypes.length,
+    coveredKnownCount: types.filter((t) => known.has(t)).length,
     uncovered: knownTypes.filter((t) => !covered.has(t)).sort(),
+    unknownTypes: types.filter((t) => !known.has(t)).sort(),
     // When the trials ran, which is not when this file was written.
     ran: stamps.length
       ? { from: Math.min(...stamps), to: Math.max(...stamps) }
@@ -125,6 +142,41 @@ export function summariseTrials(trials, knownTypes = []) {
 }
 
 const stamp = (ts) => (ts ? new Date(ts).toISOString() : 'no timestamp');
+
+/** How long a stored prompt, error or diagnostic may run in the report. */
+const TEXT_CAP = 600;
+
+/**
+ * Render untrusted stored text as an INDENTED code block.
+ *
+ * 🔴 Two hazards, and the indent answers both. A failed `claude -p` is stored
+ * by save-plugin.ts as `claude failed: Command failed: claude -p <the entire
+ * resolved prompt>\n<stderr>` — so the failure path re-introduced the 12 KB
+ * prompt echo this file exists to leave out, and that prompt contains the
+ * literal ```dgmo the studio tells the model it may use, which opened a fence
+ * and inverted every fence in the rest of the document. An indented block
+ * cannot be opened or closed by backticks, and the cap bounds the blob.
+ */
+function quoted(text) {
+  const clipped =
+    text.length > TEXT_CAP
+      ? `${text.slice(0, TEXT_CAP)}… [truncated, ${text.length} characters]`
+      : text;
+  return clipped.split('\n').map((line) => `    ${line}`);
+}
+
+/**
+ * A fence long enough to hold this content. The model is told a ```dgmo fence
+ * is acceptable, so its answer can carry one; three backticks would end the
+ * block early and spill DGMO into the document as prose.
+ */
+function fenceFor(text) {
+  const longest = (text.match(/`+/g) ?? []).reduce(
+    (n, run) => Math.max(n, run.length),
+    0
+  );
+  return '`'.repeat(Math.max(3, longest + 1));
+}
 
 /** The date this session was RUN, for the title and the filename. */
 export function sessionDate(summary, generatedAt) {
@@ -162,7 +214,7 @@ export function renderMarkdown(summary, generatedAt) {
   blank();
   out.push(
     knownTypeCount > 0
-      ? `Coverage: **${totals.types} of ${knownTypeCount} chart types** carry a trial.`
+      ? `Coverage: **${summary.coveredKnownCount} of ${knownTypeCount} chart types** carry a trial.`
       : `Coverage: ${totals.types} chart types carry a trial; the studio registry was unreadable, so the total is unknown.`
   );
   blank();
@@ -186,6 +238,18 @@ export function renderMarkdown(summary, generatedAt) {
     blank();
   }
 
+  // Trials the registry no longer lists. They are real trials and they keep
+  // their section below; they are simply not part of the coverage fraction,
+  // and a reader who adds the two counts up has to be told why.
+  if (summary.unknownTypes.length > 0) {
+    out.push(`## No longer in the registry (${summary.unknownTypes.length})`);
+    blank();
+    out.push(
+      `${summary.unknownTypes.join(', ')} — trialled, but not a chart type the studio offers today, so outside the coverage count above.`
+    );
+    blank();
+  }
+
   for (const row of types) {
     out.push(`## ${row.type}`);
     blank();
@@ -195,11 +259,15 @@ export function renderMarkdown(summary, generatedAt) {
       );
       blank();
       if (trial.prompt) {
-        out.push(`Prompt: ${trial.prompt}`);
+        out.push('Prompt:');
+        blank();
+        out.push(...quoted(trial.prompt));
         blank();
       }
       if (trial.error) {
-        out.push(`Error: ${trial.error}`);
+        out.push('Error:');
+        blank();
+        out.push(...quoted(trial.error));
         blank();
       }
       if (trial.diagnostics.length > 0) {
@@ -208,15 +276,18 @@ export function renderMarkdown(summary, generatedAt) {
         for (const d of trial.diagnostics) {
           const where = d.line !== null ? `line ${d.line}: ` : '';
           const how = d.severity ? `[${d.severity}] ` : '';
-          out.push(`- ${how}${where}${d.message}`);
+          out.push(...quoted(`${how}${where}${d.message}`));
         }
         blank();
       }
       if (trial.dgmo) {
-        // Verbatim, fence to fence. Nothing below reformats this.
-        out.push('```dgmo');
+        // Verbatim, fence to fence. Nothing below reformats this, and the
+        // fence is sized to the content so the model's own backticks cannot
+        // close it early.
+        const fence = fenceFor(trial.dgmo);
+        out.push(`${fence}dgmo`);
         out.push(trial.dgmo);
-        out.push('```');
+        out.push(fence);
         blank();
       }
     }
@@ -306,10 +377,10 @@ export function main(argv, paths = {}) {
   mkdirSync(path.dirname(target), { recursive: true });
   writeFileSync(target, renderMarkdown(summary, generatedAt));
 
-  const { totals, knownTypeCount } = summary;
+  const { totals, knownTypeCount, coveredKnownCount } = summary;
   console.log(
     `report: ${target}\n` +
-      `  ${totals.types} of ${knownTypeCount} chart types covered, ` +
+      `  ${coveredKnownCount} of ${knownTypeCount} chart types covered, ` +
       `${totals.trials} trial${totals.trials === 1 ? '' : 's'} — ${totals.rendered} rendered, ${totals.failed} failed, ` +
       `${totals.withDiagnostics} with diagnostics`
   );

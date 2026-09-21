@@ -128,8 +128,8 @@ describe('guidance studio run report', () => {
     expect(out).toContain('| sequence | 2 | 1 | 1 | 1 |');
     expect(out).toContain('## Not exercised (2)');
     expect(out).toContain('parse failed at line 2');
-    expect(out).toContain('- line 2: unknown participant "c"');
-    expect(out).toContain('- [warn] colour "#ff0000" is not in the palette');
+    expect(out).toContain('    line 2: unknown participant "c"');
+    expect(out).toContain('    [warn] colour "#ff0000" is not in the palette');
     expect(out.endsWith('\n')).toBe(true);
   });
 
@@ -160,6 +160,99 @@ describe('guidance studio run report', () => {
     };
     const out = renderMarkdown(summariseTrials(spaced, KNOWN), NOW);
     expect(out).toContain('```dgmo\nbar\n  a: 1\n\n\n  b: 2\n```');
+  });
+
+  it('bounds a stored error and never lets it open a fence', () => {
+    // What save-plugin.ts persists when `claude -p` times out or exits
+    // non-zero with empty stdout: the whole resolved prompt, and the prompt
+    // tells the model a ```dgmo fence is acceptable.
+    const failed = {
+      bar: {
+        '0': {
+          prompt: 'p',
+          ts: JUNE,
+          result: {
+            dgmo: '',
+            diagnostics: [],
+            error:
+              'claude failed: Command failed: claude -p Output ONLY the DGMO source' +
+              ' — no prose. A ```dgmo fence is fine.\n' +
+              'x'.repeat(20_000),
+          },
+        },
+      },
+      sequence: {
+        '0': {
+          prompt: 'q',
+          ts: JUNE,
+          result: {
+            dgmo: 'sequence\n  a -> b: hi',
+            diagnostics: [],
+            error: null,
+          },
+        },
+      },
+    };
+    const out = renderMarkdown(summariseTrials(failed, KNOWN), NOW);
+    expect(out).toContain('[truncated, 20');
+    expect(out.length).toBeLessThan(4000);
+    // Every fence marker must sit at the start of a line that opens or closes
+    // a DGMO block — the echoed one is indented, so it opens nothing.
+    const fences = out.split('\n').filter((l) => l.startsWith('```'));
+    expect(fences).toEqual(['```dgmo', '```']);
+    expect(out).toContain('## sequence');
+  });
+
+  it('sizes the DGMO fence to the DGMO, so the model cannot close it early', () => {
+    const backticked = {
+      bar: {
+        '0': {
+          prompt: 'p',
+          ts: JUNE,
+          result: {
+            dgmo: 'bar\n  note: ```not the end```\n  a: 1',
+            diagnostics: [],
+            error: null,
+          },
+        },
+      },
+    };
+    const out = renderMarkdown(summariseTrials(backticked, KNOWN), NOW);
+    expect(out).toContain(
+      '````dgmo\nbar\n  note: ```not the end```\n  a: 1\n````'
+    );
+  });
+
+  it('keeps the coverage fraction adding up when the registry drops a type', () => {
+    // A trial store is cumulative and the registry is not: `live-link` was in
+    // it and is now excluded. Counting it in the numerator made the parts
+    // exceed the whole — 2 of 4, above `Not exercised (3)`.
+    const stale = {
+      'live-link': {
+        '0': {
+          prompt: 'p',
+          ts: JUNE,
+          result: { dgmo: 'live-link\n  x', diagnostics: [], error: null },
+        },
+      },
+      sequence: {
+        '0': {
+          prompt: 'q',
+          ts: JUNE,
+          result: { dgmo: 'sequence\n  a -> b', diagnostics: [], error: null },
+        },
+      },
+    };
+    const s = summariseTrials(stale, KNOWN);
+    expect(s.coveredKnownCount).toBe(1);
+    expect(s.unknownTypes).toEqual(['live-link']);
+    expect(s.uncovered).toEqual(['bar', 'infra', 'timeline']);
+    const out = renderMarkdown(s, NOW);
+    expect(out).toContain('**1 of 4 chart types**');
+    expect(out).toContain('## Not exercised (3)');
+    expect(out).toContain('## No longer in the registry (1)');
+    // and the type keeps its own section — it was really trialled
+    expect(out).toContain('## live-link');
   });
 
   it('says the total is unknown rather than printing "of 0"', () => {

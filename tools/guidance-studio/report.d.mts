@@ -32,8 +32,12 @@ export interface RunSummary {
   types: TypeSummary[];
   /** How many chart types the studio offers, for the coverage line. */
   knownTypeCount: number;
+  /** Trialled types the registry STILL lists — the coverage numerator. */
+  coveredKnownCount: number;
   /** Offered types the session never exercised, sorted. */
   uncovered: string[];
+  /** Trialled types the registry no longer lists, sorted. Outside coverage. */
+  unknownTypes: string[];
   /** When the trials ran — not when the report was written. */
   ran: { from: number; to: number } | null;
   totals: {
