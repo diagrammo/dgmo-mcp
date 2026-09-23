@@ -63,7 +63,7 @@ function runClaude(prompt) {
   return new Promise((resolve) => {
     execFile(
       'claude',
-      ['-p', prompt],
+      ['-p', prompt, '--tools', '', '--strict-mcp-config', '--disable-slash-commands', '--effort', 'low'],
       { timeout: 120_000, maxBuffer: 1 << 20 },
       (err, stdout) => resolve(err ? '' : (stdout || '').trim())
     );

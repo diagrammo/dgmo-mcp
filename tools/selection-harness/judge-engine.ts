@@ -34,7 +34,7 @@ ${catalog}
 
 Request: "${prompt}"
 
-You may reason briefly, but you MUST end your reply with exactly one final line:
+End your reply with exactly one final line, which the harness parses:
 PICK: <id> — <at most 8 word reason>
 Use a single id from the catalog. Example:
 PICK: bar — one metric across discrete categories`;
@@ -90,7 +90,7 @@ function runClaude(prompt: string): Promise<string> {
   return new Promise((resolve) => {
     execFile(
       'claude',
-      ['-p', prompt],
+      ['-p', prompt, '--tools', '', '--strict-mcp-config', '--disable-slash-commands', '--effort', 'low'],
       { timeout: 120_000, maxBuffer: 1 << 20 },
       (err, stdout) => resolve(err ? '' : (stdout || '').trim())
     );

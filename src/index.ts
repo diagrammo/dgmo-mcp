@@ -384,7 +384,7 @@ tool(
 
 tool(
   'share_diagram',
-  'Generate a shareable diagrammo.app URL for a DGMO diagram.',
+  'Generate a shareable diagrammo.app URL for a DGMO diagram. The source is compressed into the URL fragment, so nothing is uploaded and the link works for anyone who opens it; returns the URL as text. Errors when the compressed source exceeds the URL size limit (the error reports both sizes) — split or simplify the diagram, or use open_in_app / render_diagram instead. The source is not validated here; call validate_diagram first.',
   {
     dgmo: z.string().describe('DGMO diagram markup'),
   },
@@ -537,7 +537,7 @@ tool(
 
 tool(
   'check_app_installed',
-  'Check whether the Diagrammo desktop app is installed (macOS). Call this ONCE before choosing how to show a diagram. If installed, the preferred output is to save the .dgmo source and open that file live in the app (open_in_app with filePath) — do NOT default to an online share URL. If not installed, fall back to the online share URL.',
+  'Check whether the Diagrammo desktop app is installed. Returns a sentence naming the output route the product prefers, plus JSON `{ installed, paths, platform }`. Detection is macOS-only; other platforms always report not installed. The answer does not change within a session, so one call is enough before deciding how to show a diagram: when installed, the preferred route is open_in_app with `filePath`; otherwise share_diagram.',
   {},
   {
     title: 'Check Diagrammo App Installed',
@@ -614,7 +614,7 @@ tool(
 
 tool(
   'get_language_reference',
-  'Get the DGMO language reference documentation. Optionally filter by chart type.',
+  'Get the DGMO language reference. With `chart_type`, returns that type\'s section plus the universal rules every diagram follows (the closed color set, titles, categorize-and-color). Without it, returns the entire reference for all chart types, which is very large (hundreds of KB); pass `chart_type` whenever the type is known. Errors when the type has no documented section — call list_chart_types for the valid ids. suggest_chart_type already appends the chosen type\'s section, so a call here is only needed after the user picks a type or when switching types.',
   {
     chart_type: chartTypeIdSchema
       .optional()
@@ -1063,7 +1063,7 @@ export function formatSuggestions(
 
 tool(
   'suggest_chart_type',
-  "Suggest the best DGMO chart type for a user's plain-English diagram request.\n\nALWAYS CALL THIS FIRST when creating a new diagram — it prevents guessing and is the authoritative selection mechanism.\n\nReturns one of two shapes: (1) a confident pick (high/medium) with the top match's syntax, or (2) an '⚠️ ASK THE USER' directive when the choice is ambiguous or nothing matched. On an ASK-THE-USER directive, do NOT pick a type yourself — present the listed candidates to the user and wait for their choice before generating.",
+  "Suggest the best DGMO chart type for a user's plain-English diagram request.\n\nCall this first when creating a new diagram: it ranks the chart types against the request and, on a confident pick, appends that type's language-reference section, so no separate get_language_reference call is needed. It is not needed when editing an existing diagram, whose first line already declares its type.\n\nReturns one of two shapes: (1) a confident pick (high/medium) with the top match's syntax, or (2) an '⚠️ ASK THE USER' result when the choice is ambiguous or nothing matched. On an ASK-THE-USER result, present the listed candidates to the user and wait for their choice before generating, because the request alone does not settle which type they want.",
   {
     prompt: z
       .string()

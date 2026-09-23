@@ -116,7 +116,9 @@ function buildResolvedPrompt(
   // faithful and the tips are judged on a realistic base (not naïve syntax).
   if (reference)
     parts.push(`DGMO syntax reference for "${type}":\n${reference}`);
-  if (tips) parts.push(`Styling guidance you MUST follow:\n${tips}`);
+  // Same framing the MCP slice gives these tips, so a studio run measures
+  // what a real client sees rather than an emphasis production never applies.
+  if (tips) parts.push(`**Styling tips:** ${tips}`);
   if (dataset)
     parts.push(
       `Use EXACTLY this data — do not invent, round, or drop any values:\n` +
@@ -138,7 +140,7 @@ function runClaude(
   return new Promise((resolve) => {
     execFile(
       'claude',
-      ['-p', prompt],
+      ['-p', prompt, '--tools', '', '--strict-mcp-config', '--disable-slash-commands'],
       { timeout: 120_000, maxBuffer: 4 << 20 },
       (err, stdout) =>
         resolve({
