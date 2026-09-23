@@ -614,7 +614,7 @@ tool(
 
 tool(
   'get_language_reference',
-  'Get the DGMO language reference. With `chart_type`, returns that type\'s section plus the universal rules every diagram follows (the closed color set, titles, categorize-and-color). Without it, returns the entire reference for all chart types, which is very large (hundreds of KB); pass `chart_type` whenever the type is known. Errors when the type has no documented section — call list_chart_types for the valid ids. suggest_chart_type already appends the chosen type\'s section, so a call here is only needed after the user picks a type or when switching types.',
+  "Get the DGMO language reference. With `chart_type`, returns that type's section plus the universal rules every diagram follows (the closed color set, titles, categorize-and-color). Without it, returns the entire reference for all chart types, which is very large (hundreds of KB); pass `chart_type` whenever the type is known. Errors when the type has no documented section — call list_chart_types for the valid ids. suggest_chart_type already appends the chosen type's section, so a call here is only needed after the user picks a type or when switching types.",
   {
     chart_type: chartTypeIdSchema
       .optional()

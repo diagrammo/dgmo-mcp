@@ -140,7 +140,14 @@ function runClaude(
   return new Promise((resolve) => {
     execFile(
       'claude',
-      ['-p', prompt, '--tools', '', '--strict-mcp-config', '--disable-slash-commands'],
+      [
+        '-p',
+        prompt,
+        '--tools',
+        '',
+        '--strict-mcp-config',
+        '--disable-slash-commands',
+      ],
       { timeout: 120_000, maxBuffer: 4 << 20 },
       (err, stdout) =>
         resolve({
