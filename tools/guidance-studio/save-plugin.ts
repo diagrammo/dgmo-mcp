@@ -432,9 +432,13 @@ export function savePlugin(): Plugin {
               reference
             );
             const { out, error: claudeErr } = await runClaude(resolvedPrompt);
-            if (claudeErr && !out) {
+            // Any claude error fails the run, stdout or not: a `claude -p` killed
+            // at its 120 s timeout still hands back whatever it had printed, and
+            // rendering that partial output would store a truncated answer as a
+            // clean `rendered` trial. The partial source is kept for inspection.
+            if (claudeErr) {
               sendJson(res, 200, {
-                dgmo: '',
+                dgmo: out ? extractDgmo(out) : '',
                 svg: null,
                 pngBase64: null,
                 resolvedPrompt,
