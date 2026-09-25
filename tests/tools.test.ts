@@ -21,6 +21,7 @@ import { readFileSync, existsSync } from 'node:fs';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { chartTypes } from '@diagrammo/dgmo';
+import { RECOGNIZED_COLOR_NAMES } from '@diagrammo/dgmo/advanced';
 import { server } from '../src/index.js';
 import { internalChartTypeIds } from '../src/internal-flag.js';
 
@@ -219,6 +220,46 @@ describe('render_diagram', () => {
     expect(text).toMatch(/<svg/);
     expect(text.toLowerCase()).toContain('not registered');
     expect(text).toContain('slate');
+  });
+});
+
+// --- Drift guard: tool descriptions point at the reference, never restate it --
+// A description says what a tool does and when to call it; DGMO syntax lives in
+// the language reference alone (diagrammo/diagrammo#855). A copied rule drifts
+// from the spec with nothing to catch it, and the one that was copied here was
+// the trailing color token — so a DGMO color name in any tool or parameter
+// description is the tell.
+describe('tool descriptions teach no DGMO syntax', () => {
+  /** Every `description` in a JSON schema, however deeply nested. */
+  function schemaDescriptions(node: unknown): string[] {
+    if (Array.isArray(node)) return node.flatMap(schemaDescriptions);
+    if (!node || typeof node !== 'object') return [];
+    return Object.entries(node).flatMap(([key, value]) =>
+      key === 'description' && typeof value === 'string'
+        ? [value]
+        : schemaDescriptions(value)
+    );
+  }
+
+  it('no tool or parameter description names a DGMO color', async () => {
+    const colorWord = new RegExp(
+      `\\b(${RECOGNIZED_COLOR_NAMES.join('|')})\\b`,
+      'i'
+    );
+    const offenders = (await client.listTools()).tools.flatMap((t) =>
+      [t.description ?? '', ...schemaDescriptions(t.inputSchema)]
+        .filter((d) => colorWord.test(d))
+        .map((d) => `${t.name}: ${d}`)
+    );
+    expect(offenders).toEqual([]);
+  });
+
+  it('the rendering tools still point at get_language_reference', async () => {
+    const { tools } = await client.listTools();
+    for (const name of ['render_diagram', 'preview_diagram', 'generate_report'])
+      expect(tools.find((t) => t.name === name)?.description).toContain(
+        'get_language_reference'
+      );
   });
 });
 

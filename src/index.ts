@@ -249,13 +249,11 @@ export function transportMode(): 'stdio' | 'http' {
 
 tool(
   'render_diagram',
-  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
+  'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. For DGMO syntax call get_language_reference.',
   {
     dgmo: z
       .string()
-      .describe(
-        'DGMO diagram markup. Color a label by appending a lowercase color name as the trailing token (e.g. "Sales red"); capitalize ("Red") to use a color word as literal text.'
-      ),
+      .describe('DGMO diagram markup. For syntax call get_language_reference.'),
     format: z.enum(['svg', 'png']).default('svg').describe('Output format'),
     theme: z
       .enum(['light', 'dark', 'transparent'])
@@ -669,7 +667,7 @@ tool(
 
 tool(
   'preview_diagram',
-  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
+  'Render one or more DGMO diagrams and open an HTML preview in the browser. Supports theme toggle and optional source display. For DGMO syntax call get_language_reference.',
   {
     diagrams: z
       .array(
@@ -681,7 +679,7 @@ tool(
           dgmo: z
             .string()
             .describe(
-              'DGMO diagram markup. Color a label by appending a lowercase color name as the trailing token (e.g. "Sales red"); capitalize ("Red") to use a color word as literal text.'
+              'DGMO diagram markup. For syntax call get_language_reference.'
             ),
         })
       )
@@ -790,7 +788,7 @@ tool(
 
 tool(
   'generate_report',
-  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. For DGMO syntax call get_language_reference (e.g. color a label with a trailing color name: "Sales red").',
+  'Generate a polished HTML report with multiple DGMO diagrams, table of contents, and optional source blocks. Opens in browser by default. For DGMO syntax call get_language_reference.',
   {
     title: z.string().describe('Report title'),
     subtitle: z.string().optional().describe('Optional subtitle'),
@@ -805,7 +803,7 @@ tool(
           dgmo: z
             .string()
             .describe(
-              'DGMO diagram markup. Color a label by appending a lowercase color name as the trailing token (e.g. "Sales red"); capitalize ("Red") to use a color word as literal text.'
+              'DGMO diagram markup. For syntax call get_language_reference.'
             ),
         })
       )
