@@ -14,7 +14,11 @@ export interface TrialSummary {
   idx: number;
   prompt: string;
   ts: number | null;
-  rendered: boolean;
+  /**
+   * `rendered` only when the pipeline returned no diagnostics at all; a render
+   * that carried any is `rendered-with-warnings`.
+   */
+  verdict: 'rendered' | 'rendered-with-warnings' | 'failed';
   error: string | null;
   diagnostics: Diagnostic[];
   dgmo: string;
@@ -23,7 +27,9 @@ export interface TrialSummary {
 export interface TypeSummary {
   type: string;
   trials: TrialSummary[];
+  /** Clean renders — no diagnostics. */
   rendered: number;
+  withWarnings: number;
   failed: number;
   withDiagnostics: number;
 }
@@ -44,6 +50,7 @@ export interface RunSummary {
     types: number;
     trials: number;
     rendered: number;
+    withWarnings: number;
     failed: number;
     withDiagnostics: number;
   };

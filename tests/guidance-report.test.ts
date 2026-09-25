@@ -89,13 +89,69 @@ describe('guidance studio run report', () => {
     expect(s.totals).toEqual({
       types: 2,
       trials: 3,
-      rendered: 2,
+      rendered: 0,
+      withWarnings: 2,
       failed: 1,
       withDiagnostics: 2,
     });
     const sequence = s.types.filter((t) => t.type === 'sequence')[0];
-    expect(sequence.rendered).toBe(1);
+    expect(sequence.rendered).toBe(0);
+    expect(sequence.withWarnings).toBe(1);
     expect(sequence.failed).toBe(1);
+  });
+
+  it('does not call a render that came back with warnings a plain rendered', () => {
+    // The 2026-09-24 probe's sequence trial (#847): the pipeline rendered it,
+    // but rejected the multi-word participant's tag as an unexpected line, so
+    // half the participants lost their colour — and the report said `rendered`.
+    const probe = {
+      sequence: {
+        '0': {
+          prompt: 'a checkout flow',
+          ts: JUNE,
+          result: {
+            dgmo: 'sequence\nUser z: Customer\nWeb App z: Customer',
+            svg: SVG,
+            diagnostics: [
+              {
+                message: "Unexpected line: 'Web App z: Customer'",
+                line: 3,
+                severity: 'warning',
+              },
+            ],
+            error: null,
+          },
+        },
+      },
+      er: {
+        '0': {
+          prompt: 'a blog schema',
+          ts: JUNE + 1_000,
+          result: {
+            dgmo: 'er\n  users',
+            svg: SVG,
+            diagnostics: [],
+            error: null,
+          },
+        },
+      },
+    };
+    const s = summariseTrials(probe, ['er', 'sequence']);
+    const verdicts = s.types.map((t) => [t.type, t.trials[0].verdict]);
+    expect(verdicts).toEqual([
+      ['er', 'rendered'],
+      ['sequence', 'rendered-with-warnings'],
+    ]);
+    expect(s.totals).toMatchObject({ rendered: 1, withWarnings: 1, failed: 0 });
+
+    const out = renderMarkdown(s, NOW);
+    expect(out).toContain(
+      'Trials: 2 · rendered 1 · rendered with warnings 1 · failed 0'
+    );
+    expect(out).toContain('| sequence | 1 | 0 | 1 | 0 | 1 |');
+    expect(out).toContain('| er | 1 | 1 | 0 | 0 | 0 |');
+    expect(out).toMatch(/^### trial 0 — rendered-with-warnings — /m);
+    expect(out).toMatch(/^### trial 0 — rendered — /m);
   });
 
   it('names the chart types the session never exercised', () => {
@@ -125,7 +181,8 @@ describe('guidance studio run report', () => {
   it('states the coverage, the verdicts and the diagnostics with their lines', () => {
     const out = md();
     expect(out).toContain('**2 of 4 chart types**');
-    expect(out).toContain('| sequence | 2 | 1 | 1 | 1 |');
+    expect(out).toContain('| sequence | 2 | 0 | 1 | 1 | 1 |');
+    expect(out).toContain('### trial 0 — FAILED — ');
     expect(out).toContain('## Not exercised (2)');
     expect(out).toContain('parse failed at line 2');
     expect(out).toContain('    line 2: unknown participant "c"');

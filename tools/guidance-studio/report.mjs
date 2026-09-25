@@ -69,9 +69,9 @@ export function summariseTrials(trials, knownTypes = []) {
       .map((idx) => {
         const trial = byIdx[idx] ?? {};
         const result = trial.result ?? {};
-        // A trial is RENDERED when the pipeline returned no error and some
-        // DGMO came back. `svg`/`pngBase64` are deliberately not consulted —
-        // they are the fields this report exists to leave behind.
+        // A trial RENDERED when the pipeline returned no error and some DGMO
+        // came back. `svg`/`pngBase64` are deliberately not consulted — they
+        // are the fields this report exists to leave behind.
         const error = result.error ? String(result.error) : null;
         const dgmo = typeof result.dgmo === 'string' ? result.dgmo.trim() : '';
         // 🔴 `line` and `severity` are kept, not flattened to the message.
@@ -95,7 +95,7 @@ export function summariseTrials(trials, knownTypes = []) {
           idx: Number(idx),
           prompt: typeof trial.prompt === 'string' ? trial.prompt : '',
           ts,
-          rendered: !error && dgmo.length > 0,
+          verdict: verdictFor(!error && dgmo.length > 0, diagnostics),
           error,
           diagnostics,
           dgmo,
@@ -105,8 +105,11 @@ export function summariseTrials(trials, knownTypes = []) {
     return {
       type,
       trials: trialList,
-      rendered: trialList.filter((t) => t.rendered).length,
-      failed: trialList.filter((t) => !t.rendered).length,
+      rendered: trialList.filter((t) => t.verdict === 'rendered').length,
+      withWarnings: trialList.filter(
+        (t) => t.verdict === 'rendered-with-warnings'
+      ).length,
+      failed: trialList.filter((t) => t.verdict === 'failed').length,
       withDiagnostics: trialList.filter((t) => t.diagnostics.length > 0).length,
     };
   });
@@ -135,10 +138,27 @@ export function summariseTrials(trials, knownTypes = []) {
       types: rows.length,
       trials: rows.reduce((n, r) => n + r.trials.length, 0),
       rendered: rows.reduce((n, r) => n + r.rendered, 0),
+      withWarnings: rows.reduce((n, r) => n + r.withWarnings, 0),
       failed: rows.reduce((n, r) => n + r.failed, 0),
       withDiagnostics: rows.reduce((n, r) => n + r.withDiagnostics, 0),
     },
   };
+}
+
+/**
+ * A trial's verdict: `failed`, `rendered-with-warnings`, or `rendered`.
+ *
+ * 🔴 A render that came back with diagnostics is NOT a plain `rendered`. The
+ * pipeline refuses only on an error-severity diagnostic, so everything on a
+ * trial that rendered is a warning the model's output tripped — and a warning
+ * can mean its intent was dropped. The 2026-09-24 probe's sequence trial is
+ * the case: `Web App z: Customer` was rejected as an unexpected line, half the
+ * participants lost their colour tag, and the report still said `rendered`
+ * (#847). Only a render with no diagnostics at all is clean.
+ */
+function verdictFor(rendered, diagnostics) {
+  if (!rendered) return 'failed';
+  return diagnostics.length > 0 ? 'rendered-with-warnings' : 'rendered';
 }
 
 const stamp = (ts) => (ts ? new Date(ts).toISOString() : 'no timestamp');
@@ -219,14 +239,16 @@ export function renderMarkdown(summary, generatedAt) {
   );
   blank();
   out.push(
-    `Trials: ${totals.trials} · rendered ${totals.rendered} · failed ${totals.failed} · returned diagnostics ${totals.withDiagnostics}`
+    `Trials: ${totals.trials} · rendered ${totals.rendered} · rendered with warnings ${totals.withWarnings} · failed ${totals.failed} · returned diagnostics ${totals.withDiagnostics}`
   );
   blank();
-  out.push('| chart type | trials | rendered | failed | with diagnostics |');
-  out.push('|---|---|---|---|---|');
+  out.push(
+    '| chart type | trials | rendered | rendered with warnings | failed | with diagnostics |'
+  );
+  out.push('|---|---|---|---|---|---|');
   for (const row of types) {
     out.push(
-      `| ${row.type} | ${row.trials.length} | ${row.rendered} | ${row.failed} | ${row.withDiagnostics} |`
+      `| ${row.type} | ${row.trials.length} | ${row.rendered} | ${row.withWarnings} | ${row.failed} | ${row.withDiagnostics} |`
     );
   }
   blank();
@@ -255,7 +277,7 @@ export function renderMarkdown(summary, generatedAt) {
     blank();
     for (const trial of row.trials) {
       out.push(
-        `### trial ${trial.idx} — ${trial.rendered ? 'rendered' : 'FAILED'} — ${stamp(trial.ts)}`
+        `### trial ${trial.idx} — ${trial.verdict === 'failed' ? 'FAILED' : trial.verdict} — ${stamp(trial.ts)}`
       );
       blank();
       if (trial.prompt) {
@@ -381,7 +403,8 @@ export function main(argv, paths = {}) {
   console.log(
     `report: ${target}\n` +
       `  ${coveredKnownCount} of ${knownTypeCount} chart types covered, ` +
-      `${totals.trials} trial${totals.trials === 1 ? '' : 's'} — ${totals.rendered} rendered, ${totals.failed} failed, ` +
+      `${totals.trials} trial${totals.trials === 1 ? '' : 's'} — ${totals.rendered} rendered, ` +
+      `${totals.withWarnings} rendered with warnings, ${totals.failed} failed, ` +
       `${totals.withDiagnostics} with diagnostics`
   );
   return 0;
