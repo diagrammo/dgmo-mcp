@@ -22,7 +22,7 @@ import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
 import { chartTypes } from '@diagrammo/dgmo';
 import { RECOGNIZED_COLOR_NAMES } from '@diagrammo/dgmo/advanced';
-import { server } from '../src/index.js';
+import { server, formatSuggestions } from '../src/index.js';
 import { internalChartTypeIds } from '../src/internal-flag.js';
 
 /** Types that route but are never OFFERED — see src/internal-flag.ts. */
@@ -188,6 +188,67 @@ describe('get_examples', () => {
     });
     expect(isError).toBe(false);
     expect(text.length).toBeGreaterThan(20);
+  });
+
+  // The gallery files some types in a directory named for the type
+  // (gallery/fixtures/raci/…); a top-level read made them invisible (#854).
+  it('returns examples filed in a directory named for the chart type', async () => {
+    const { text, isError } = await call('get_examples', {
+      chart_type: 'raci',
+    });
+    expect(isError).toBe(false);
+    expect(text).toMatch(/^## raci\//m);
+  });
+
+  it('lists nested examples alongside top-level ones', async () => {
+    const { text, isError } = await call('get_examples', {});
+    expect(isError).toBe(false);
+    const listed = text.split('\n').filter((l) => l.startsWith('- '));
+    expect(text).toContain(`Available examples (${listed.length})`);
+    expect(listed).toContain('- raci/minimal');
+    expect(listed).toContain('- sequence');
+  });
+});
+
+// A suggestion must never tell a model to make a call that can only answer
+// with an error — 8 of 50 types used to (#854).
+describe('suggest_chart_type → get_examples pointers', () => {
+  const offered = chartTypes.filter((c) => !internalIds.has(c.id));
+  const pointers = (out: string) =>
+    [...out.matchAll(/get_examples\('([^']*)'\)/g)].map((m) => m[1]);
+  const score = (type: (typeof chartTypes)[number]) => ({
+    type,
+    score: 200,
+    matched: [type.id],
+    breakdown: { contig: 200, idf: 0, desc: 0, prior: 0 },
+  });
+
+  it('every pointer in a confident suggestion answers without error', async () => {
+    const failing: string[] = [];
+    for (const t of offered) {
+      for (const id of pointers(formatSuggestions([score(t)], false, 'high'))) {
+        const { isError } = await call('get_examples', { chart_type: id });
+        if (isError) failing.push(id);
+      }
+    }
+    expect(failing).toEqual([]);
+  });
+
+  it('an ambiguous suggestion names real ids, never a placeholder', async () => {
+    const failing: string[] = [];
+    for (let i = 0; i + 1 < offered.length; i += 2) {
+      const out = formatSuggestions(
+        [score(offered[i]), score(offered[i + 1])],
+        false,
+        'ambiguous'
+      );
+      expect(out).toContain('ASK THE USER');
+      for (const id of pointers(out)) {
+        const { isError } = await call('get_examples', { chart_type: id });
+        if (isError) failing.push(id);
+      }
+    }
+    expect(failing).toEqual([]);
   });
 });
 

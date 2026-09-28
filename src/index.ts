@@ -7,7 +7,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { exec } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join } from 'node:path';
+import { join, sep } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { assetRoots } from './asset-roots.js';
@@ -1029,11 +1029,11 @@ export function formatSuggestions(
       );
       if (r.matched.length)
         lines.push(`      matched: ${r.matched.join(', ')}`);
+      if (hasExamples(r.type.id))
+        lines.push(
+          `      starter template, once chosen: mcp__dgmo__get_examples('${r.type.id}')`
+        );
     }
-    lines.push('');
-    lines.push(
-      "Once the user chooses, call mcp__dgmo__get_examples('<id>') for a starter template."
-    );
     return lines.join('\n');
   }
 
@@ -1051,9 +1051,10 @@ export function formatSuggestions(
     lines.push(
       `  Matched triggers: ${r.matched.join(', ') || '(none — secondary score from description)'}`
     );
-    lines.push(
-      `  For a starter template, call mcp__dgmo__get_examples('${r.type.id}').`
-    );
+    if (hasExamples(r.type.id))
+      lines.push(
+        `  For a starter template, call mcp__dgmo__get_examples('${r.type.id}').`
+      );
     lines.push('');
   }
   return lines.join('\n').trimEnd();
@@ -1119,6 +1120,43 @@ function resolveGalleryPath(): string {
   );
 }
 
+/**
+ * Every example in the gallery, as a `/`-separated path relative to it without
+ * `.dgmo` — `sequence-basic` at the top level, `raci/minimal` in a directory
+ * named for its chart type. Recursive because the gallery files some types one
+ * level down, and a top-level read made those invisible (diagrammo/diagrammo#854).
+ */
+function listExamples(galleryPath: string): string[] {
+  return readdirSync(galleryPath, { recursive: true, encoding: 'utf8' })
+    .filter((f) => f.endsWith('.dgmo'))
+    .map((f) => f.split(sep).join('/').slice(0, -'.dgmo'.length))
+    .sort();
+}
+
+/**
+ * Whether an example belongs to `chartType`: `<type>.dgmo` or `<type>-*.dgmo`
+ * at the top level, or anything under a `<type>/` directory.
+ */
+function isExampleFor(name: string, chartType: string): boolean {
+  const slash = name.indexOf('/');
+  if (slash !== -1) return name.slice(0, slash) === chartType;
+  return name === chartType || name.startsWith(chartType + '-');
+}
+
+/**
+ * Whether `get_examples(chartType)` has anything to return, so a suggestion
+ * never points a caller at a call that can only answer with an error.
+ */
+function hasExamples(chartType: string): boolean {
+  try {
+    return listExamples(resolveGalleryPath()).some((n) =>
+      isExampleFor(n, chartType)
+    );
+  } catch {
+    return false;
+  }
+}
+
 tool(
   'get_examples',
   'Get example DGMO diagrams for a chart type. Returns real-world examples from the gallery that demonstrate syntax patterns. Use these as few-shot references when generating new diagrams.',
@@ -1145,11 +1183,9 @@ tool(
       };
     }
 
-    let files: string[];
+    let names: string[];
     try {
-      files = readdirSync(galleryPath)
-        .filter((f) => f.endsWith('.dgmo'))
-        .sort();
+      names = listExamples(galleryPath);
     } catch {
       return {
         content: [
@@ -1161,22 +1197,17 @@ tool(
 
     // If no chart_type, return a listing of all available examples
     if (!chart_type) {
-      const names = files.map((f) => f.replace('.dgmo', ''));
       return {
         content: [
           {
             type: 'text' as const,
-            text: `Available examples (${files.length}):\n\n${names.map((n) => `- ${n}`).join('\n')}\n\nCall get_examples with a chart_type to see the full DGMO source.`,
+            text: `Available examples (${names.length}):\n\n${names.map((n) => `- ${n}`).join('\n')}\n\nCall get_examples with a chart_type to see the full DGMO source.`,
           },
         ],
       };
     }
 
-    // Filter files matching the chart type prefix
-    const matching = files.filter((f) => {
-      const base = f.replace('.dgmo', '');
-      return base === chart_type || base.startsWith(chart_type + '-');
-    });
+    const matching = names.filter((n) => isExampleFor(n, chart_type));
 
     if (matching.length === 0) {
       return {
@@ -1192,9 +1223,9 @@ tool(
 
     // Cap at 5 examples to avoid overwhelming context
     const toShow = matching.slice(0, 5);
-    const parts = toShow.map((f) => {
-      const content = readFileSync(join(galleryPath, f), 'utf-8');
-      return `## ${f.replace('.dgmo', '')}\n\n\`\`\`dgmo\n${content.trim()}\n\`\`\``;
+    const parts = toShow.map((n) => {
+      const content = readFileSync(join(galleryPath, `${n}.dgmo`), 'utf-8');
+      return `## ${n}\n\n\`\`\`dgmo\n${content.trim()}\n\`\`\``;
     });
 
     let text = parts.join('\n\n---\n\n');
