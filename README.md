@@ -84,7 +84,7 @@ embed anywhere:
   [docusaurus-plugin-dgmo](https://www.npmjs.com/package/docusaurus-plugin-dgmo),
   [fumadocs-dgmo](https://www.npmjs.com/package/fumadocs-dgmo).
 - **Obsidian** — the _Diagrammo Diagrams_ community plugin renders DGMO in your vault.
-- **CLI** — `npx @diagrammo/dgmo-cli file.dgmo -o out.png`, or install via Homebrew.
+- **CLI** — `npx @diagrammo/dgmo-cli file.dgmo -o out.png`, or install it with `npm install -g @diagrammo/dgmo-cli` (macOS and Linux).
 
 > **One markup, everywhere.** A diagram you generate here renders identically in the
 > app, in your docs, and in Obsidian — because they all speak DGMO.
@@ -98,9 +98,11 @@ embed anywhere:
 Install the [`dgmo`](https://www.npmjs.com/package/@diagrammo/dgmo-cli) CLI and let it wire everything up:
 
 ```bash
-npm install -g @diagrammo/dgmo-cli   # or: brew install diagrammo/dgmo/dgmo
-dgmo install                     # auto-detects Claude Code, Codex, Claude Desktop, Cursor, …
+npm install -g @diagrammo/dgmo-cli   # macOS and Linux
+dgmo install                         # auto-detects Claude Code, Codex, Claude Desktop, Cursor, …
 ```
+
+Prefer Homebrew or pacman? See [diagrammo.app/dev](https://diagrammo.app/dev#cli).
 
 `dgmo install` configures each detected assistant non-interactively and points it at `dgmo mcp`, so there's no separate package to install or prompts to answer. Target one surface with `dgmo install claude-code` (or `codex`, `claude-desktop`, …).
 
