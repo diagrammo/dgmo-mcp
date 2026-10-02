@@ -26,13 +26,21 @@ import {
   extractTitleRule,
   extractCategorizeRule,
 } from '../../src/reference';
+import { assetRoots } from '../../src/asset-roots';
 
 const TIPS_BLOCK_RE = /<!--\s*TIPS start\s*-->[\s\S]*?<!--\s*TIPS end\s*-->/;
 
 const here = path.dirname(fileURLToPath(import.meta.url));
 const REPO_ROOT = path.join(here, '../..'); // dgmo-mcp/
-// Authoring target = the workspace dgmo source (edits are written back here).
-const REF_PATH = path.join(here, '../../../dgmo/docs/language-reference.md');
+// The language reference, found the way the server finds it (src/asset-roots.ts):
+// the sibling dgmo source in the workspace, else the installed devDependency's
+// copy — so a checkout with no sibling, like GitHub's CI runner, still has one
+// (#1012). Neither present → the sibling path, which the read errors name.
+const REF_PATH =
+  assetRoots()
+    .map((root) => path.join(root, 'docs', 'language-reference.md'))
+    .find((p) => existsSync(p)) ??
+  path.join(here, '../../../dgmo/docs/language-reference.md');
 const DATASETS_DIR = path.join(here, 'datasets');
 // Persisted manual runs ("trials"). Survives a browser refresh AND a dev-server
 // restart — build-gallery.mjs only ever rewrites gallery.json + gallery/, never

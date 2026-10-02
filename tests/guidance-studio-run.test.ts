@@ -13,6 +13,31 @@ import { describe, it, expect, vi, beforeEach } from 'vitest';
 const execFile = vi.hoisted(() => vi.fn());
 vi.mock('node:child_process', () => ({ execFile }));
 
+// Every test here runs as GitHub's CI runner does: with no sibling `dgmo/`
+// checkout beside this repo. The studio read the language reference from that
+// sibling only, so every run answered 400 there and passed on anchor (#1012).
+vi.mock('node:fs', async (importOriginal) => {
+  const fs = await importOriginal<typeof import('node:fs')>();
+  const { fileURLToPath } = await import('node:url');
+  const sibling = fileURLToPath(new URL('../../dgmo', import.meta.url));
+  const absent = (p: unknown): boolean =>
+    String(p) === sibling || String(p).startsWith(sibling + '/');
+  const mocked = {
+    ...fs,
+    existsSync: (p: Parameters<typeof fs.existsSync>[0]) =>
+      !absent(p) && fs.existsSync(p),
+    readFileSync: ((p: Parameters<typeof fs.readFileSync>[0], ...rest: []) => {
+      if (absent(p))
+        throw Object.assign(
+          new Error(`ENOENT: no such file or directory, open '${String(p)}'`),
+          { code: 'ENOENT' }
+        );
+      return fs.readFileSync(p, ...rest);
+    }) as typeof fs.readFileSync,
+  };
+  return { ...mocked, default: mocked };
+});
+
 import { savePlugin } from '../tools/guidance-studio/save-plugin';
 
 type Handler = (
