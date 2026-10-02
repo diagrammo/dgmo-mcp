@@ -5,7 +5,7 @@ import type { ToolCallback } from '@modelcontextprotocol/sdk/server/mcp.js';
 import type { ToolAnnotations } from '@modelcontextprotocol/sdk/types.js';
 import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js';
 import { z } from 'zod';
-import { exec } from 'node:child_process';
+import { execFile } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
 import { join, sep } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
@@ -454,17 +454,17 @@ tool(
     // When a saved file path is given, open THAT file in the app (via the .dgmo
     // file association) so it stays the single editable source — in-app edits
     // autosave back to disk. Otherwise hand off the diagram via deep link.
-    const openCmd = filePath
-      ? `open -a Diagrammo ${JSON.stringify(filePath)}`
-      : `open ${JSON.stringify(deepLink)}`;
+    // argv, never a shell string: filePath is model-supplied, and /bin/sh
+    // expands $(...) and backticks even inside JSON.stringify's double quotes.
+    const openArgs = filePath ? ['-a', 'Diagrammo', filePath] : [deepLink];
     const successText = filePath
       ? `Opened ${filePath} in Diagrammo app (live editing — in-app changes save back to this file).`
       : 'Opened diagram in Diagrammo app.';
 
     return new Promise((resolve) => {
-      // exec's callback is sync-typed; wrap the async body in a void IIFE
+      // execFile's callback is sync-typed; wrap the async body in a void IIFE
       // so the Promise return doesn't violate @typescript-eslint/no-misused-promises.
-      exec(openCmd, (error) => {
+      execFile('open', openArgs, (error) => {
         void (async () => {
           if (error) {
             // Fallback: render to SVG and open in browser
