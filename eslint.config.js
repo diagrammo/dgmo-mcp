@@ -23,6 +23,13 @@ export default tseslint.config(
       '@typescript-eslint/no-explicit-any': 'warn',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
+      // Measured at zero hits and turned on as a ratchet (#992): an object
+      // interpolated as `[object Object]`, string eval, a non-string in a
+      // template literal, a union swallowed by `any`/`unknown`.
+      '@typescript-eslint/no-base-to-string': 'error',
+      '@typescript-eslint/no-implied-eval': 'error',
+      '@typescript-eslint/restrict-template-expressions': 'error',
+      '@typescript-eslint/no-redundant-type-constituents': 'error',
       // Disable noisy type-checked rules that don't catch real bugs
       // (matches dgmo + app convention).
       '@typescript-eslint/no-unsafe-assignment': 'off',
@@ -31,10 +38,6 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-return': 'off',
       '@typescript-eslint/no-unsafe-call': 'off',
       '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/no-redundant-type-constituents': 'off',
-      '@typescript-eslint/no-base-to-string': 'off',
-      '@typescript-eslint/no-implied-eval': 'off',
-      '@typescript-eslint/restrict-template-expressions': 'off',
       '@typescript-eslint/require-await': 'off',
     },
   },
