@@ -131,7 +131,11 @@ describe('a non-Latin label in a PNG render (#968)', () => {
         svgToPngBase64(await svgFor('\u200B\u200B\u200B'), BG)
       );
       expect(japanese - nothing).toBeGreaterThan(1000);
-    }
+    },
+    // A hang guard, not a speed check: each PNG loads every system font, so
+    // ~3s alone ran past the 20s default under a loaded release gate on
+    // anchor (2026-10-08).
+    60_000
   );
 
   it('names the characters the bundled Inter cannot draw, and only those', async () => {
