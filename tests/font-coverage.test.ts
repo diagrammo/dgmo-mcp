@@ -127,7 +127,9 @@ describe('a non-Latin label in a PNG render (#968)', () => {
       // LastResort.otf, which draws a box for every codepoint, so there the
       // reference drew as much ink as 日本語 (2026-10-08, diff 15 vs 1000).
       const japanese = inkPixels(svgToPngBase64(await svgFor('日本語'), BG));
-      const nothing = inkPixels(svgToPngBase64(await svgFor('\u200B\u200B\u200B'), BG));
+      const nothing = inkPixels(
+        svgToPngBase64(await svgFor('\u200B\u200B\u200B'), BG)
+      );
       expect(japanese - nothing).toBeGreaterThan(1000);
     }
   );
