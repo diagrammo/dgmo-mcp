@@ -120,12 +120,14 @@ describe('a non-Latin label in a PNG render (#968)', () => {
   it.skipIf(!hasJapaneseSystemFont())(
     'draws the 日本語 title instead of rasterising it to nothing',
     async () => {
-      // The reference title is three UNASSIGNED codepoints: no font on any
-      // machine has a glyph for them, so they rasterise to nothing — exactly
-      // what 日本語 did before the fix. Same length, same chart, so the only
-      // ink one has and the other lacks is the title's glyphs.
+      // The reference title is three ZERO-WIDTH SPACES: a title is present,
+      // so the chart lays out the same, but it draws no ink — exactly what
+      // 日本語 did before the fix. So the only ink one has and the other
+      // lacks is the title's glyphs. Not unassigned codepoints: macOS ships
+      // LastResort.otf, which draws a box for every codepoint, so there the
+      // reference drew as much ink as 日本語 (2026-10-08, diff 15 vs 1000).
       const japanese = inkPixels(svgToPngBase64(await svgFor('日本語'), BG));
-      const nothing = inkPixels(svgToPngBase64(await svgFor('͸͹͸'), BG));
+      const nothing = inkPixels(svgToPngBase64(await svgFor('\u200B\u200B\u200B'), BG));
       expect(japanese - nothing).toBeGreaterThan(1000);
     }
   );
