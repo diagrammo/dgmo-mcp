@@ -129,19 +129,6 @@ jobs:
         if: steps.npm_state.outputs.already == 'false'
         run: npm publish --access public --provenance
 
-      - name: Wait for npm propagation
-        if: steps.npm_state.outputs.already == 'false'
-        run: |
-          for i in 1 2 3 4 5 6; do
-            if npm view "@diagrammo/dgmo-mcp@${{ steps.target.outputs.version }}" version >/dev/null 2>&1; then
-              echo "✓ npm shows ${{ steps.target.outputs.version }}"
-              exit 0
-            fi
-            echo "Waiting for npm registry... ($i/6)"
-            sleep 10
-          done
-          echo "::warning::npm did not surface the new version within 60s — proceeding anyway"
-
       - name: Build .mcpb bundle
         run: bash scripts/bundle.sh
 
@@ -154,9 +141,11 @@ jobs:
           ./mcp-publisher --version || true
 
       - name: Publish to MCP Registry
-        run: |
-          ./mcp-publisher login github-oidc
-          ./mcp-publisher publish
+        # The registry validates against npm, which can take ~10 minutes to
+        # serve a fresh version. The script waits for npm (bounded, failing if
+        # it never answers), then logs in and publishes, retrying the
+        # registry's not-found 404 (diagrammo/diagrammo#1164).
+        run: bash scripts/publish-registry.sh "${{ steps.target.outputs.version }}"
 
       - name: Attach .mcpb to GitHub release
         uses: softprops/action-gh-release@v3
