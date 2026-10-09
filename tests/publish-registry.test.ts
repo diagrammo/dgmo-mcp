@@ -62,7 +62,7 @@ function run(env: Record<string, string> = {}) {
     encoding: 'utf8',
     env: {
       ...process.env,
-      PATH: `${dir}:${process.env.PATH}`,
+      PATH: `${dir}:${process.env['PATH']}`,
       MCP_PUBLISHER: join(dir, 'mcp-publisher'),
       NPM_POLL_SECONDS: '0',
       PUBLISH_RETRY_SECONDS: '0',
