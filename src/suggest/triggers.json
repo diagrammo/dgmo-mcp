@@ -86,7 +86,12 @@
     "concepts": []
   },
   "cycle": {
-    "phrases": ["loop", "cycle", "flywheel", "cyclical"],
+    "phrases": [
+      "loop",
+      "cycle",
+      "flywheel",
+      "cyclical"
+    ],
     "concepts": []
   },
   "er": {
@@ -124,7 +129,9 @@
       "y equals",
       "x squared"
     ],
-    "concepts": ["trigonometry"]
+    "concepts": [
+      "trigonometry"
+    ]
   },
   "funnel": {
     "phrases": [
@@ -262,7 +269,9 @@
       "by us state",
       "by country"
     ],
-    "concepts": ["anything to do with locations"]
+    "concepts": [
+      "anything to do with locations"
+    ]
   },
   "mindmap": {
     "phrases": [
@@ -326,7 +335,10 @@
     "prior": 5
   },
   "polar-area": {
-    "phrases": ["polar area", "radial bar chart"],
+    "phrases": [
+      "polar area",
+      "radial bar chart"
+    ],
     "concepts": []
   },
   "pyramid": {
@@ -626,7 +638,6 @@
   "sketch": {
     "phrases": [
       "sketch",
-      "whiteboard",
       "free-form boxes",
       "canvas diagram",
       "rough architecture sketch",
@@ -692,5 +703,17 @@
     ],
     "concepts": [],
     "prior": 0
+  },
+  "whiteboard": {
+    "phrases": [
+      "whiteboard",
+      "freehand drawing",
+      "scribble",
+      "doodle",
+      "excalidraw",
+      "brainstorm board",
+      "draw ideas"
+    ],
+    "concepts": []
   }
 }

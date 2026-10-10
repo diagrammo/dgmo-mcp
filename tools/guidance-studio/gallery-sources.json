@@ -198,7 +198,7 @@
     "sitemap Restaurant Website\n\nHome\n  Menu\n  Reservations\n  About\n  Contact\n"
   ],
   "sketch": [
-    "sketch Morning Standup\n\ntag Owner\n  Bot\n  Team\n\nStandup Bot as bot at: 0 0, shape: person, owner: Bot\n  -prompts-> board\nTeam Board as board at: 3 0, owner: Team\n  -feeds-> notes\n\n[Follow-ups] as followups at: 6 0, owner: Team\n  Blocker Notes as notes shape: note, at: 0 0\n  Action Log as log shape: document, at: 3 0\n"
+    "sketch Morning Standup\n\ntag Owner\n  Bot\n  Team\n\nStandup Bot as bot at: 0 0, owner: Bot\n  -prompts-> board\nTeam Board as board at: 3 0, owner: Team\n  -feeds-> notes\n\n[Follow-ups] as followups at: 6 0, owner: Team\n  Blocker Notes as notes at: 0 0\n  Action Log as log at: 3 0\n"
   ],
   "slope": [
     "slope Market Share Shift\n\nperiod 2024 2026\n\nProduct A 34 41\nProduct B 28 22\nProduct C 18 24\nProduct D 12 9\nOther 8 4\n",
