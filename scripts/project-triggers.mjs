@@ -21,6 +21,7 @@
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
 import { dirname, join } from 'node:path';
+import { format, resolveConfig } from 'prettier';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MCP_ROOT = join(HERE, '..');
@@ -50,7 +51,12 @@ for (const [id, entry] of Object.entries(triggers)) {
   out[id] = { ...entry, phrases: projected ?? entry.phrases };
 }
 
-const text = JSON.stringify(out, null, 2) + '\n';
+// Prettier-formatted, so the file the gate's format:check accepts is also
+// the file this check calls in sync.
+const text = await format(JSON.stringify(out, null, 2), {
+  ...(await resolveConfig(TRIGGERS)),
+  filepath: TRIGGERS,
+});
 
 // report any type the registry knows that triggers.json doesn't (selection needs it)
 const missing = [...phrasesByType.keys()].filter((id) => !(id in triggers));
