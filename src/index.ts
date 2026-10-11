@@ -38,6 +38,7 @@ import {
   svgToPngBase64,
   renderPipeline,
   fontCoverageWarning,
+  svgBackground,
 } from './render-helpers.js';
 export { renderPipeline } from './render-helpers.js';
 import { validateFlowchartStructure } from './flowchart-structure.js';
@@ -261,9 +262,9 @@ tool(
       .describe('Color theme'),
     palette: z
       .string()
-      .default('slate')
+      .optional()
       .describe(
-        'Color palette (slate, atlas, blueprint, tidewater, nord, catppuccin, tokyo-night)'
+        "Color palette (slate, atlas, blueprint, tidewater, nord, catppuccin, tokyo-night). Given, it beats the diagram's own palette line; omitted, the diagram's own palette is used, else slate."
       ),
     width: z
       .number()
@@ -293,13 +294,14 @@ tool(
     // Resolve the palette here (not only inside render) so the fallback warning
     // that render() swallows is surfaced to the caller (Story 110.2 AC3).
     const paletteNotes: { type: 'text'; text: string }[] = [];
-    const paletteColors = resolvePaletteOrFallback(palette, (message) =>
-      paletteNotes.push({ type: 'text' as const, text: message })
+    const paletteColors = resolvePaletteOrFallback(
+      palette ?? 'slate',
+      (message) => paletteNotes.push({ type: 'text' as const, text: message })
     );
 
     const result = await renderPipeline(dgmo, {
       theme,
-      palette,
+      paletteOverride: palette,
       ...(width !== undefined && { width }),
       ...(height !== undefined && { height }),
     });
@@ -334,10 +336,13 @@ tool(
       }));
 
     if (format === 'png') {
+      // The diagram's own palette line can win over the default, so take the
+      // background the renderer drew rather than the one the caller named.
       const bg =
         theme === 'transparent'
           ? undefined
-          : paletteColors[theme === 'dark' ? 'dark' : 'light'].bg;
+          : (svgBackground(svg) ??
+            paletteColors[theme === 'dark' ? 'dark' : 'light'].bg);
       const base64 = svgToPngBase64(svg, bg);
       // Rasterising is the only path where a missing glyph is fatal — the SVG
       // branch below hands the text to a viewer that has its own fonts. Say so
@@ -688,7 +693,12 @@ tool(
     // Default aligned with render_diagram and the canonical embed block
     // (BL-114): light across all rendering tools.
     theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
-    palette: z.string().default('slate').describe('Color palette'),
+    palette: z
+      .string()
+      .optional()
+      .describe(
+        "Color palette for the page and every diagram. Given, it beats each diagram's own palette line; omitted, each diagram uses its own, and the page uses slate."
+      ),
     include_source: z
       .boolean()
       .default(true)
@@ -703,12 +713,15 @@ tool(
   async ({ diagrams, theme, palette, include_source }) => {
     // Surface the palette fallback warning rather than dropping it (110.2 AC3).
     const paletteNotes: string[] = [];
-    const paletteConfig = resolvePaletteOrFallback(palette, (m) =>
+    const paletteConfig = resolvePaletteOrFallback(palette ?? 'slate', (m) =>
       paletteNotes.push(m)
     );
     const results = await Promise.all(
       diagrams.map(async (d) => {
-        const { svg, error } = await renderPipeline(d.dgmo, { theme, palette });
+        const { svg, error } = await renderPipeline(d.dgmo, {
+          theme,
+          paletteOverride: palette,
+        });
         return { title: d.title, dgmo: d.dgmo, svg, error };
       })
     );
@@ -812,7 +825,12 @@ tool(
     // Default aligned with render_diagram and the canonical embed block
     // (BL-114): light across all rendering tools.
     theme: z.enum(['light', 'dark']).default('light').describe('Color theme'),
-    palette: z.string().default('slate').describe('Color palette'),
+    palette: z
+      .string()
+      .optional()
+      .describe(
+        "Color palette for the page and every diagram. Given, it beats each diagram's own palette line; omitted, each diagram uses its own, and the page uses slate."
+      ),
     include_source: z
       .boolean()
       .default(true)
@@ -834,10 +852,13 @@ tool(
     include_source,
     open,
   }) => {
-    const paletteConfig = getPalette(palette);
+    const paletteConfig = getPalette(palette ?? 'slate');
     const results = await Promise.all(
       inputSections.map(async (s) => {
-        const { svg, error } = await renderPipeline(s.dgmo, { theme, palette });
+        const { svg, error } = await renderPipeline(s.dgmo, {
+          theme,
+          paletteOverride: palette,
+        });
         return { ...s, svg, error };
       })
     );

@@ -119,7 +119,10 @@ export async function renderPipeline(
   dgmo: string,
   opts: {
     theme: 'light' | 'dark' | 'transparent';
-    palette: string;
+    /** The default palette — a diagram's own `palette` line beats it. */
+    palette?: string | undefined;
+    /** An explicit caller choice that beats the diagram's own palette. */
+    paletteOverride?: string | undefined;
     /**
      * Canvas width in px. Exact for a chart type that lays its content out
      * into the canvas (the data charts); an upper bound for one that fits a
@@ -156,7 +159,10 @@ export async function renderPipeline(
   try {
     const { svg } = await render(dgmo, {
       theme: opts.theme,
-      palette: opts.palette,
+      ...(opts.palette !== undefined && { palette: opts.palette }),
+      ...(opts.paletteOverride !== undefined && {
+        paletteOverride: opts.paletteOverride,
+      }),
       // `render()` takes basemaps by dependency injection and draws nothing at
       // all without them — it does not load them itself. Omitting this is why
       // every map chart returned an empty SVG through this path, in every
@@ -179,4 +185,15 @@ export async function renderPipeline(
       error: err instanceof Error ? err.message : String(err),
     };
   }
+}
+
+/**
+ * The background the renderer actually drew — the root `<svg>`'s
+ * `style="background: …"`. Which palette won (the caller's override, the
+ * diagram's own `palette` line, or the default) is decided inside `render()`,
+ * so the SVG is the one place that knows it. Undefined when it carries none.
+ */
+export function svgBackground(svg: string): string | undefined {
+  const root = /<svg\b[^>]*>/.exec(svg)?.[0] ?? '';
+  return /style="[^"]*\bbackground:\s*([^;"]+)/.exec(root)?.[1]?.trim();
 }
