@@ -8,6 +8,10 @@
 // harness (tools/selection-harness, `pnpm harness`) fixes them. Plus structural
 // checks that catch corpus typos/renames, and a unit test of the harness's pure
 // net-delta logic (diffRun).
+//
+// A second ratchet (`offeredBaseline`) scores what the tool actually answers:
+// the top pick on a confident result, the listed candidates on an ASK-THE-USER
+// result. Every run prints both accuracies and every miss (diagrammo#1288).
 // ============================================================
 
 import { describe, it, expect } from 'vitest';
@@ -16,6 +20,7 @@ import { fileURLToPath } from 'node:url';
 import path from 'node:path';
 import { chartTypes } from '@diagrammo/dgmo';
 import { suggestChartTypes } from '../src/suggest/scoring';
+import { formatSuggestions } from '../src/index';
 import {
   accepts,
   sameSelectionGroup,
@@ -30,7 +35,7 @@ import {
 const here = path.dirname(fileURLToPath(import.meta.url));
 const corpus = JSON.parse(
   readFileSync(path.join(here, 'fixtures/selection-corpus.json'), 'utf8')
-) as Corpus;
+) as Corpus & { offeredBaseline: number };
 
 const validIds = new Set(chartTypes.map((c) => c.id));
 
@@ -48,6 +53,18 @@ function installedDgmoVersion(): string {
 
 function top1(prompt: string): string | undefined {
   return suggestChartTypes(prompt).ranked[0]?.type.id;
+}
+
+/** The ids the tool's answer puts in front of the user, as formatSuggestions
+ *  lays them out: nothing matched → the fallback types; ambiguous → the top
+ *  three; otherwise the top pick alone. */
+function offered(prompt: string): string[] {
+  const r = suggestChartTypes(prompt);
+  if (r.ranked.length === 0 || r.fellBack)
+    return chartTypes.filter((c) => c.fallback).map((c) => c.id);
+  if (r.confidence === 'ambiguous')
+    return r.ranked.slice(0, 3).map((x) => x.type.id);
+  return [r.ranked[0].type.id];
 }
 
 describe('selection corpus — structural integrity', () => {
@@ -127,6 +144,61 @@ describe('selection accuracy — baseline ratchet', () => {
         `this is quality signal only.`
     );
     expect(primaryHits).toBeGreaterThanOrEqual(0);
+  });
+});
+
+describe('selection accuracy — offered set (top pick, or the ASK-THE-USER candidates)', () => {
+  const active = activeCases(corpus);
+
+  it('offered() names exactly the ids formatSuggestions shows', () => {
+    const drift = active.filter((c) => {
+      const r = suggestChartTypes(c.prompt);
+      const out = formatSuggestions(r.ranked, r.fellBack, r.confidence);
+      const shown = [
+        ...out.matchAll(/^(?:  \[[A-H]\] |Top match: )(\S+)/gm),
+      ].map((m) => m[1]);
+      return shown.join(',') !== offered(c.prompt).join(',');
+    });
+    expect(drift.map((c) => c.prompt)).toEqual([]);
+  });
+
+  it(`offered pass-count is >= committed offeredBaseline (${corpus.offeredBaseline})`, () => {
+    expect(corpus.offeredBaseline).toBeLessThanOrEqual(active.length);
+    const passCount = active.filter((c) =>
+      offered(c.prompt).some((id) => accepts(c.accept, id))
+    ).length;
+    expect(passCount).toBeGreaterThanOrEqual(corpus.offeredBaseline);
+  });
+
+  // The report, printed on every run: both accuracies, then every case that
+  // misses on either score, with what the tool picked and offered.
+  it('prints top-1 and offered accuracy and every miss', () => {
+    const pct = (n: number) => ((n / active.length) * 100).toFixed(1);
+    const rows = active.map((c) => {
+      const r = suggestChartTypes(c.prompt);
+      const shown = offered(c.prompt);
+      return {
+        c,
+        how: r.fellBack ? 'nothing matched' : r.confidence,
+        top: top1(c.prompt),
+        shown,
+        top1Ok: accepts(c.accept, top1(c.prompt)),
+        offeredOk: shown.some((id) => accepts(c.accept, id)),
+      };
+    });
+    const top1N = rows.filter((x) => x.top1Ok).length;
+    const offeredN = rows.filter((x) => x.offeredOk).length;
+    const misses = rows.filter((x) => !x.top1Ok || !x.offeredOk);
+    console.log(
+      [
+        `[report] top-1 ${top1N}/${active.length} (${pct(top1N)}%), offered ${offeredN}/${active.length} (${pct(offeredN)}%) — ${misses.length} misses:`,
+        ...misses.map(
+          (x) =>
+            `  top-1 ${x.top1Ok ? 'ok  ' : 'MISS'} offered ${x.offeredOk ? 'ok  ' : 'MISS'} [${x.how}] "${x.c.prompt}" → want ${x.c.accept.join('/')}, top ${x.top ?? '(none)'}, offered ${x.shown.join(',')}`
+        ),
+      ].join('\n')
+    );
+    expect(top1N).toBeGreaterThanOrEqual(0);
   });
 });
 
