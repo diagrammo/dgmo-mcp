@@ -155,7 +155,7 @@ describe('selection accuracy — offered set (top pick, or the ASK-THE-USER cand
       const r = suggestChartTypes(c.prompt);
       const out = formatSuggestions(r.ranked, r.fellBack, r.confidence);
       const shown = [
-        ...out.matchAll(/^(?:  \[[A-H]\] |Top match: )(\S+)/gm),
+        ...out.matchAll(/^(?: {2}\[[A-H]\] |Top match: )(\S+)/gm),
       ].map((m) => m[1]);
       return shown.join(',') !== offered(c.prompt).join(',');
     });
