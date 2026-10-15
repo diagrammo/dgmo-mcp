@@ -81,6 +81,18 @@
       "description": "Check DGMO markup and report parse errors, without rendering"
     },
     {
+      "name": "put_space_diagram",
+      "description": "Write a diagram into a Diagrammo Cloud space with a space API key"
+    },
+    {
+      "name": "get_space_diagram",
+      "description": "Read a diagram from a Diagrammo Cloud space"
+    },
+    {
+      "name": "list_space_diagrams",
+      "description": "List the diagrams in a Diagrammo Cloud space"
+    },
+    {
       "name": "suggest_chart_type",
       "description": "Suggest the chart types that fit a description"
     }

@@ -23,6 +23,11 @@ import {
   parseMap,
   resolveMap,
   loadMapData,
+  putSpaceDiagram,
+  getSpaceDiagram,
+  listSpaceDiagrams,
+  CloudSpaceError,
+  type CloudSpaceTarget,
 } from '@diagrammo/dgmo/advanced';
 import { betaChartTypeIds, internalChartTypeIds } from './internal-flag.js';
 
@@ -1258,6 +1263,142 @@ tool(
       content: [{ type: 'text' as const, text }],
     };
   }
+);
+
+// --- Space tools: put_space_diagram, get_space_diagram, list_space_diagrams ---
+//
+// Write and read a diagram in a Diagrammo Cloud space with a space API key
+// (#1094), through the same client as `dgmo put` / `get` / `ls` — never a second
+// one. The key comes from this server's environment, never a tool argument, so
+// it stays out of the transcript.
+
+type ToolResult = {
+  content: { type: 'text'; text: string }[];
+  isError?: boolean;
+};
+
+const errorResult = (text: string): ToolResult => ({
+  content: [{ type: 'text' as const, text }],
+  isError: true,
+});
+
+/** Run `act` against the space, or explain why it cannot run. */
+async function withSpace(
+  spaceId: string,
+  act: (target: CloudSpaceTarget) => Promise<ToolResult>
+): Promise<ToolResult> {
+  const apiKey = process.env['DGMO_API_KEY']?.trim();
+  if (!apiKey)
+    return errorResult(
+      "DGMO_API_KEY is not set in the MCP server's environment. Mint a space API key on the Diagrammo account page and add it to the server's env config."
+    );
+  try {
+    return await act({ apiKey, spaceId });
+  } catch (err) {
+    return errorResult(
+      err instanceof CloudSpaceError ? err.message : String(err)
+    );
+  }
+}
+
+const jsonResult = (value: unknown): ToolResult => ({
+  content: [{ type: 'text' as const, text: JSON.stringify(value, null, 2) }],
+});
+
+const SPACE_ID = z
+  .string()
+  .min(1)
+  .describe('The space the API key belongs to (the key does not name it).');
+const FOLDER = z
+  .string()
+  .optional()
+  .describe(
+    'Folder path from the space root, e.g. "docs/architecture". Omit for the root.'
+  );
+
+tool(
+  'put_space_diagram',
+  'Write a DGMO diagram into a Diagrammo Cloud space, by folder and title: updates the diagram with that title in that folder, or creates it (private) when there is none. Re-sending identical source changes nothing. Returns JSON `{ action: "created" | "updated", id, title, folder, version }`. Needs DGMO_API_KEY (a space API key) in the server environment. Errors name the cause: 401 bad or revoked key, 403 not allowed, 404 no such space or folder, 409 another write landed first (call again). Call validate_diagram first; this does not validate.',
+  {
+    space_id: SPACE_ID,
+    title: z.string().min(1).describe('Diagram title within the folder.'),
+    dgmo: z.string().describe('DGMO diagram markup'),
+    folder: FOLDER,
+  },
+  {
+    title: 'Put Space Diagram',
+    readOnlyHint: false,
+    destructiveHint: true,
+    openWorldHint: true,
+    idempotentHint: true,
+  },
+  async ({ space_id, title, dgmo, folder }) =>
+    withSpace(space_id, async (target) =>
+      jsonResult(
+        await putSpaceDiagram(target, {
+          source: dgmo,
+          title,
+          ...(folder === undefined ? {} : { folder }),
+        })
+      )
+    )
+);
+
+tool(
+  'get_space_diagram',
+  'Read a diagram from a Diagrammo Cloud space, by `id` or by `title` in `folder`. Titles match case-insensitively. Returns JSON `{ id, title, folder, chartType, version, updatedAt, source }`. Needs DGMO_API_KEY (a space API key) in the server environment. Errors when the key is refused (401/403) or nothing matches (404); list_space_diagrams shows what is there.',
+  {
+    space_id: SPACE_ID,
+    id: z
+      .string()
+      .optional()
+      .describe('Diagram id. Takes precedence over title.'),
+    title: z
+      .string()
+      .optional()
+      .describe('Diagram title, when no id is given.'),
+    folder: FOLDER,
+  },
+  {
+    title: 'Get Space Diagram',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: true,
+    idempotentHint: true,
+  },
+  async ({ space_id, id, title, folder }) => {
+    if (!id && !title) return errorResult('Pass either `id` or `title`.');
+    return withSpace(space_id, async (target) =>
+      jsonResult(
+        await getSpaceDiagram(
+          target,
+          id
+            ? { id }
+            : {
+                title: title ?? '',
+                ...(folder === undefined ? {} : { folder }),
+              }
+        )
+      )
+    );
+  }
+);
+
+tool(
+  'list_space_diagrams',
+  'List every diagram in a Diagrammo Cloud space. Returns JSON `{ diagrams: [{ id, title, folder, chartType, version, updatedAt }] }`, sorted by folder then title. Needs DGMO_API_KEY (a space API key) in the server environment.',
+  { space_id: SPACE_ID },
+  {
+    title: 'List Space Diagrams',
+    readOnlyHint: true,
+    destructiveHint: false,
+    openWorldHint: true,
+    idempotentHint: true,
+  },
+  async ({ space_id }) =>
+    withSpace(space_id, async (target) =>
+      jsonResult({ diagrams: await listSpaceDiagrams(target) })
+    )
 );
 
 // ---------------------------------------------------------------------------

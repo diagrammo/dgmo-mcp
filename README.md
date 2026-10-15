@@ -60,6 +60,13 @@ leaves your machine.
 | `check_app_installed`    | Report whether the desktop app is installed                                 | no        |
 | `preview_diagram`        | Render one or more diagrams and open an **HTML preview** in the browser     | no        |
 | `generate_report`        | Build a polished **multi-section HTML report** with ToC and optional source | no        |
+| `put_space_diagram`      | Write a diagram into a **Diagrammo Cloud space**, by folder and title       | yes       |
+| `get_space_diagram`      | Read a diagram from a Cloud space, by id or by folder and title             | yes       |
+| `list_space_diagrams`    | List every diagram in a Cloud space                                         | yes       |
+
+The three space tools send the diagram to Diagrammo Cloud. They need a space API key
+(minted on the Diagrammo account page) as `DGMO_API_KEY` in the server's environment —
+never as a tool argument, so the key stays out of the transcript.
 
 `share_diagram` and `open_in_app` are the bridge out of chat: a diagram Claude generates
 becomes something you can refine, restyle, and embed — see below.
