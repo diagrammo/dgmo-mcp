@@ -7,7 +7,7 @@ import { StdioServerTransport } from '@modelcontextprotocol/sdk/server/stdio.js'
 import { z } from 'zod';
 import { execFile } from 'node:child_process';
 import { existsSync, readdirSync, readFileSync, writeFileSync } from 'node:fs';
-import { join, sep } from 'node:path';
+import { isAbsolute, join, sep } from 'node:path';
 import { homedir, tmpdir } from 'node:os';
 import { randomUUID } from 'node:crypto';
 import { assetRoots } from './asset-roots.js';
@@ -424,6 +424,26 @@ tool(
 
 // --- Tool 3: open_in_app ---
 
+/**
+ * Why `filePath` cannot be handed to `open`, or null when it can. The value is
+ * model-supplied, so a prompt-injected document steers it: a leading `-` would
+ * reach open(1) as an option, and any other path would open whatever it names.
+ * Only an absolute path to an existing .dgmo file passes — and an absolute path
+ * cannot start with `-`.
+ */
+function openInAppPathError(filePath: string): string | null {
+  if (!isAbsolute(filePath)) {
+    return `filePath must be an absolute path: ${filePath}`;
+  }
+  if (!filePath.toLowerCase().endsWith('.dgmo')) {
+    return `filePath must name a .dgmo file: ${filePath}`;
+  }
+  if (!existsSync(filePath)) {
+    return `filePath does not exist: ${filePath}`;
+  }
+  return null;
+}
+
 tool(
   'open_in_app',
   'Open a DGMO diagram in the Diagrammo desktop app (macOS only). Falls back to browser preview if the app is not installed. Pass `filePath` to open a saved .dgmo file directly — the app opens THAT file, so in-app edits autosave back to it (one editable source of truth, live re-render). This is the preferred path when the app is installed: write the .dgmo source first, then open it here. Omit `filePath` for an ephemeral diagram (sends a deep link; the app creates its own copy).',
@@ -433,7 +453,7 @@ tool(
       .string()
       .optional()
       .describe(
-        'Absolute path to an already-saved .dgmo file. When set, the app opens this exact file for live editing instead of receiving a deep-linked copy.'
+        'Absolute path to an already-saved .dgmo file. When set, the app opens this exact file for live editing instead of receiving a deep-linked copy. Any other value — relative, not .dgmo, or missing — is refused with an error.'
       ),
   },
   {
@@ -443,6 +463,17 @@ tool(
     openWorldHint: true,
   },
   async ({ dgmo, filePath }) => {
+    // Checked before anything else: a refused path never falls back to the
+    // deep link, which would open a diagram the caller did not ask for.
+    const pathError =
+      filePath === undefined ? null : openInAppPathError(filePath);
+    if (pathError) {
+      return {
+        content: [{ type: 'text' as const, text: pathError }],
+        isError: true,
+      };
+    }
+
     const result = encodeDiagramUrl(dgmo);
     if (result.error === 'too-large') {
       return {
