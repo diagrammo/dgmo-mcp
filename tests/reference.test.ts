@@ -123,7 +123,7 @@ describe('color rule rides every per-type slice (closed-set contract)', () => {
 
   it('the real reference defines the COLORS block with the closed 11-name list', () => {
     if (!anchored) return;
-    const rule = extractColorRule(ref as string);
+    const rule = extractColorRule(ref);
     expect(rule).toBeTruthy();
     for (const name of [
       'red',
@@ -153,7 +153,7 @@ describe('title rule rides every per-type slice (always-title contract)', () => 
 
   it('the real reference defines the TITLE block', () => {
     if (!anchored) return;
-    const rule = extractTitleRule(ref as string);
+    const rule = extractTitleRule(ref);
     expect(rule).toBeTruthy();
     expect(rule).toMatch(/title/i);
     expect(rule).not.toMatch(/<!--/); // markers stripped from the extracted rule
@@ -166,7 +166,7 @@ describe('categorize rule rides every per-type slice (color-by-grouping push)', 
 
   it('the real reference defines the CATEGORIZE block', () => {
     if (!anchored) return;
-    const rule = extractCategorizeRule(ref as string);
+    const rule = extractCategorizeRule(ref);
     expect(rule).toBeTruthy();
     expect(rule).toMatch(/tag group/i);
     expect(rule).not.toMatch(/<!--/); // markers stripped from the extracted rule
@@ -207,7 +207,7 @@ describe('integration — all 45 chart-type ids resolve against the real referen
   for (const c of chartTypes) {
     it(`resolves ${c.id}`, () => {
       if (!anchored) return; // guarded by the assertion above
-      const block = extractSection(ref as string, c.id);
+      const block = extractSection(ref, c.id);
       expect(block, `no TYPE block for "${c.id}"`).toBeTruthy();
       expect((block ?? '').length).toBeGreaterThan(20);
     });
@@ -235,7 +235,7 @@ describe('per-type TIPS ride along the MCP slice (AC11)', () => {
   for (const id of seededWithTips) {
     it(`get_language_reference slice for ${id} includes its TIPS block`, () => {
       if (!anchored) return;
-      const block = extractSection(ref as string, id) ?? '';
+      const block = extractSection(ref, id) ?? '';
       expect(block).toMatch(/<!--\s*TIPS start\s*-->/);
       expect(block).toMatch(/<!--\s*TIPS end\s*-->/);
     });
@@ -243,7 +243,7 @@ describe('per-type TIPS ride along the MCP slice (AC11)', () => {
 
   it('an aliased id (pie→bar) inherits the parent block TIPS', () => {
     if (!anchored) return;
-    const block = extractSection(ref as string, 'pie') ?? '';
+    const block = extractSection(ref, 'pie') ?? '';
     expect(block).toMatch(/<!--\s*TIPS start\s*-->/);
   });
 });

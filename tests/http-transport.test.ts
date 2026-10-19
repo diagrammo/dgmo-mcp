@@ -139,7 +139,7 @@ describe('parseRuntimeConfig', () => {
 });
 
 describe('tool surface per transport', () => {
-  it('offers every tool over stdio', async () => {
+  it('offers every tool over stdio', () => {
     const server = createServer('stdio');
     const names = Object.keys(
       (server as unknown as { _registeredTools: Record<string, unknown> })
@@ -250,7 +250,8 @@ describe('over the wire', () => {
       body: '{}',
     });
     expect(response.status).toBe(404);
-    expect((await response.json()).error.message).toContain(DEFAULT_HTTP_PATH);
+    const body = (await response.json()) as { error: { message: string } };
+    expect(body.error.message).toContain(DEFAULT_HTTP_PATH);
   });
 
   it('rejects a request carrying a Host header it was not told to answer to', async () => {

@@ -30,15 +30,18 @@ export default tseslint.config(
       '@typescript-eslint/no-implied-eval': 'error',
       '@typescript-eslint/restrict-template-expressions': 'error',
       '@typescript-eslint/no-redundant-type-constituents': 'error',
-      // Disable noisy type-checked rules that don't catch real bugs
-      // (matches dgmo + app convention).
-      '@typescript-eslint/no-unsafe-assignment': 'off',
-      '@typescript-eslint/no-unsafe-member-access': 'off',
-      '@typescript-eslint/no-unsafe-argument': 'off',
-      '@typescript-eslint/no-unsafe-return': 'off',
-      '@typescript-eslint/no-unsafe-call': 'off',
-      '@typescript-eslint/no-unnecessary-type-assertion': 'off',
-      '@typescript-eslint/require-await': 'off',
+      // Measured at zero hits (or fixed to zero) and turned on (#1267): an
+      // `any` flowing into an assignment, member access, argument, return or
+      // call; a cast the type already satisfies; an `async` with no `await`.
+      // A tool callback may return its result directly — the MCP SDK takes
+      // `CallToolResult | Promise<CallToolResult>` and awaits either.
+      '@typescript-eslint/no-unsafe-assignment': 'error',
+      '@typescript-eslint/no-unsafe-member-access': 'error',
+      '@typescript-eslint/no-unsafe-argument': 'error',
+      '@typescript-eslint/no-unsafe-return': 'error',
+      '@typescript-eslint/no-unsafe-call': 'error',
+      '@typescript-eslint/no-unnecessary-type-assertion': 'error',
+      '@typescript-eslint/require-await': 'error',
     },
   },
   // Disable type-checked linting for files outside the TS project.

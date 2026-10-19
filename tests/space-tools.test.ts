@@ -46,22 +46,29 @@ type Request = {
 /** Script the Cloud's answers by `METHOD path`; record what was sent. */
 function mockCloud(routes: Record<string, Answer>): Request[] {
   const requests: Request[] = [];
-  vi.stubGlobal('fetch', async (url: string, init: RequestInit) => {
-    const method = init.method ?? 'GET';
-    const headers = init.headers as Record<string, string>;
-    requests.push({
-      method,
-      url,
-      auth: headers['authorization'],
-      body: init.body ? JSON.parse(init.body as string) : undefined,
-    });
-    const a = routes[`${method} ${url.slice(API.length)}`];
-    if (!a) throw new Error(`unexpected ${method} ${url}`);
-    return new Response(a.body === undefined ? '' : JSON.stringify(a.body), {
-      status: a.status,
-      headers: { 'content-type': 'application/json' },
-    });
-  });
+  // A Promise executor, so a throw here rejects the call as an async stub would.
+  vi.stubGlobal(
+    'fetch',
+    (url: string, init: RequestInit) =>
+      new Promise<Response>((resolve) => {
+        const method = init.method ?? 'GET';
+        const headers = init.headers as Record<string, string>;
+        requests.push({
+          method,
+          url,
+          auth: headers['authorization'],
+          body: init.body ? JSON.parse(init.body as string) : undefined,
+        });
+        const a = routes[`${method} ${url.slice(API.length)}`];
+        if (!a) throw new Error(`unexpected ${method} ${url}`);
+        resolve(
+          new Response(a.body === undefined ? '' : JSON.stringify(a.body), {
+            status: a.status,
+            headers: { 'content-type': 'application/json' },
+          })
+        );
+      })
+  );
   return requests;
 }
 

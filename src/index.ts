@@ -217,7 +217,7 @@ function tool<Args extends z.ZodRawShape>(
     ...(fifth ? { annotations: fourth as ToolAnnotations } : {}),
     cb: (fifth ?? fourth) as ToolCallback<Args>,
   };
-  RECORDED_TOOLS.push(recorded as unknown as RecordedTool);
+  RECORDED_TOOLS.push(recorded);
 }
 
 /**
@@ -403,7 +403,7 @@ tool(
     openWorldHint: false,
     idempotentHint: true,
   },
-  async ({ dgmo }) => {
+  ({ dgmo }) => {
     const result = encodeDiagramUrl(dgmo);
     if (result.error === 'too-large') {
       return {
@@ -620,7 +620,7 @@ tool(
     openWorldHint: false,
     idempotentHint: true,
   },
-  async () => {
+  () => {
     // 🔴 `CHART_TYPE_DESCRIPTIONS` is a bare Record and carries no metadata, so
     // the `internal` flag is invisible from here — cross-look-up into
     // `chartTypes`. An internal type routes but is never OFFERED: nobody hand-
@@ -668,7 +668,7 @@ tool(
     openWorldHint: false,
     idempotentHint: true,
   },
-  async ({ chart_type }) => {
+  ({ chart_type }) => {
     let content: string;
     try {
       content = resolveLanguageReference();
@@ -1128,7 +1128,7 @@ tool(
       .max(5000)
       .describe("User's plain-English diagram request"),
   },
-  async ({ prompt }) => {
+  ({ prompt }) => {
     const { ranked, confidence, fellBack } = suggestChartTypes(prompt);
     let text = formatSuggestions(ranked, fellBack, confidence);
 
@@ -1224,7 +1224,7 @@ tool(
         'Chart type to get examples for (e.g. "sequence", "infra", "bar"). Omit to list all available example names.'
       ),
   },
-  async ({ chart_type }) => {
+  ({ chart_type }) => {
     let galleryPath: string;
     try {
       galleryPath = resolveGalleryPath();

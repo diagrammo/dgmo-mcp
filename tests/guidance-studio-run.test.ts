@@ -71,7 +71,10 @@ function post(
       statusCode: 0,
       setHeader: () => undefined,
       end(payload: string) {
-        resolve({ status: res.statusCode, json: JSON.parse(payload) });
+        resolve({
+          status: res.statusCode,
+          json: JSON.parse(payload) as Record<string, unknown>,
+        });
       },
     } as unknown as ServerResponse;
     runHandler()(req, res, () => resolve({ status: -1, json: {} }));
