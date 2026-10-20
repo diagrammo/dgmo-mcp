@@ -105,6 +105,39 @@ describe('hybrid scorer mechanics', () => {
   });
 });
 
+// diagrammo#1286: "create a high level block diagram" answered boxes-and-lines,
+// because its incidental `high level` phrase outscored `block diagram` on IDF.
+describe('a prompt that names a type gets that type', () => {
+  const top = (prompt: string) => {
+    const r = suggestChartTypes(prompt);
+    return { id: r.ranked[0]?.type.id, confidence: r.confidence };
+  };
+  it.each([
+    [
+      'analyze the code in this repo and create a high level block diagram',
+      'block',
+    ],
+    ['make a pie chart of revenue by region', 'pie'],
+    ['convert this flowchart into a sequence diagram', 'sequence'],
+  ])('"%s" → %s, high confidence', (prompt, id) => {
+    expect(top(prompt)).toEqual({ id, confidence: 'high' });
+  });
+  it.each([
+    ['a mind map diagram of my ideas', 'mindmap'],
+    ['customer journey map diagram', 'journey-map'],
+    ['tech radar chart for our stack', 'tech-radar'],
+  ])(
+    'a longer name that overlaps it wins: "%s" → %s, not the shorter name',
+    (prompt, id) => {
+      expect(top(prompt).id).toBe(id);
+    }
+  );
+  it('the name is a whole-token match, not a substring', () => {
+    // "timeline chart" must not name `line`.
+    expect(top('a timeline chart of releases').id).toBe('timeline');
+  });
+});
+
 describe('selection accuracy — natural language', () => {
   const cases: { prompt: string; accept: string[] }[] = [
     { prompt: 'who reports to whom', accept: ['org'] },
