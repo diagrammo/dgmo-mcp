@@ -136,6 +136,14 @@ describe('a prompt that names a type gets that type', () => {
     // "timeline chart" must not name `line`.
     expect(top('a timeline chart of releases').id).toBe('timeline');
   });
+  it('"high level" and "connect" are scope words, not boxes-and-lines', () => {
+    const bnl = chartTypes.find((c) => c.id === 'boxes-and-lines')!;
+    for (const prompt of [
+      'a high level overview of the system',
+      'connect my services',
+    ])
+      expect(scoreChartType(prompt, bnl).score).toBeLessThan(MIN_PRIMARY_SCORE);
+  });
 });
 
 describe('selection accuracy — natural language', () => {
