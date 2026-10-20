@@ -43,7 +43,9 @@
       "boxes and arrows",
       "nodes and edges",
       "generic diagram",
-      "general-purpose network"
+      "general-purpose network",
+      "how they connect",
+      "architecture diagram"
     ],
     "concepts": []
   },
@@ -334,7 +336,7 @@
       "maslow hierarchy",
       "dikw pyramid",
       "layered model",
-      "level",
+      "levels",
       "pyramid",
       "tiers",
       "hierarchy of evidence",

@@ -136,13 +136,34 @@ describe('a prompt that names a type gets that type', () => {
     // "timeline chart" must not name `line`.
     expect(top('a timeline chart of releases').id).toBe('timeline');
   });
-  it('"high level" and "connect" are scope words, not boxes-and-lines', () => {
+  it('"high level" and "connect" are no boxes-and-lines trigger phrase', () => {
+    // No contiguous phrase fires; "connect" keeps only its token-overlap
+    // credit from "how they connect".
     const bnl = chartTypes.find((c) => c.id === 'boxes-and-lines')!;
     for (const prompt of [
       'a high level overview of the system',
       'connect my services',
     ])
-      expect(scoreChartType(prompt, bnl).score).toBeLessThan(MIN_PRIMARY_SCORE);
+      expect(scoreChartType(prompt, bnl).breakdown.contig).toBe(0);
+  });
+  it('"high level" is not a pyramid "level" either', () => {
+    const pyramid = chartTypes.find((c) => c.id === 'pyramid')!;
+    expect(
+      scoreChartType('a high level overview of the system', pyramid).score
+    ).toBeLessThan(CONTIGUITY_DOMINANCE);
+    expect(
+      top('levels of the food chain from producers up to apex predators').id
+    ).toBe('pyramid');
+  });
+  it('an architecture diagram is boxes-and-lines, high level or not', () => {
+    for (const prompt of [
+      'create a high level architecture diagram',
+      'draw an architecture diagram of the backend',
+    ])
+      expect(top(prompt)).toEqual({
+        id: 'boxes-and-lines',
+        confidence: 'high',
+      });
   });
 });
 
