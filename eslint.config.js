@@ -20,7 +20,8 @@ export default tseslint.config(
         'error',
         { argsIgnorePattern: '^_' },
       ],
-      '@typescript-eslint/no-explicit-any': 'warn',
+      // Measured at zero hits and raised from 'warn' as a ratchet (#1468).
+      '@typescript-eslint/no-explicit-any': 'error',
       '@typescript-eslint/no-floating-promises': 'error',
       '@typescript-eslint/no-misused-promises': 'error',
       // Measured at zero hits and turned on as a ratchet (#992): an object
