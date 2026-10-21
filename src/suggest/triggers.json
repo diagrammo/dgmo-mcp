@@ -530,7 +530,12 @@
       "folder sizes",
       "space breakdown",
       "portfolio allocation",
-      "size by category"
+      "size by category",
+      "sunburst",
+      "sunburst chart",
+      "hierarchical pie",
+      "multi-level pie",
+      "category and subcategory"
     ],
     "concepts": []
   },
