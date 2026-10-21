@@ -32,7 +32,9 @@
       "count by",
       "number of",
       "stacked bar",
-      "composite bar"
+      "composite bar",
+      "stacked breakdown",
+      "revenue by segment"
     ],
     "concepts": [],
     "prior": 3
