@@ -28,7 +28,7 @@ describe('.mcp.json (diagrammo/diagrammo#1123)', () => {
   });
 
   it('runs the published package through npx', () => {
-    expect(mcpJson.mcpServers.dgmo).toEqual({
+    expect(mcpJson.mcpServers['dgmo']).toEqual({
       command: 'npx',
       args: ['-y', pkg.name],
     });
