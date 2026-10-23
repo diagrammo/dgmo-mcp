@@ -92,9 +92,16 @@ function readManifest(): { id: string; label: string; suitsTypes: string[] }[] {
   return JSON.parse(readFileSync(p, 'utf8'));
 }
 
+/** A dataset id is a bare file stem — no separator, no `..` (#1500). */
+function isDatasetId(id: string): boolean {
+  return /^[A-Za-z0-9_-]+$/.test(id);
+}
+
 function readDataset(id: string): Dataset | null {
-  const p = path.join(DATASETS_DIR, `${id}.json`);
-  if (!existsSync(p)) return null;
+  if (!isDatasetId(id)) return null;
+  // Belt and braces: the resolved file must still sit inside DATASETS_DIR.
+  const p = path.resolve(DATASETS_DIR, `${id}.json`);
+  if (!p.startsWith(DATASETS_DIR + path.sep) || !existsSync(p)) return null;
   return JSON.parse(readFileSync(p, 'utf8'));
 }
 
@@ -307,6 +314,10 @@ export function savePlugin(): Plugin {
             req.url ?? '',
             'http://localhost'
           ).searchParams.get('id');
+          if (id && !isDatasetId(id)) {
+            sendJson(res, 400, { error: 'invalid dataset id' });
+            return;
+          }
           const ds = id ? readDataset(id) : null;
           if (!ds) {
             sendJson(res, 404, { error: 'dataset not found' });
