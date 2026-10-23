@@ -34,9 +34,11 @@ cp "$ROOT/manifest.json" "$BUNDLE_DIR/"
 cp "$ROOT/README.md" "$BUNDLE_DIR/"
 [ -f "$ROOT/LICENSE" ] && cp "$ROOT/LICENSE" "$BUNDLE_DIR/"
 
-echo "→ Writing bundle/package.json (prod deps; dgmo is compiled in, not declared)"
+echo "→ Writing bundle/package.json (dgmo is compiled in, not a runtime dep)"
 # ESM-safe: assembled with jq (no `node -e`/`require`). `type` is carried over
 # so the bundled ESM `dist/index.js` is loaded as a module, not CommonJS.
+# `devDependencies` rides along only so the frozen install below matches the
+# lockfile's specifiers; `--prod` installs none of them.
 jq '{
   name,
   version,
@@ -46,7 +48,8 @@ jq '{
   bin,
   author,
   license,
-  dependencies
+  dependencies,
+  devDependencies
 }' "$ROOT/package.json" > "$BUNDLE_DIR/package.json"
 
 # Guard the mistake this file just made in the other direction: a bundle that
@@ -56,8 +59,19 @@ if jq -e '.dependencies["@diagrammo/dgmo"]' "$BUNDLE_DIR/package.json" > /dev/nu
   exit 1
 fi
 
-echo "→ Installing prod deps with npm (no workspace resolution)"
-(cd "$BUNDLE_DIR" && npm install --omit=dev --no-audit --no-fund --silent)
+# 🔴 Installed FROZEN from the repo's own pnpm-lock.yaml, which ships in the
+# bundle (diagrammo/diagrammo#1501). This used to be a bare `npm install`: no
+# lockfile, so every release resolved its runtime tree afresh that day, outside
+# the minimumReleaseAge hold, and shipped versions no test had run against —
+# measured 2026-10-23, 38 of 135 packages differed from the lockfile, among
+# them @modelcontextprotocol/sdk 1.32.1 for a tested 1.29.0.
+# pnpm-workspace.yaml is copied too: it makes bundle/ its own workspace root,
+# so pnpm does not walk up and install the repo instead. `hoisted` gives a flat
+# npm-style node_modules with no symlinks for `mcpb pack` to trip on.
+echo "→ Installing prod deps from pnpm-lock.yaml (frozen)"
+cp "$ROOT/pnpm-lock.yaml" "$ROOT/pnpm-workspace.yaml" "$BUNDLE_DIR/"
+(cd "$BUNDLE_DIR" && pnpm install --prod --frozen-lockfile \
+  --config.node-linker=hoisted --silent)
 
 echo "→ Packing .mcpb"
 (cd "$ROOT" && npx mcpb pack bundle/ dgmo-mcp.mcpb)
