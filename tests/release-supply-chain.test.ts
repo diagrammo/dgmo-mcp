@@ -24,7 +24,7 @@ import { dirname, join } from 'node:path';
 const root = join(dirname(fileURLToPath(import.meta.url)), '..');
 const releaseYml = readFileSync(
   join(root, '.github', 'workflows', 'release.yml'),
-  'utf8',
+  'utf8'
 );
 
 let dir: string;
@@ -41,7 +41,7 @@ function fake(bin: string, name: string, body = '') {
   const path = join(bin, name);
   writeFileSync(
     path,
-    `#!/usr/bin/env bash\necho "$PWD $*" >> "${join(dir, `${name}.log`)}"\n${body}\n`,
+    `#!/usr/bin/env bash\necho "$PWD $*" >> "${join(dir, `${name}.log`)}"\n${body}\n`
   );
   chmodSync(path, 0o755);
 }
@@ -75,12 +75,12 @@ describe('scripts/install-mcp-publisher.sh', () => {
     fake(
       bin,
       'curl',
-      'while [ $# -gt 0 ]; do [ "$1" = -o ] && { echo junk > "$2"; shift; }; shift; done',
+      'while [ $# -gt 0 ]; do [ "$1" = -o ] && { echo junk > "$2"; shift; }; shift; done'
     );
     const dest = join(dir, 'dest');
     mkdirSync(dest);
     const res = spawnSync('bash', [script, dest], {
-      env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+      env: { ...process.env, PATH: `${bin}:${process.env['PATH']}` },
       encoding: 'utf8',
     });
     return { ...res, dest };
@@ -89,7 +89,7 @@ describe('scripts/install-mcp-publisher.sh', () => {
   it('downloads one pinned version, not latest', () => {
     run();
     expect(log('curl')).toMatch(
-      /releases\/download\/v\d+\.\d+\.\d+\/mcp-publisher_linux_amd64\.tar\.gz/,
+      /releases\/download\/v\d+\.\d+\.\d+\/mcp-publisher_linux_amd64\.tar\.gz/
     );
   });
 
@@ -112,7 +112,7 @@ describe('scripts/bundle.sh', () => {
     mkdirSync(join(repo, 'icons'));
     cpSync(
       join(root, 'scripts', 'bundle.sh'),
-      join(repo, 'scripts', 'bundle.sh'),
+      join(repo, 'scripts', 'bundle.sh')
     );
     for (const f of [
       'package.json',
@@ -129,7 +129,7 @@ describe('scripts/bundle.sh', () => {
     fake(bin, 'npm', 'exit 0');
     fake(bin, 'npx', 'touch "${@: -1}"');
     const res = spawnSync('bash', [join(repo, 'scripts', 'bundle.sh')], {
-      env: { ...process.env, PATH: `${bin}:${process.env.PATH}` },
+      env: { ...process.env, PATH: `${bin}:${process.env['PATH']}` },
       encoding: 'utf8',
     });
     return { ...res, bundle: join(repo, 'bundle') };
@@ -140,19 +140,17 @@ describe('scripts/bundle.sh', () => {
     expect(stderr).toBe('');
     expect(status).toBe(0);
     expect(log('npm')).toBe('');
-    expect(log('pnpm')).toContain(
-      `${bundle} install --prod --frozen-lockfile`,
-    );
+    expect(log('pnpm')).toContain(`${bundle} install --prod --frozen-lockfile`);
   });
 
   it('ships the lockfile, and a manifest whose specifiers match it', () => {
     const { bundle } = run();
     expect(readFileSync(join(bundle, 'pnpm-lock.yaml'), 'utf8')).toBe(
-      readFileSync(join(root, 'pnpm-lock.yaml'), 'utf8'),
+      readFileSync(join(root, 'pnpm-lock.yaml'), 'utf8')
     );
     const pkg = JSON.parse(readFileSync(join(bundle, 'package.json'), 'utf8'));
     const repoPkg = JSON.parse(
-      readFileSync(join(root, 'package.json'), 'utf8'),
+      readFileSync(join(root, 'package.json'), 'utf8')
     );
     expect(pkg.dependencies).toEqual(repoPkg.dependencies);
     expect(pkg.devDependencies).toEqual(repoPkg.devDependencies);
