@@ -187,6 +187,17 @@ function sendJson(
   res.end(JSON.stringify(body));
 }
 
+/** True when the request has no Origin, or one naming the Host it was sent to. */
+function isOwnOrigin(req: import('node:http').IncomingMessage): boolean {
+  const origin = req.headers.origin;
+  if (origin === undefined) return true;
+  try {
+    return new URL(origin).host === req.headers.host;
+  } catch {
+    return false; // `null` (a sandboxed frame, a file: page) or malformed
+  }
+}
+
 function readBody(req: import('node:http').IncomingMessage): Promise<string> {
   return new Promise((resolve) => {
     let b = '';
@@ -200,6 +211,19 @@ export function savePlugin(): Plugin {
     name: 'guidance-studio-save',
     apply: 'serve',
     configureServer(server) {
+      // Every write here, and every metered `claude -p` run, is a POST. Any web
+      // page open in the same browser can send one blind — a `text/plain` body
+      // needs no preflight — so a POST whose Origin is not the studio's own is
+      // refused. Registered first, so it runs before every handler below. A
+      // request with no Origin is not a browser's cross-site one (#1501).
+      server.middlewares.use('/studio', (req, res, next) => {
+        if (req.method === 'POST' && !isOwnOrigin(req)) {
+          sendJson(res, 403, { error: 'cross-origin request refused' });
+          return;
+        }
+        next();
+      });
+
       // Live coverage — fresh from disk so a save flips the marker immediately.
       server.middlewares.use('/studio/coverage', (req, res, next) => {
         if (req.method !== 'GET') return next();

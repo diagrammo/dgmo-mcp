@@ -262,6 +262,18 @@ describe('render_diagram', () => {
     expect(text).toMatch(/<svg/);
   });
 
+  it('refuses a canvas side past the cap before rasterising it (#1501)', async () => {
+    for (const size of [{ width: 4097 }, { height: 1_000_000 }]) {
+      const { text, isError } = await call('render_diagram', {
+        dgmo: 'bar Revenue\n\nNorth 850\nSouth 620',
+        format: 'png',
+        ...size,
+      });
+      expect(isError).toBe(true);
+      expect(text).toMatch(/4096/);
+    }
+  });
+
   it('returns an error for an invalid diagram instead of rendering', async () => {
     const { text } = await call('render_diagram', {
       dgmo: 'flowchart',

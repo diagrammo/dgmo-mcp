@@ -461,7 +461,8 @@ async function selectType(id: string): Promise<void> {
       });
       row.appendChild(el('span', { className: 'pglyph' }, glyph));
       row.appendChild(el('span', { className: 'pnum' }, `${i + 1}.`));
-      row.appendChild(el('span', {}, p));
+      // Text, never markup: prompts.json is written by POST /studio/prompts (#1501).
+      row.appendChild(el('span', { textContent: p }));
       row.onclick = () => selectPrompt(i);
       promptList.appendChild(row);
     });

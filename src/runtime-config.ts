@@ -20,7 +20,10 @@ export interface RuntimeConfig {
   declaredHosts: string[];
   /** Host headers accepted, for DNS-rebinding protection. */
   allowedHosts: string[];
-  /** Origin headers accepted. Empty means "don't police Origin". */
+  /**
+   * Origin headers accepted. Empty means the server's own origins only — a
+   * request carrying any other Origin is refused; one carrying none is served.
+   */
   allowedOrigins: string[];
   /**
    * True when the operator bound a non-loopback interface without naming the
@@ -169,7 +172,8 @@ HTTP options (flag, or environment variable):
   --host <addr>       MCP_HOST              default ${DEFAULT_HTTP_HOST} (loopback)
   --path <path>       MCP_PATH              default ${DEFAULT_HTTP_PATH}
   --allow-host <h>    MCP_ALLOWED_HOSTS     extra Host headers to accept (repeatable)
-  --allow-origin <o>  MCP_ALLOWED_ORIGINS   Origin headers to accept (repeatable)
+  --allow-origin <o>  MCP_ALLOWED_ORIGINS   Origin headers to accept (repeatable;
+                                            default: the server's own)
 
 In HTTP mode the four tools that act on the machine the server runs on
 (open_in_app, check_app_installed, preview_diagram, generate_report) are not

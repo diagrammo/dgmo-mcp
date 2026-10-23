@@ -289,6 +289,50 @@ describe('over the wire', () => {
     expect(status).toBeGreaterThanOrEqual(400);
   });
 
+  // Raw http, so the Origin header goes out exactly as a browser would send it.
+  function postWithOrigin(origin: string): Promise<number> {
+    const body = JSON.stringify({
+      jsonrpc: '2.0',
+      id: 1,
+      method: 'tools/list',
+    });
+    return new Promise<number>((resolve, reject) => {
+      const req = httpRequest(
+        {
+          host: '127.0.0.1',
+          port: handle.port,
+          path: baseUrl.pathname,
+          method: 'POST',
+          headers: {
+            'content-type': 'application/json',
+            accept: 'application/json, text/event-stream',
+            origin,
+            'content-length': Buffer.byteLength(body),
+          },
+        },
+        (res) => {
+          res.resume();
+          resolve(res.statusCode ?? 0);
+        }
+      );
+      req.on('error', reject);
+      req.end(body);
+    });
+  }
+
+  it('refuses a cross-site Origin even when no --allow-origin was given (#1501)', async () => {
+    // A web page open on the operator's machine can POST to loopback. With no
+    // accept-list the SDK skips its Origin check entirely, so the server
+    // supplies its own origins as the default list.
+    expect(await postWithOrigin('https://evil.example.com')).toBe(403);
+    expect(await postWithOrigin('http://localhost:1')).toBe(403);
+  });
+
+  it('serves a request from its own origin when no --allow-origin was given', async () => {
+    expect(await postWithOrigin(`http://127.0.0.1:${handle.port}`)).toBe(200);
+    expect(await postWithOrigin(`http://localhost:${handle.port}`)).toBe(200);
+  });
+
   it('refuses a body past the cap on its declared length, without reading it', async () => {
     // Raw http, because the point is a Content-Length larger than what is sent:
     // the server must answer from the header alone, having read no body at all.

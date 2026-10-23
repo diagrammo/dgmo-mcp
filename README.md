@@ -153,13 +153,14 @@ Every option takes a flag or an environment variable, whichever your setup can e
 | `--host <addr>`      | `MCP_HOST`            | `127.0.0.1` | Interface to bind                          |
 | `--path <path>`      | `MCP_PATH`            | `/mcp`      | Path the endpoint answers on               |
 | `--allow-host <h>`   | `MCP_ALLOWED_HOSTS`   | loopback    | Extra `Host` headers to accept, repeatable |
-| `--allow-origin <o>` | `MCP_ALLOWED_ORIGINS` | unset       | `Origin` headers to accept, repeatable     |
+| `--allow-origin <o>` | `MCP_ALLOWED_ORIGINS` | own origin  | `Origin` headers to accept, repeatable     |
 
 Each request is served independently — no sessions, nothing kept between calls — so one
 endpoint can serve several clients at once.
 
 > **The server has no authentication of its own.** It binds loopback by default and
-> rejects requests carrying a `Host` header it was not told to expect, which is enough
+> rejects requests carrying a `Host` header it was not told to expect, or an `Origin`
+> header other than its own unless `--allow-origin` names it, which is enough
 > for a client on the same machine or inside the same container. Anything reachable from
 > a wider network needs your own authentication in front of it, and `--allow-host` for
 > the hostname it will be reached by. Binding a non-loopback interface without naming a

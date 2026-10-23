@@ -27,6 +27,17 @@ export const MAX_BODY_BYTES = 4 * 1024 * 1024;
 const JSONRPC_INVALID_REQUEST = -32600;
 const JSONRPC_INTERNAL_ERROR = -32603;
 
+/**
+ * The Origins accepted when the operator named none: the server's own, one per
+ * accepted Host header. A request with no Origin — every non-browser client —
+ * is unaffected. A cross-site page's simple `text/plain` POST does carry one,
+ * and without this list the SDK does not look at Origin at all, so any web page
+ * open on the operator's machine could call the tools (diagrammo/diagrammo#1501).
+ */
+function ownOrigins(allowedHosts: string[]): string[] {
+  return allowedHosts.flatMap((h) => [`http://${h}`, `https://${h}`]);
+}
+
 function sendJsonRpcError(
   res: ServerResponse,
   status: number,
@@ -154,9 +165,10 @@ export function createMcpRequestListener(
       enableJsonResponse: true,
       enableDnsRebindingProtection: true,
       allowedHosts: config.allowedHosts,
-      ...(config.allowedOrigins.length > 0
-        ? { allowedOrigins: config.allowedOrigins }
-        : {}),
+      allowedOrigins:
+        config.allowedOrigins.length > 0
+          ? config.allowedOrigins
+          : ownOrigins(config.allowedHosts),
     });
 
     // The pair is per-request, so it is torn down when the response is, whether

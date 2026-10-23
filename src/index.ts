@@ -253,6 +253,11 @@ export function transportMode(): 'stdio' | 'http' {
 
 // --- Tool 1: render_diagram ---
 
+// The largest canvas side a caller may ask for. A PNG is rasterised at 2x, so
+// an unbounded width or height let one call ask Resvg for a raster of any size
+// and take the process's memory with it (diagrammo/diagrammo#1501).
+const MAX_CANVAS_PX = 4096;
+
 tool(
   'render_diagram',
   'Render DGMO markup to SVG or PNG. Returns SVG text or base64 PNG image. When format is "png", also saves the image to a temp file and returns the path. For DGMO syntax call get_language_reference.',
@@ -275,6 +280,7 @@ tool(
       .number()
       .int()
       .positive()
+      .max(MAX_CANVAS_PX)
       .optional()
       .describe(
         'Canvas width in px. Omit to let the diagram size itself from its content. Honoured exactly by the chart types that lay their content out into the canvas (bar, line, pie and the other data charts). A chart that sizes itself from its own nodes — org, sitemap, class, er, infra and the rest of the structured family — cannot go below its content and will return a wider canvas than asked for.'
@@ -283,6 +289,7 @@ tool(
       .number()
       .int()
       .positive()
+      .max(MAX_CANVAS_PX)
       .optional()
       .describe(
         'Canvas height in px. Most chart types derive height from their content and ignore this; the data charts honour it.'
