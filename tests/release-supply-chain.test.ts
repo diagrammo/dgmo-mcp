@@ -148,10 +148,14 @@ describe('scripts/bundle.sh', () => {
     expect(readFileSync(join(bundle, 'pnpm-lock.yaml'), 'utf8')).toBe(
       readFileSync(join(root, 'pnpm-lock.yaml'), 'utf8')
     );
-    const pkg = JSON.parse(readFileSync(join(bundle, 'package.json'), 'utf8'));
-    const repoPkg = JSON.parse(
-      readFileSync(join(root, 'package.json'), 'utf8')
-    );
+    type Manifest = {
+      dependencies?: Record<string, string>;
+      devDependencies?: Record<string, string>;
+    };
+    const read = (path: string) =>
+      JSON.parse(readFileSync(path, 'utf8')) as Manifest;
+    const pkg = read(join(bundle, 'package.json'));
+    const repoPkg = read(join(root, 'package.json'));
     expect(pkg.dependencies).toEqual(repoPkg.dependencies);
     expect(pkg.devDependencies).toEqual(repoPkg.devDependencies);
   });
