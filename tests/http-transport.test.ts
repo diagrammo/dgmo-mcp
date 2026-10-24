@@ -13,6 +13,7 @@ import { Client } from '@modelcontextprotocol/sdk/client/index.js';
 import { StreamableHTTPClientTransport } from '@modelcontextprotocol/sdk/client/streamableHttp.js';
 import { createServer, transportMode } from '../src/index.js';
 import { request as httpRequest } from 'node:http';
+import { connect as netConnect } from 'node:net';
 import {
   startHttpServer,
   MAX_BODY_BYTES,
@@ -357,5 +358,34 @@ describe('over the wire', () => {
       req.write('{');
     });
     expect(status).toBe(413);
+  });
+
+  // Raw TCP, so the request line and Host header go out byte for byte: both
+  // `fetch` and `http.request` would normalise or refuse what is under test.
+  function rawStatus(target: string, host: string): Promise<number> {
+    return new Promise<number>((resolve, reject) => {
+      const socket = netConnect(handle.port, '127.0.0.1', () => {
+        socket.write(
+          `GET ${target} HTTP/1.1\r\nHost: ${host}\r\nConnection: close\r\n\r\n`
+        );
+      });
+      let head = '';
+      socket.on('data', (chunk) => {
+        head += chunk.toString('latin1');
+      });
+      socket.on('end', () => {
+        const status = /^HTTP\/1\.1 (\d{3})/.exec(head);
+        resolve(status ? Number(status[1]) : 0);
+      });
+      socket.on('error', reject);
+    });
+  }
+
+  it('answers 400 to a malformed Host header or request target, and keeps serving (#1499)', async () => {
+    // Either input once made `new URL()` throw outside any catch, and the
+    // unhandled rejection ended the process.
+    expect(await rawStatus(baseUrl.pathname, 'a b')).toBe(400);
+    expect(await rawStatus('//[', `127.0.0.1:${handle.port}`)).toBe(400);
+    expect(await postWithOrigin(`http://127.0.0.1:${handle.port}`)).toBe(200);
   });
 });

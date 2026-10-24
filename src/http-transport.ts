@@ -118,7 +118,19 @@ export function createMcpRequestListener(
   makeServer: () => McpServer
 ): (req: IncomingMessage, res: ServerResponse) => void {
   return (req, res) => {
-    void handle(req, res);
+    // Nothing installs an unhandledRejection handler, so a rejection that got
+    // out of here would end the process: one bad request, no server (#1499).
+    handle(req, res).catch((err: unknown) => {
+      process.stderr.write(
+        `dgmo-mcp: request failed: ${err instanceof Error ? err.message : String(err)}\n`
+      );
+      sendJsonRpcError(
+        res,
+        500,
+        JSONRPC_INTERNAL_ERROR,
+        'Internal server error handling MCP request'
+      );
+    });
   };
 
   async function handle(
@@ -126,10 +138,31 @@ export function createMcpRequestListener(
     res: ServerResponse
   ): Promise<void> {
     const config = getConfig();
-    const url = new URL(
-      req.url ?? '/',
-      `http://${req.headers.host ?? 'localhost'}`
-    );
+    // Only the path routes, so it is parsed against a fixed base. The Host
+    // header is the SDK's to check against the accept-list — but one no URL
+    // can carry is refused here, as the bad request it is.
+    const host = req.headers.host;
+    if (host !== undefined && !URL.canParse(`http://${host}`)) {
+      sendJsonRpcError(
+        res,
+        400,
+        JSONRPC_INVALID_REQUEST,
+        'Host header is not a valid host'
+      );
+      return;
+    }
+    let url: URL;
+    try {
+      url = new URL(req.url ?? '/', 'http://localhost');
+    } catch {
+      sendJsonRpcError(
+        res,
+        400,
+        JSONRPC_INVALID_REQUEST,
+        'request target is not a valid URL'
+      );
+      return;
+    }
     if (url.pathname !== config.path) {
       sendJsonRpcError(
         res,
