@@ -18,6 +18,10 @@
 //                       plural-stemmed, non-contiguous) — rescues natural-
 //                       language paraphrases that miss every exact phrase.
 //   TIEBREAK            description-word overlap at 0.25x.
+//   PRECEDENCE          a prompt that NAMES a type — its id followed by
+//                       "diagram"/"chart" ("block diagram", "pie chart") —
+//                       gets NAMED_TYPE_DOMINANCE on top, so a named type beats
+//                       any sum of incidental phrases (diagrammo#1286).
 //
 // The scorer is built by `createSuggester(triggers)` so a caller (the eval
 // harness's curation UI) can score a *live-edited* vocabulary without a
@@ -74,25 +78,37 @@ export function normalize(s: string): string[] {
   return out.split(/[^a-z0-9]+/).filter(Boolean);
 }
 
+/** Every index at which `triggerTokens` starts as a contiguous slice of
+ *  `promptTokens`. */
+function contiguousStarts(
+  promptTokens: readonly string[],
+  triggerTokens: readonly string[]
+): number[] {
+  const starts: number[] = [];
+  if (triggerTokens.length === 0 || triggerTokens.length > promptTokens.length)
+    return starts;
+  outer: for (let i = 0; i <= promptTokens.length - triggerTokens.length; i++) {
+    for (let j = 0; j < triggerTokens.length; j++) {
+      if (promptTokens[i + j] !== triggerTokens[j]) continue outer;
+    }
+    starts.push(i);
+  }
+  return starts;
+}
+
 /** True if `triggerTokens` appears as a contiguous slice of `promptTokens`. */
 export function matchesContiguously(
   promptTokens: readonly string[],
   triggerTokens: readonly string[]
 ): boolean {
-  if (triggerTokens.length === 0 || triggerTokens.length > promptTokens.length)
-    return false;
-  outer: for (let i = 0; i <= promptTokens.length - triggerTokens.length; i++) {
-    for (let j = 0; j < triggerTokens.length; j++) {
-      if (promptTokens[i + j] !== triggerTokens[j]) continue outer;
-    }
-    return true;
-  }
-  return false;
+  return contiguousStarts(promptTokens, triggerTokens).length > 0;
 }
 
 /** The three already-computed score components, surfaced so a UI can explain
  *  *why* a type scored: contiguous-phrase, IDF token-overlap, description. */
 export interface ScoreBreakdown {
+  /** Contiguous-phrase score, plus NAMED_TYPE_DOMINANCE when the prompt names
+   *  the type ("block diagram"). */
   readonly contig: number;
   readonly idf: number;
   readonly desc: number;
@@ -199,6 +215,14 @@ function matchTokens(s: string): string[] {
  *  overlap sum), so a real trigger phrase always wins. */
 export const CONTIGUITY_DOMINANCE = 100;
 
+/** A prompt that names a type ("block diagram", "pie chart") asked for THAT
+ *  type: this sits far above any realistic sum of contiguous phrases, so
+ *  "a high level block diagram" is `block`, not the `high level` phrase on
+ *  boxes-and-lines (diagrammo#1286). Credited inside `breakdown.contig`. */
+const NAMED_TYPE_DOMINANCE = 10_000;
+/** The nouns that turn a type id into a request for it. */
+const NAMING_NOUNS = ['diagram', 'diagrams', 'chart', 'charts'];
+
 /** Popularity-prior calibration — a TIE-BREAKER, not a thumb on the scale. A
  *  type's prior contributes `prior * PRIOR_SCALE` to its score, but ONLY when the
  *  type already has match signal (so a prior never resurrects a no-match type or
@@ -275,6 +299,45 @@ export function createSuggester(
     return d <= 2 ? 1 : 1 / Math.sqrt(d - 1);
   };
 
+  // The phrases that can SHADOW a type's name: every type's triggers plus its
+  // own id. "mind map diagram" holds "map diagram", but mindmap's "mind map"
+  // starts earlier and overlaps it, so the prompt names mindmap, not map.
+  const shadowPhrases = REGISTRY.map((type) => ({
+    id: type.id,
+    phrases: [...triggersFor(type.id), type.id].map(normalize),
+  }));
+
+  /** The phrase naming each type the prompt names (`id → "block diagram"`). */
+  function namedTypes(promptTokens: readonly string[]): Map<string, string> {
+    const named = new Map<string, string>();
+    for (const type of REGISTRY) {
+      const name = normalize(type.id);
+      for (const noun of NAMING_NOUNS) {
+        for (const start of contiguousStarts(promptTokens, [...name, noun])) {
+          const shadowed = shadowPhrases.some(
+            (other) =>
+              other.id !== type.id &&
+              other.phrases.some((phrase) =>
+                contiguousStarts(promptTokens, phrase).some(
+                  (s) => s < start && s + phrase.length > start
+                )
+              )
+          );
+          if (!shadowed && !named.has(type.id))
+            named.set(type.id, [...name, noun].join(' '));
+        }
+      }
+    }
+    return named;
+  }
+  // suggestChartTypes scores every type against one prompt: name it once.
+  let lastNamed: { prompt: string; named: Map<string, string> } | undefined;
+  const namedFor = (prompt: string): Map<string, string> => {
+    if (lastNamed?.prompt !== prompt)
+      lastNamed = { prompt, named: namedTypes(normalize(prompt)) };
+    return lastNamed.named;
+  };
+
   function scoreChartType(
     prompt: string,
     type: RegistryType
@@ -314,7 +377,14 @@ export function createSuggester(
     for (const tok of promptMatchTokens)
       if (descTokens.has(tok) && !triggerTokenUnion.has(tok)) desc += 0.25;
 
-    const contigScore = contig * CONTIGUITY_DOMINANCE;
+    // PRECEDENCE: the prompt names this type.
+    const namedAs = namedFor(prompt).get(type.id);
+    if (namedAs !== undefined && !matched.includes(namedAs))
+      matched.unshift(namedAs);
+
+    const contigScore =
+      contig * CONTIGUITY_DOMINANCE +
+      (namedAs !== undefined ? NAMED_TYPE_DOMINANCE : 0);
     const match = contigScore + idf + desc;
     // Popularity prior: a near-tie BREAKER, applied ONLY to types that already
     // have match signal. Its max (the tie-break margin, ≤ 1) is below a single
