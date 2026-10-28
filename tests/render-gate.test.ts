@@ -51,12 +51,17 @@ describe('color hard-gate in renderPipeline', () => {
   });
 });
 
-// A boxes-and-lines chain: one node line and one edge connector per line.
+// One node line and one edge connector per line, in a chart type dagre lays out
+// (boxes-and-lines) and in one it does not (sequence).
 const chain = (edges: number) =>
   [
     'boxes-and-lines',
     ...Array.from({ length: edges }, (_, i) => `n${i} -> n${i + 1}`),
   ].join('\n');
+const messages = (count: number) =>
+  ['sequence', ...Array.from({ length: count }, (_, i) => `A -m${i}-> B`)].join(
+    '\n'
+  );
 
 describe('input caps in renderPipeline, before parse and layout (#1557)', () => {
   it('refuses a line past the length cap, naming the line', async () => {
@@ -74,33 +79,40 @@ describe('input caps in renderPipeline, before parse and layout (#1557)', () => 
     ).toBeNull();
   });
 
-  it('refuses a diagram past the node and edge cap', async () => {
-    const r = await renderPipeline(chain(1001), opts);
+  it('refuses a dagre-laid-out graph past the edge cap, before layout', async () => {
+    const r = await renderPipeline(chain(151), opts);
+    expect(r.svg).toBeNull();
+    expect(r.error).toBe(
+      'The boxes-and-lines diagram has 151 edges; the limit for this chart type is 150. Split it into smaller diagrams.'
+    );
+  });
+
+  it('accepts a dagre-laid-out graph at the edge cap', () => {
+    expect(inputSizeError(chain(150))).toBeNull();
+  });
+
+  it('counts every connector on a line toward the edge cap', () => {
+    // 76 nodes and 75 connectors a line: two lines are 150 edges, three are 225.
+    const line = Array.from({ length: 76 }, (_, i) => `n${i}`).join(' -> ');
+    const src = (n: number) =>
+      ['boxes-and-lines', ...Array.from({ length: n }, () => line)].join('\n');
+    expect(inputSizeError(src(2))).toBeNull();
+    expect(inputSizeError(src(3))).toMatch(
+      /has 225 edges; the limit for this chart type is 150/
+    );
+  });
+
+  it('holds a chart type dagre does not lay out to the node and edge cap only', async () => {
+    // The chart-type line plus 999 lines of one node and one connector each.
+    expect(inputSizeError(messages(999))).toBeNull();
+    const r = await renderPipeline(messages(1001), opts);
     expect(r.svg).toBeNull();
     expect(r.error).toMatch(
       /more than 2000 nodes and edges \(counted to line 1001\)/
     );
   });
 
-  it('accepts a diagram at the node and edge cap', () => {
-    // The chart-type line plus 999 lines of one node and one connector each.
-    expect(inputSizeError(chain(999))).toBe(null);
-    expect(inputSizeError(chain(1000))).toMatch(/more than 2000/);
-  });
-
-  it('counts every connector on a chain line, not only the line', () => {
-    // 100 nodes and 99 connectors a line: the 20th chain line (line 21) crosses.
-    const line = Array.from({ length: 100 }, (_, i) => `n${i}`).join(' -> ');
-    const src = [
-      'boxes-and-lines',
-      ...Array.from({ length: 25 }, () => line),
-    ].join('\n');
-    expect(inputSizeError(src)).toMatch(
-      /more than 2000 nodes and edges \(counted to line 21\)/
-    );
-  });
-
-  it('lets every gallery fixture through both caps', () => {
+  it('lets every gallery fixture through every cap', () => {
     const dir = assetRoots()
       .map((root) => join(root, 'gallery', 'fixtures'))
       .find((d) => existsSync(d));

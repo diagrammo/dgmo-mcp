@@ -55,7 +55,7 @@ Added 2026-08-06 for `diagrammo/dgmo-mcp#7`, the only feature request this ecosy
 - ⚠️ **The Host accept-list is rebuilt after `listen`**, since a Host header carries the port and the bound port is not known until then. Building it from the requested port makes every request fail as a rebinding attempt whenever the two differ (port 0 is the obvious case, and how the tests bind).
 - **No authentication, deliberately.** Binds `127.0.0.1`, DNS-rebinding protection on, loopback Host headers always accepted, `--allow-host` for anything else. Binding non-loopback without naming a host warns on stderr. Anyone exposing it to a network puts their own auth in front of it — don't add auth here without deciding that question properly.
 - Body cap is `MAX_BODY_BYTES` in `src/http-transport.ts`, refused on the declared `Content-Length` before a byte is read.
-- 🔴 **The body cap is not a layout bound — the input caps are.** `inputSizeError()` in `src/render-helpers.ts` refuses a line over `MAX_LINE_CHARS` and a text estimate over `MAX_NODES_AND_EDGES` before any parse, in `renderPipeline()` and `validate_diagram`, over both transports. Layout is synchronous in the request's thread, so a render deadline cannot stop it (diagrammo/diagrammo#1557).
+- 🔴 **The body cap is not a layout bound — the input caps are.** `inputSizeError()` in `src/render-helpers.ts` refuses a line over `MAX_LINE_CHARS`, a text estimate over `MAX_NODES_AND_EDGES`, and, in a chart type dagre lays out (`GRAPH_LAYOUT_TYPES`), more than `MAX_GRAPH_EDGES` edge connectors, before any parse, in `renderPipeline()` and `validate_diagram`, over both transports. Layout is synchronous in the request's thread, so a render deadline cannot stop it (diagrammo/diagrammo#1557).
 
 ## Releasing
 

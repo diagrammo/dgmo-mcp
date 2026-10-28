@@ -122,14 +122,33 @@ const MAX_LINE_CHARS = 1000;
 
 // The most nodes and edges accepted, estimated from the text: every non-blank
 // line, plus every edge connector in it, since a chain line declares one node
-// per connector. Over-counting refuses early, never late. Measured 2026-10-27
-// through renderPipeline: a boxes-and-lines chain of 1,600 edges took 13 s.
+// per connector. Over-counting refuses early, never late. Measured 2026-10-27:
+// about 2,000 lines of org, mindmap or sankey render in 1.5 s or less.
 const MAX_NODES_AND_EDGES = 2000;
 const EDGE_CONNECTOR = /->|~>|<-|=>|-{2,}|\.{2,}/g;
 
-/** Why a diagram is too large to lay out, or null when it is within both caps. */
+// The most edge connectors accepted in a chart type laid out by dagre (the
+// chart types whose dgmo layout imports it). Their layout grows much faster
+// than the edge count: measured 2026-10-27 through renderPipeline, a
+// boxes-and-lines graph of random edges took 8-10 s at 150 edges, 16 s at 200
+// and 71 s at 300. The gallery's most connected fixture has 48.
+const MAX_GRAPH_EDGES = 150;
+const GRAPH_LAYOUT_TYPES = new Set([
+  'boxes-and-lines',
+  'c4',
+  'class',
+  'er',
+  'flowchart',
+  'infra',
+  'pert',
+  'sitemap',
+  'state',
+]);
+
+/** Why a diagram is too large to lay out, or null when it is within the caps. */
 export function inputSizeError(dgmo: string): string | null {
   let count = 0;
+  let edges = 0;
   const lines = dgmo.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -137,10 +156,22 @@ export function inputSizeError(dgmo: string): string | null {
       return `Line ${i + 1} is ${line.length} characters long; the limit is ${MAX_LINE_CHARS}. Split it or shorten it.`;
     }
     if (line.trim() === '') continue;
-    count += 1 + (line.match(EDGE_CONNECTOR)?.length ?? 0);
+    const connectors = line.match(EDGE_CONNECTOR)?.length ?? 0;
+    edges += connectors;
+    count += 1 + connectors;
     if (count > MAX_NODES_AND_EDGES) {
       return `The diagram has more than ${MAX_NODES_AND_EDGES} nodes and edges (counted to line ${i + 1}). Split it into smaller diagrams.`;
     }
+  }
+  // Only once every line is within MAX_LINE_CHARS, so the type is read from a
+  // bounded first line.
+  const chartType = parseDgmoChartType(dgmo);
+  if (
+    edges > MAX_GRAPH_EDGES &&
+    chartType &&
+    GRAPH_LAYOUT_TYPES.has(chartType)
+  ) {
+    return `The ${chartType} diagram has ${edges} edges; the limit for this chart type is ${MAX_GRAPH_EDGES}. Split it into smaller diagrams.`;
   }
   return null;
 }
