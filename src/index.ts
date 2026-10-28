@@ -44,6 +44,7 @@ import {
   renderPipeline,
   fontCoverageWarning,
   svgBackground,
+  inputSizeError,
 } from './render-helpers.js';
 export { renderPipeline } from './render-helpers.js';
 import { validateFlowchartStructure } from './flowchart-structure.js';
@@ -970,6 +971,14 @@ tool(
     dgmo: z.string().describe('DGMO diagram markup to validate'),
   },
   async ({ dgmo }) => {
+    // The render gate's input caps, so validate and render agree.
+    const tooLarge = inputSizeError(dgmo);
+    if (tooLarge !== null) {
+      return {
+        content: [{ type: 'text' as const, text: tooLarge }],
+        isError: true,
+      };
+    }
     const chartType = parseDgmoChartType(dgmo);
     // Maps need the RESOLVER, not just the parser: place names, route/edge
     // endpoints, and `as`/label references are all resolved (and errored) in

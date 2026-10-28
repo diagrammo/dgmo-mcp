@@ -108,6 +108,43 @@ export function svgToPngBase64(svg: string, background?: string): string {
 // are a per-request concern, not per-diagram.
 // ---------------------------------------------------------------------------
 
+// ---------------------------------------------------------------------------
+// Input caps — checked on the raw text, before any parse or layout
+// (diagrammo/diagrammo#1557). The HTTP body cap (MAX_BODY_BYTES, 4 MiB) was
+// the only bound on what a caller could hand the renderer, and stdio had none.
+// Layout is synchronous, so a deadline cannot stop it; refusing the input can.
+// ---------------------------------------------------------------------------
+
+// The longest line accepted. The inline-markdown link scan in the inlined
+// library is super-linear in the length of one line (fixed in dgmo fdcedbf9,
+// not yet released into this package). The gallery's longest line is 85.
+const MAX_LINE_CHARS = 1000;
+
+// The most nodes and edges accepted, estimated from the text: every non-blank
+// line, plus every edge connector in it, since a chain line declares one node
+// per connector. Over-counting refuses early, never late. Measured 2026-10-27
+// through renderPipeline: a boxes-and-lines chain of 1,600 edges took 13 s.
+const MAX_NODES_AND_EDGES = 2000;
+const EDGE_CONNECTOR = /->|~>|<-|=>|-{2,}|\.{2,}/g;
+
+/** Why a diagram is too large to lay out, or null when it is within both caps. */
+export function inputSizeError(dgmo: string): string | null {
+  let count = 0;
+  const lines = dgmo.split('\n');
+  for (let i = 0; i < lines.length; i++) {
+    const line = lines[i];
+    if (line.length > MAX_LINE_CHARS) {
+      return `Line ${i + 1} is ${line.length} characters long; the limit is ${MAX_LINE_CHARS}. Split it or shorten it.`;
+    }
+    if (line.trim() === '') continue;
+    count += 1 + (line.match(EDGE_CONNECTOR)?.length ?? 0);
+    if (count > MAX_NODES_AND_EDGES) {
+      return `The diagram has more than ${MAX_NODES_AND_EDGES} nodes and edges (counted to line ${i + 1}). Split it into smaller diagrams.`;
+    }
+  }
+  return null;
+}
+
 type RenderDiagnostics = ReturnType<typeof parseDgmo>['diagnostics'];
 
 /** Discriminated on `error`: a null error guarantees a non-null svg. */
@@ -135,6 +172,10 @@ export async function renderPipeline(
     height?: number | undefined;
   }
 ): Promise<RenderPipelineResult> {
+  const tooLarge = inputSizeError(dgmo);
+  if (tooLarge !== null) {
+    return { svg: null, diagnostics: [], error: tooLarge };
+  }
   const { diagnostics } = parseDgmo(dgmo);
   // Flowcharts get an extra structural gate (orphan nodes, one-way decisions);
   // these are warnings in the library but the MCP refuses them so the authoring

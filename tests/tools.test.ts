@@ -110,6 +110,16 @@ describe('validate_diagram', () => {
     });
     expect(text.toLowerCase()).toMatch(/error|invalid|no nodes|found/);
   });
+
+  it("refuses a line past the render gate's length cap (#1557)", async () => {
+    const { text, isError } = await call('validate_diagram', {
+      dgmo: `flowchart\n(a) -> (b) ${'['.repeat(5000)}`,
+    });
+    expect(isError).toBe(true);
+    expect(text).toMatch(
+      /^Line 2 is 5011 characters long; the limit is 1000\./
+    );
+  });
 });
 
 describe('list_chart_types', () => {
