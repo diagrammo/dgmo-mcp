@@ -122,8 +122,9 @@ const MAX_LINE_CHARS = 1000;
 
 // The most nodes and edges accepted, estimated from the text: every non-blank
 // line, plus every edge connector in it, since a chain line declares one node
-// per connector. Over-counting refuses early, never late. Measured 2026-10-27:
-// about 2,000 lines of org, mindmap or sankey render in 1.5 s or less.
+// per connector. Over-counting refuses early, never late. Measured 2026-10-27
+// through renderPipeline, at about this cap: sequence, org, family, gantt,
+// mindmap, treemap and swimlane each render in 2.6 s or less.
 const MAX_NODES_AND_EDGES = 2000;
 const EDGE_CONNECTOR = /->|~>|<-|=>|-{2,}|\.{2,}/g;
 
