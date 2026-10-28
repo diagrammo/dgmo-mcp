@@ -127,12 +127,15 @@ const MAX_LINE_CHARS = 1000;
 const MAX_NODES_AND_EDGES = 2000;
 const EDGE_CONNECTOR = /->|~>|<-|=>|-{2,}|\.{2,}/g;
 
-// The most edge connectors accepted in a chart type laid out by dagre (the
-// chart types whose dgmo layout imports it). Their layout grows much faster
-// than the edge count: measured 2026-10-27 through renderPipeline, a
-// boxes-and-lines graph of random edges took 8-10 s at 150 edges, 16 s at 200
-// and 71 s at 300. The gallery's most connected fixture has 48.
-const MAX_GRAPH_EDGES = 150;
+// The same count's limit in a chart type laid out by dagre (the chart types
+// whose dgmo layout imports it). Their layout grows much faster than the
+// count. Edge connectors alone undercount them: an ER relationship is a line
+// with no arrow (`1-aboard-* crew_members`) and a sitemap edge is indentation,
+// so every line counts. Measured 2026-10-27 through renderPipeline: a
+// boxes-and-lines graph of random edges took 8-10 s at 150 edges (300
+// counted), 16 s at 200 and 71 s at 300; an ER diagram of 474 lines, 44.8 s.
+// The gallery's highest count is the sitemap fixture's, 180.
+const MAX_GRAPH_COUNT = 300;
 const GRAPH_LAYOUT_TYPES = new Set([
   'boxes-and-lines',
   'c4',
@@ -148,7 +151,6 @@ const GRAPH_LAYOUT_TYPES = new Set([
 /** Why a diagram is too large to lay out, or null when it is within the caps. */
 export function inputSizeError(dgmo: string): string | null {
   let count = 0;
-  let edges = 0;
   const lines = dgmo.split('\n');
   for (let i = 0; i < lines.length; i++) {
     const line = lines[i];
@@ -156,9 +158,7 @@ export function inputSizeError(dgmo: string): string | null {
       return `Line ${i + 1} is ${line.length} characters long; the limit is ${MAX_LINE_CHARS}. Split it or shorten it.`;
     }
     if (line.trim() === '') continue;
-    const connectors = line.match(EDGE_CONNECTOR)?.length ?? 0;
-    edges += connectors;
-    count += 1 + connectors;
+    count += 1 + (line.match(EDGE_CONNECTOR)?.length ?? 0);
     if (count > MAX_NODES_AND_EDGES) {
       return `The diagram has more than ${MAX_NODES_AND_EDGES} nodes and edges (counted to line ${i + 1}). Split it into smaller diagrams.`;
     }
@@ -167,11 +167,11 @@ export function inputSizeError(dgmo: string): string | null {
   // bounded first line.
   const chartType = parseDgmoChartType(dgmo);
   if (
-    edges > MAX_GRAPH_EDGES &&
+    count > MAX_GRAPH_COUNT &&
     chartType &&
     GRAPH_LAYOUT_TYPES.has(chartType)
   ) {
-    return `The ${chartType} diagram has ${edges} edges; the limit for this chart type is ${MAX_GRAPH_EDGES}. Split it into smaller diagrams.`;
+    return `The ${chartType} diagram has ${count} nodes and edges; the limit for this chart type is ${MAX_GRAPH_COUNT}. Split it into smaller diagrams.`;
   }
   return null;
 }

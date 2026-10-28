@@ -79,26 +79,49 @@ describe('input caps in renderPipeline, before parse and layout (#1557)', () => 
     ).toBeNull();
   });
 
-  it('refuses a dagre-laid-out graph past the edge cap, before layout', async () => {
-    const r = await renderPipeline(chain(151), opts);
+  it('refuses a dagre-laid-out graph past the graph cap, before layout', async () => {
+    // The chart-type line plus 150 lines of one node and one connector: 301.
+    const r = await renderPipeline(chain(150), opts);
     expect(r.svg).toBeNull();
     expect(r.error).toBe(
-      'The boxes-and-lines diagram has 151 edges; the limit for this chart type is 150. Split it into smaller diagrams.'
+      'The boxes-and-lines diagram has 301 nodes and edges; the limit for this chart type is 300. Split it into smaller diagrams.'
     );
   });
 
-  it('accepts a dagre-laid-out graph at the edge cap', () => {
-    expect(inputSizeError(chain(150))).toBeNull();
+  it('accepts a dagre-laid-out graph at the graph cap', () => {
+    expect(inputSizeError(chain(149))).toBeNull();
   });
 
-  it('counts every connector on a line toward the edge cap', () => {
-    // 76 nodes and 75 connectors a line: two lines are 150 edges, three are 225.
-    const line = Array.from({ length: 76 }, (_, i) => `n${i}`).join(' -> ');
+  it('counts every connector on a line toward the graph cap', () => {
+    // 51 nodes and 50 connectors a line, so 51 a line: five lines and the
+    // chart-type line are 256, six are 307.
+    const line = Array.from({ length: 51 }, (_, i) => `n${i}`).join(' -> ');
     const src = (n: number) =>
       ['boxes-and-lines', ...Array.from({ length: n }, () => line)].join('\n');
-    expect(inputSizeError(src(2))).toBeNull();
-    expect(inputSizeError(src(3))).toMatch(
-      /has 225 edges; the limit for this chart type is 150/
+    expect(inputSizeError(src(5))).toBeNull();
+    expect(inputSizeError(src(6))).toMatch(
+      /has 307 nodes and edges; the limit for this chart type is 300/
+    );
+  });
+
+  it('counts an edge written with no arrow — an ER relationship, a sitemap child', () => {
+    const er = [
+      'er',
+      ...Array.from({ length: 30 }, (_, t) => [
+        `t${t}`,
+        ...Array.from({ length: 9 }, () => `  1-has-* t${(t + 1) % 30}`),
+      ]).flat(),
+    ];
+    expect(er.length).toBe(301);
+    expect(inputSizeError(er.join('\n'))).toMatch(
+      /^The er diagram has 301 nodes and edges/
+    );
+    const sitemap = [
+      'sitemap',
+      ...Array.from({ length: 300 }, (_, i) => `${i ? '  ' : ''}Page ${i}`),
+    ];
+    expect(inputSizeError(sitemap.join('\n'))).toMatch(
+      /^The sitemap diagram has 301 nodes and edges/
     );
   });
 
