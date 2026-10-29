@@ -26,6 +26,7 @@ import { Resvg } from '@resvg/resvg-js';
 import { existsSync, readFileSync } from 'node:fs';
 import { join } from 'node:path';
 import { assetRoots } from './asset-roots.js';
+import { emojiOmittedWarning, stripEmojiFromSvg } from './emoji-strip.js';
 
 const DEFAULT_FONT_NAME = 'Inter';
 
@@ -58,6 +59,15 @@ const BUNDLED_FONT_FILES = resolveBundledFonts();
  * is missing — an odd install layout is not worth a warning of its own.
  */
 export function fontCoverageWarning(svg: string): string | undefined {
+  // Emoji never reach resvg (see svgToPngBase64), so they are reported as
+  // left out rather than as a coverage gap.
+  const emojiNote = emojiOmittedWarning(textFromSvg(svg));
+  const portability = glyphCoverageWarning(stripEmojiFromSvg(svg));
+  if (emojiNote && portability) return `${emojiNote}\nWarning: ${portability}`;
+  return emojiNote ?? portability;
+}
+
+function glyphCoverageWarning(svg: string): string | undefined {
   for (const root of assetRoots()) {
     const manifest = join(root, 'fonts', 'coverage.json');
     if (!existsSync(manifest)) continue;
@@ -76,7 +86,9 @@ export function fontCoverageWarning(svg: string): string | undefined {
 }
 
 export function svgToPngBase64(svg: string, background?: string): string {
-  const resvg = new Resvg(svg, {
+  // Emoji are dropped before resvg sees them — see src/emoji-strip.ts
+  // (diagrammo/diagrammo#1423). SVG output never comes through here.
+  const resvg = new Resvg(stripEmojiFromSvg(svg), {
     fitTo: { mode: 'zoom' as const, value: 2 },
     ...(background ? { background } : {}),
     font: {
