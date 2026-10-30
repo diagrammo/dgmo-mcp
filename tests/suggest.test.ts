@@ -165,6 +165,30 @@ describe('a prompt that names a type gets that type', () => {
         confidence: 'high',
       });
   });
+  // Owner's rule, diagrammo/diagrammo#1447: "architecture" alone is
+  // boxes-and-lines; an ask that also names traffic infrastructure — a load
+  // balancer, a WAF, a firewall, requests per second — is infra.
+  it('a plain architecture ask is boxes-and-lines, even naming a message queue', () => {
+    for (const prompt of [
+      'an architecture diagram of a small web app',
+      // The first-try probe's architecture prompt (scripts/first-try-probe.py
+      // in diagrammo/diagrammo), which answered infra on 3 of 4 runs.
+      'Draw an architecture diagram of a small web app: a React single-page app talks to an ' +
+        'API gateway, which routes to an auth service and an orders service; the orders service ' +
+        'uses a Postgres database and publishes events to a message queue that a notification ' +
+        'worker consumes to send email. Group the backend services together.',
+    ])
+      expect(top(prompt).id, prompt).toBe('boxes-and-lines');
+  });
+  it('an architecture ask naming traffic infrastructure is infra', () => {
+    for (const prompt of [
+      'architecture with a load balancer and WAF at 5000 RPS',
+      'an architecture diagram with a load balancer in front of the web app',
+      'architecture diagram of the web app behind a WAF and a firewall',
+      'architecture for a service handling 2000 requests per second',
+    ])
+      expect(top(prompt).id, prompt).toBe('infra');
+  });
 });
 
 describe('selection accuracy — natural language', () => {
