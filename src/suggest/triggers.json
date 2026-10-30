@@ -196,7 +196,18 @@
       "requests per second"
     ],
     "concepts": [],
-    "prior": 5
+    "prior": 5,
+    "signals": [
+      "load balancer",
+      "waf",
+      "firewall",
+      "network infrastructure",
+      "network traffic",
+      "internet facing",
+      "internet traffic",
+      "rps",
+      "requests per second"
+    ]
   },
   "journey-map": {
     "phrases": [

@@ -189,6 +189,34 @@ describe('a prompt that names a type gets that type', () => {
     ])
       expect(top(prompt).id, prompt).toBe('infra');
   });
+  // Each signal ALONE beats "architecture diagram", a longer phrase match: the
+  // signal is precedence, not one more phrase (SIGNAL_DOMINANCE).
+  it('one traffic-infrastructure signal alone makes an architecture diagram infra', () => {
+    for (const prompt of [
+      'an architecture diagram of a small web app behind a WAF',
+      'an architecture diagram of a web app with a firewall',
+      'architecture diagram of a web app handling 5000 RPS',
+      'an architecture diagram of a web app serving 300 requests per second',
+      'an architecture diagram with load balancers in front of the web app',
+      'an architecture diagram of an internet-facing web app',
+      'an architecture diagram of our network infrastructure',
+    ])
+      expect(top(prompt).id, prompt).toBe('infra');
+  });
+  it('a type named outright still beats a signal', () => {
+    expect(top('a sequence diagram of a request through the WAF').id).toBe(
+      'sequence'
+    );
+  });
+  // Bare "network" is no signal: other types own "general-purpose network",
+  // "project network" and "task dependency network".
+  it('a network that is not traffic infrastructure is not infra', () => {
+    for (const prompt of [
+      'an architecture diagram of a general-purpose network of services',
+      'a task dependency network for the launch plan',
+    ])
+      expect(top(prompt).id, prompt).not.toBe('infra');
+  });
 });
 
 describe('selection accuracy — natural language', () => {

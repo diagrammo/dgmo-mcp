@@ -29,7 +29,7 @@
 // the instances bound to the committed `TRIGGERS`.
 
 import { chartTypes } from '@diagrammo/dgmo/advanced';
-import { TRIGGERS, PRIORS } from './triggers.js';
+import { TRIGGERS, PRIORS, SIGNALS } from './triggers.js';
 
 /** The registry shape we depend on (dgmo owns this; triggers are local). */
 interface RegistryType {
@@ -108,7 +108,8 @@ export function matchesContiguously(
  *  *why* a type scored: contiguous-phrase, IDF token-overlap, description. */
 export interface ScoreBreakdown {
   /** Contiguous-phrase score, plus NAMED_TYPE_DOMINANCE when the prompt names
-   *  the type ("block diagram"). */
+   *  the type ("block diagram") and SIGNAL_DOMINANCE when it holds one of the
+   *  type's signals ("waf"). */
   readonly contig: number;
   readonly idf: number;
   readonly desc: number;
@@ -220,6 +221,14 @@ export const CONTIGUITY_DOMINANCE = 100;
  *  "a high level block diagram" is `block`, not the `high level` phrase on
  *  boxes-and-lines (diagrammo#1286). Credited inside `breakdown.contig`. */
 const NAMED_TYPE_DOMINANCE = 10_000;
+/** A prompt holding one of a type's SIGNAL phrases ("waf", "firewall", "rps"
+ *  on infra) wants that type even when another type's phrase is longer:
+ *  "an architecture diagram of a web app behind a WAF" is infra, though
+ *  "architecture diagram" (200) outscores "waf" (100) as plain phrases
+ *  (diagrammo#1447). Above any realistic sum of contiguous phrases, below
+ *  NAMED_TYPE_DOMINANCE so a named type still wins. Credited inside
+ *  `breakdown.contig`. */
+const SIGNAL_DOMINANCE = 1_000;
 /** The nouns that turn a type id into a request for it. */
 const NAMING_NOUNS = ['diagram', 'diagrams', 'chart', 'charts'];
 
@@ -273,9 +282,18 @@ export interface Suggester {
  */
 export function createSuggester(
   triggers: TriggerMap,
-  priors: PriorMap = {}
+  priors: PriorMap = {},
+  signals: TriggerMap = {}
 ): Suggester {
   const triggersFor = (id: string): readonly string[] => triggers[id] ?? [];
+  // Signals match plural-stemmed, so "load balancers" holds "load balancer".
+  // Tokenized once per vocabulary, as the IDF table below is.
+  const signalTokens = new Map(
+    Object.entries(signals).map(([id, list]) => [
+      id,
+      list.map((text) => ({ text, tokens: normalize(text).map(stemPlural) })),
+    ])
+  );
   /** Clamped prior contribution for a type, before the match-signal gate. */
   const priorBonus = (id: string): number =>
     Math.max(0, Math.min(priors[id] ?? 0, PRIOR_MAX)) * PRIOR_SCALE;
@@ -382,9 +400,18 @@ export function createSuggester(
     if (namedAs !== undefined && !matched.includes(namedAs))
       matched.unshift(namedAs);
 
+    // PRECEDENCE: the prompt holds one of this type's signals.
+    const promptStemmed = promptTokensArr.map(stemPlural);
+    const signal = signalTokens
+      .get(type.id)
+      ?.find(({ tokens }) => matchesContiguously(promptStemmed, tokens));
+    const signalled = signal !== undefined;
+    if (signalled && !matched.includes(signal.text)) matched.push(signal.text);
+
     const contigScore =
       contig * CONTIGUITY_DOMINANCE +
-      (namedAs !== undefined ? NAMED_TYPE_DOMINANCE : 0);
+      (namedAs !== undefined ? NAMED_TYPE_DOMINANCE : 0) +
+      (signalled ? SIGNAL_DOMINANCE : 0);
     const match = contigScore + idf + desc;
     // Popularity prior: a near-tie BREAKER, applied ONLY to types that already
     // have match signal. Its max (the tie-break margin, ≤ 1) is below a single
@@ -425,8 +452,8 @@ export function createSuggester(
   return { scoreChartType, suggestChartTypes };
 }
 
-// Default instances bound to the committed TRIGGERS vocabulary + PRIORS.
-const defaultSuggester = createSuggester(TRIGGERS, PRIORS);
+// Default instances bound to the committed TRIGGERS vocabulary + PRIORS + SIGNALS.
+const defaultSuggester = createSuggester(TRIGGERS, PRIORS, SIGNALS);
 
 export function scoreChartType(
   prompt: string,

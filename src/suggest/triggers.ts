@@ -14,7 +14,13 @@
 //                itself never reads concepts (they only produce phrases).
 //   • prior    — optional popularity bias (0–10): how typically a user means
 //                this type when the prompt is ambiguous. Absent = 0 = no bias.
-//   concepts + prior are MCP-owned TUNING and stay authored here.
+//   • signals  — optional phrases that put THIS type first whenever one appears
+//                in the prompt, over any sum of ordinary phrase matches (see
+//                SIGNAL_DOMINANCE in scoring). Infra's traffic-infrastructure
+//                words ("waf", "firewall", "rps") are the case: "an architecture
+//                diagram ... behind a WAF" is infra, though "architecture diagram"
+//                is the longer phrase match (diagrammo#1447).
+//   concepts + prior + signals are MCP-owned TUNING and stay authored here.
 //
 // Keyed by id; validated against @diagrammo/dgmo chartTypes by suggest.test.ts.
 import data from './triggers.json';
@@ -25,6 +31,8 @@ export interface TriggerEntry {
   /** Popularity prior (0–10): how typically a user means THIS type when a prompt
    *  is ambiguous. Optional; absent = 0 = no bias. See PRIOR_SCALE in scoring. */
   readonly prior?: number;
+  /** Precedence phrases: one in the prompt puts this type first. Optional. */
+  readonly signals?: readonly string[];
 }
 
 /** Full per-type authoring data (phrases + concept hints + optional prior). */
@@ -40,4 +48,12 @@ export const PRIORS: Record<string, number> = Object.fromEntries(
   Object.entries(TRIGGER_DATA)
     .map(([id, entry]) => [id, entry.prior ?? 0] as const)
     .filter(([, p]) => p > 0)
+);
+
+/** The precedence signals the scorer consumes — `{ id: [signals] }` (only
+ *  types that declare some). */
+export const SIGNALS: Record<string, readonly string[]> = Object.fromEntries(
+  Object.entries(TRIGGER_DATA)
+    .filter(([, entry]) => (entry.signals?.length ?? 0) > 0)
+    .map(([id, entry]) => [id, entry.signals ?? []])
 );
