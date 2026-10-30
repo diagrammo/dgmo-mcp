@@ -190,7 +190,10 @@
       "network topology",
       "cloud",
       "requests flow",
-      "message queue"
+      "load balancer",
+      "waf",
+      "firewall",
+      "requests per second"
     ],
     "concepts": [],
     "prior": 5
