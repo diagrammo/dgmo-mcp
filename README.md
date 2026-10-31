@@ -137,9 +137,11 @@ If you have the `dgmo` CLI installed, `{ "command": "dgmo", "args": ["mcp"] }` w
 The setups above launch the server as a child process and talk to it over its standard
 input and output. That needs the server and the client on the same machine. Where they
 are not — a hosted agent platform, a container, one server shared by several people —
-start it as an HTTP endpoint instead:
+start it as an HTTP endpoint instead. The same endpoint also suits one machine, when you
+want a single server always running for every AI tool you use:
 
 ```bash
+dgmo mcp --http                              # with the dgmo CLI installed
 npx -y @diagrammo/dgmo-mcp --http            # http://127.0.0.1:3333/mcp
 MCP_TRANSPORT=http MCP_PORT=8080 npx -y @diagrammo/dgmo-mcp
 ```
@@ -167,6 +169,59 @@ endpoint can serve several clients at once.
 > host prints a warning saying so.
 
 `--help` prints all of this from the installed version.
+
+#### Keep it running
+
+Run the server as a background service so it starts at login and restarts if it stops.
+Change the `dgmo` path to what `which dgmo` prints.
+
+**Linux — systemd user service**, saved as `~/.config/systemd/user/dgmo-mcp.service`:
+
+```ini
+[Unit]
+Description=Diagrammo MCP server over HTTP
+After=network.target
+
+[Service]
+ExecStart=%h/.local/bin/dgmo mcp --http
+Environment=PATH=%h/.local/bin:/usr/local/bin:/usr/bin:/bin
+Restart=on-failure
+RestartSec=3
+
+[Install]
+WantedBy=default.target
+```
+
+```bash
+systemctl --user daemon-reload
+systemctl --user enable --now dgmo-mcp
+```
+
+**macOS — launchd agent**, saved as `~/Library/LaunchAgents/app.diagrammo.mcp.plist`:
+
+```xml
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE plist PUBLIC "-//Apple//DTD PLIST 1.0//EN" "http://www.apple.com/DTDs/PropertyList-1.0.dtd">
+<plist version="1.0">
+<dict>
+  <key>Label</key><string>app.diagrammo.mcp</string>
+  <key>ProgramArguments</key>
+  <array>
+    <string>/opt/homebrew/bin/dgmo</string><string>mcp</string><string>--http</string>
+  </array>
+  <key>EnvironmentVariables</key>
+  <dict><key>PATH</key><string>/opt/homebrew/bin:/usr/local/bin:/usr/bin:/bin</string></dict>
+  <key>RunAtLoad</key><true/>
+  <key>KeepAlive</key><true/>
+</dict>
+</plist>
+```
+
+```bash
+launchctl bootstrap gui/$(id -u) ~/Library/LaunchAgents/app.diagrammo.mcp.plist
+```
+
+Then point each AI tool at `http://127.0.0.1:3333/mcp` as a streamable-HTTP MCP server.
 
 ## Privacy
 
