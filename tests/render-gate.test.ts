@@ -147,4 +147,52 @@ describe('input caps in renderPipeline, before parse and layout (#1557)', () => 
     );
     expect(refused).toEqual([]);
   });
+
+  describe('reads the chart type past a leading palette line, as parseDgmo does (#1663)', () => {
+    const GRAPH_TYPES = [
+      'boxes-and-lines',
+      'flowchart',
+      'er',
+      'class',
+      'state',
+      'c4',
+      'infra',
+      'pert',
+      'sitemap',
+    ];
+    // The chart-type line plus 150 lines of one node and one connector: 301
+    // without the palette line, 302 with it — both past MAX_GRAPH_COUNT.
+    const arrows = Array.from({ length: 150 }, (_, i) => `a${i} -> b${i}`);
+    for (const type of GRAPH_TYPES) {
+      it(`refuses a ${type} graph past the graph cap with or without a palette line`, () => {
+        const bare = [type, ...arrows].join('\n');
+        const withPalette = `palette nord\n${bare}`;
+        expect(inputSizeError(bare)).toBe(
+          `The ${type} diagram has 301 nodes and edges; the limit for this chart type is 300. Split it into smaller diagrams.`
+        );
+        expect(inputSizeError(withPalette)).toBe(
+          `The ${type} diagram has 302 nodes and edges; the limit for this chart type is 300. Split it into smaller diagrams.`
+        );
+      });
+    }
+
+    it('refuses the 2000-count palette payload before renderPipeline lays it out', async () => {
+      const src = [
+        'palette nord',
+        'boxes-and-lines',
+        ...Array.from({ length: 999 }, (_, i) => `a${i} -> b${i}`),
+      ].join('\n');
+      const r = await renderPipeline(src, opts);
+      expect(r.svg).toBeNull();
+      expect(r.error).toMatch(
+        /^The boxes-and-lines diagram has 2000 nodes and edges; the limit for this chart type is 300\./
+      );
+    });
+
+    it('still passes a small diagram with a palette line', () => {
+      expect(
+        inputSizeError('palette nord\nboxes-and-lines\na -> b\nb -> c')
+      ).toBeNull();
+    });
+  });
 });

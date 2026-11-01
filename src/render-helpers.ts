@@ -13,6 +13,7 @@ import {
   render,
   parseDgmo,
   parseDgmoChartType,
+  extractPaletteDirective,
   formatDgmoError,
   loadMapData,
   INVALID_COLOR_CODE,
@@ -177,8 +178,11 @@ export function inputSizeError(dgmo: string): string | null {
     }
   }
   // Only once every line is within MAX_LINE_CHARS, so the type is read from a
-  // bounded first line.
-  const chartType = parseDgmoChartType(dgmo);
+  // bounded first line. Read it as parseDgmo does: a leading `palette` line
+  // (and its block) is lifted to `//` first. On the raw text that line hid the
+  // type, inference took the arrows for a sequence, and a dagre graph skipped
+  // MAX_GRAPH_COUNT (diagrammo/diagrammo#1663).
+  const chartType = parseDgmoChartType(extractPaletteDirective(dgmo).content);
   if (
     count > MAX_GRAPH_COUNT &&
     chartType &&
