@@ -761,10 +761,10 @@ const DATASETS = [
 // prompts.json (as string arrays), imported by main.ts as each type's prompts.
 const PROMPTS = {
   // ── Added 2026-09-04 (#686) ──────────────────────────────────────────────
-  // The 2026-09-03 registry refresh picked up eight types the studio could not
+  // The 2026-09-03 registry refresh picked up types the studio could not
   // teach. `live-link` is now excluded at the source (dump-registry.mjs — the
-  // language reference says it is offered in no picker), `sketch` is
-  // DATASETLESS, and these seven carry one prompt each.
+  // language reference says it is offered in no picker), and these six carry
+  // one prompt each.
   //
   // ⚠️ ONE prompt each, where the older types carry four. Every prompt here has
   // a real verdict in prompt-validation.json — authored, parsed, rendered with
@@ -787,9 +787,6 @@ const PROMPTS = {
   ],
   bracket: [
     'Draw a single-elimination bracket of the cup in the sample data: name the three rounds, then list each result so the winners advance to the final.',
-  ],
-  sketch: [
-    'Draw a small sketch of a morning standup flow: a standup bot prompts a team board, the board feeds a follow-ups group holding a blocker-notes sticky and an action-log document. Tag who owns each shape.',
   ],
   sequence: [
     'Draw a sequence diagram of the checkout flow in the sample data — show each message between the participants in order.',

@@ -2,7 +2,7 @@
   "_meta": {
     "validatedOn": "2026-09-04",
     "method": "Each prompt authored by a competent model (per-type subagent), parsed through the renderPipeline gate (VALID), rendered to PNG via the dgmo render path, and the image judged against the prompt intent. The persisted DGMO + render for each is browsable in the studio gallery.",
-    "summary": "35 types x 4 prompts = 140 validated: all parse, render, and match intent. The 3 new ring prompts were reframed from proportional-allocation (wrong for ring) to nested/core-out concepts per spec section 24; the 3 new sitemap prompts were reworded to steer toward the connected-arrow form (indentation alone renders disconnected boxes). 2026-07-04: added event-line, swimlane, block, treemap, and version-control (5 types x 4 prompts) after the dgmo 0.44 chart-type sync + chord removal; each authored to DGMO and rendered through the CLI (parse+render VALID), intent judged against the prompt. 2026-09-04 (#686): added family, body, goal, countdown, clock, bracket and sketch (7 types x 1 prompt). Each was authored here, parsed through validate_diagram, rendered with the WORKSPACE CLI at dgmo 0.83.0 (NOT the installed `dgmo`, which was 0.62.1 and drew a stale glyph that briefly read as a rendering bug), and the PNG looked at. One prompt each rather than four: a fourth costs another render-and-look, not another sentence. Two dgmo defects were found and filed rather than worked around in the prompts \u2014 sketch `shape: cloud` is in the language reference but rejected by the parser, and the `goal` gauge face collides its value with the 250k/750k axis labels, which is why goal uses thermometer here."
+    "summary": "35 types x 4 prompts = 140 validated: all parse, render, and match intent. The 3 new ring prompts were reframed from proportional-allocation (wrong for ring) to nested/core-out concepts per spec section 24; the 3 new sitemap prompts were reworded to steer toward the connected-arrow form (indentation alone renders disconnected boxes). 2026-07-04: added event-line, swimlane, block, treemap, and version-control (5 types x 4 prompts) after the dgmo 0.44 chart-type sync + chord removal; each authored to DGMO and rendered through the CLI (parse+render VALID), intent judged against the prompt. 2026-09-04 (#686): added family, body, goal, countdown, clock and bracket (6 types x 1 prompt). Each was authored here, parsed through validate_diagram, rendered with the WORKSPACE CLI at dgmo 0.83.0 (NOT the installed `dgmo`, which was 0.62.1 and drew a stale glyph that briefly read as a rendering bug), and the PNG looked at. One prompt each rather than four: a fourth costs another render-and-look, not another sentence. One dgmo defect was found and filed rather than worked around in the prompts \u2014 the `goal` gauge face collides its value with the 250k/750k axis labels, which is why goal uses thermometer here."
   },
   "arc": [
     {
@@ -1087,14 +1087,6 @@
   "bracket": [
     {
       "prompt": "Draw a single-elimination bracket of the cup in the sample data: name the three rounds, then list each result so the winners advance to the final.",
-      "valid": true,
-      "render": "ok",
-      "intent": "good"
-    }
-  ],
-  "sketch": [
-    {
-      "prompt": "Draw a small sketch of a morning standup flow: a standup bot prompts a team board, the board feeds a follow-ups group holding a blocker-notes sticky and an action-log document. Tag who owns each shape.",
       "valid": true,
       "render": "ok",
       "intent": "good"

@@ -19,12 +19,7 @@ import { renderPipeline } from '../src/render-helpers.js';
 // Types whose content is fully specified by the prompt itself, so no injected
 // dataset is needed (logic/structure the model builds from the instruction).
 //
-// `sketch` joined them 2026-09-04. It is not a data chart at all — the language
-// reference calls it "a GUI-authored format — the desktop and web canvas
-// editors generate this markup, so hand-writing it is the exception", and the
-// same block caps a good sketch at ~15 shapes. That is the identical reason
-// `wireframe` has always been here.
-const DATASETLESS = new Set(['flowchart', 'function', 'wireframe', 'sketch']);
+const DATASETLESS = new Set(['flowchart', 'function', 'wireframe']);
 
 // The studio shows exactly the TYPE-block ids in registry.json, not the full
 // chartTypes registry (which includes grouped data-chart ids like line/pie).
@@ -101,8 +96,8 @@ describe('guidance-studio per-type coverage', () => {
   // regenerates itself on every `pnpm studio` run, so it cannot drift for
   // longer than one run; the gallery cannot regenerate, and the gap it grows
   // is invisible — build-gallery.mjs reports a missing source as "a render
-  // failure on a fresh checkout and nowhere else". It had regrown to seven
-  // types (body, bracket, clock, countdown, family, goal, sketch) after
+  // failure on a fresh checkout and nowhere else". It had regrown to six
+  // types (body, bracket, clock, countdown, family, goal) after
   // `1a82b1b` closed the last one. These two assertions are what stop it
   // regrowing a third time.
   it('every starter prompt has an index-aligned gallery source', () => {
