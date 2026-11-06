@@ -43,7 +43,20 @@ export default tseslint.config(
       '@typescript-eslint/no-unsafe-call': 'error',
       '@typescript-eslint/no-unnecessary-type-assertion': 'error',
       '@typescript-eslint/require-await': 'error',
+      // Every site converted or kept as `||` with a reasoned disable where an
+      // empty string must still take the fallback (#1714); an error so none
+      // return.
+      '@typescript-eslint/prefer-nullish-coalescing': 'error',
+      // The server speaks MCP over stdio: stdout IS the protocol channel, so a
+      // stray console.log corrupts the stream the client reads. stderr is safe
+      // (#1714).
+      'no-console': ['error', { allow: ['warn', 'error'] }],
     },
+  },
+  // Tests print advisory reports to vitest's output, not to the MCP stream.
+  {
+    files: ['tests/**/*.ts'],
+    rules: { 'no-console': 'off' },
   },
   // Disable type-checked linting for files outside the TS project.
   {

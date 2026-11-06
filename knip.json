@@ -6,7 +6,7 @@
   "ignoreExportsUsedInFile": true,
   "rules": {
     "duplicates": "off",
-    "exports": "warn",
+    "exports": "error",
     "types": "warn"
   }
 }

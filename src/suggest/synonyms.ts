@@ -20,11 +20,6 @@ export function sameSelectionGroup(a: string, b: string): boolean {
   return !!g && g.includes(b);
 }
 
-/** The canonical (opinionated default) type for an id — itself if ungrouped. */
-export function canonicalOf(id: string): string {
-  return groupOf(id)?.[0] ?? id;
-}
-
 /** A pick satisfies a case if it's an accepted id OR a synonym of one. Use this
  *  everywhere a top-1 is checked against `accept[]` (gate, harness, net-delta) so
  *  the synonym policy is enforced in exactly one place. */

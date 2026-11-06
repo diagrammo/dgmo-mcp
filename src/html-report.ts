@@ -260,6 +260,7 @@ export function buildPreviewHtml(options: PreviewHtmlOptions): string {
     shareUrl,
     theme = 'light',
   } = options;
+  // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- an empty title must still take the default page title
   const pageTitle = title || 'Diagram Preview';
   const openLink = shareUrl
     ? `<a class="open-link" href="${escapeHtml(shareUrl)}" target="_blank" rel="noopener">Open at diagrammo.app ↗</a>`
@@ -322,6 +323,7 @@ export function buildReportHtml(options: ReportHtmlOptions): string {
       const diagram = s.svg
         ? diagramBlock(s.svg, includeSource ? s.dgmoSource : undefined, s.title)
         : errorBlockHtml(
+            // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- an empty error message must still say something
             new Error(s.error || 'Unknown render error'),
             s.dgmoSource ?? ''
           );

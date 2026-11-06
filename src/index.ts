@@ -781,6 +781,7 @@ tool(
             text:
               'All diagrams failed to render:\n' +
               failures
+                // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- an empty title must still read 'untitled'
                 .map((f) => `- ${f.title || 'untitled'}: ${f.error}`)
                 .join('\n'),
           },
@@ -806,6 +807,7 @@ tool(
     } else {
       // Multiple diagrams → report layout
       const sections: ReportSection[] = results.map((r) => ({
+        // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- an empty title must still read 'Untitled'
         title: r.title || 'Untitled',
         svg: r.svg,
         dgmoSource: r.dgmo,
@@ -828,6 +830,7 @@ tool(
       message +=
         '\n\nWarning — some diagrams failed to render:\n' +
         failures
+          // eslint-disable-next-line @typescript-eslint/prefer-nullish-coalescing -- an empty title must still read 'untitled'
           .map((f) => `- ${f.title || 'untitled'}: ${f.error}`)
           .join('\n');
     }
