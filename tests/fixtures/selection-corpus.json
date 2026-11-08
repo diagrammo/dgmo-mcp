@@ -145,6 +145,16 @@
       "accept": ["quadrant"]
     },
     {
+      "prompt": "SWOT analysis of a business",
+      "accept": ["swot"],
+      "pending": true
+    },
+    {
+      "prompt": "map our strengths, weaknesses, opportunities and threats before the launch",
+      "accept": ["swot"],
+      "pending": true
+    },
+    {
       "prompt": "boxes-and-lines architecture of the payment services",
       "accept": ["boxes-and-lines", "c4"]
     },
