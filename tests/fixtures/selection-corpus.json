@@ -146,13 +146,11 @@
     },
     {
       "prompt": "SWOT analysis of a business",
-      "accept": ["swot"],
-      "pending": true
+      "accept": ["swot"]
     },
     {
       "prompt": "map our strengths, weaknesses, opportunities and threats before the launch",
-      "accept": ["swot"],
-      "pending": true
+      "accept": ["swot"]
     },
     {
       "prompt": "boxes-and-lines architecture of the payment services",
