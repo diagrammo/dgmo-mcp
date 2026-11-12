@@ -10,6 +10,7 @@
 import { describe, it, expect } from 'vitest';
 import { chartTypes } from '@diagrammo/dgmo';
 import {
+  createSuggester,
   suggestChartTypes,
   scoreChartType,
   confidence,
@@ -18,7 +19,7 @@ import {
   CONTIGUITY_DOMINANCE,
   MIN_PRIMARY_SCORE,
 } from '../src/suggest/scoring';
-import { TRIGGERS } from '../src/suggest/triggers';
+import { TRIGGERS, PRIORS, SIGNALS, VARIANTS } from '../src/suggest/triggers';
 import { internalChartTypeIds } from '../src/internal-flag';
 
 const validIds = new Set(chartTypes.map((c) => c.id));
@@ -83,6 +84,91 @@ describe('trigger vocabulary integrity (keyed by the dgmo registry)', () => {
         else seen.set(t, id);
       }
     expect(collisions).toEqual([]);
+  });
+  // A variant keyword picks its BASE type, so it may repeat its own base's
+  // phrase ("fundraising thermometer" on goal) but never another type's
+  // (diagrammo/diagrammo#1945).
+  it('no variant keyword points at a type other than its base', () => {
+    const owner = new Map<string, string>();
+    for (const [id, ts] of Object.entries(TRIGGERS))
+      for (const t of ts) owner.set(t, id);
+    const collisions: string[] = [];
+    for (const [base, list] of Object.entries(VARIANTS))
+      for (const v of list)
+        for (const t of v.phrases) {
+          const other = owner.get(t);
+          if (other !== undefined && other !== base)
+            collisions.push(`"${t}": ${other} vs ${v.id}`);
+          else owner.set(t, base);
+        }
+    expect(collisions).toEqual([]);
+  });
+  it('every variant is keyed by a real chart type', () => {
+    const bad = Object.keys(VARIANTS).filter((id) => !validIds.has(id));
+    expect(bad).toEqual([]);
+  });
+});
+
+describe('a variant keyword picks the base type and names the variant', () => {
+  const pick = (prompt: string, suggest = suggestChartTypes) => {
+    const top = suggest(prompt).ranked[0];
+    return { type: top?.type.id, variants: top?.variants ?? [] };
+  };
+
+  it('"doughnut chart of budget" → pie, the donut variant, `hole`', () => {
+    const { type, variants } = pick('doughnut chart of budget');
+    expect(type).toBe('pie');
+    expect(variants).toContainEqual(
+      expect.objectContaining({ id: 'pie-donut', produces: 'hole' })
+    );
+  });
+  it('"c4 level 2 for our app" → c4, the containers variant', () => {
+    const { type, variants } = pick('c4 level 2 for our app');
+    expect(type).toBe('c4');
+    expect(variants.map((v) => v.id)).toEqual(['c4-containers']);
+  });
+  it('"critical path gantt" → gantt, the critical-path variant', () => {
+    const { type, variants } = pick('critical path gantt');
+    expect(type).toBe('gantt');
+    expect(variants.map((v) => v.id)).toEqual(['gantt-critical-path']);
+  });
+  it('"fundraising thermometer" → goal, the thermometer variant', () => {
+    const { type, variants } = pick('fundraising thermometer');
+    expect(type).toBe('goal');
+    expect(variants.map((v) => v.id)).toEqual(['goal-thermometer']);
+  });
+  it("a distinctive variant keyword outranks another type's phrase", () => {
+    // A fixture variant until bar-marimekko is in the registry (#1872):
+    // "market share" is a pie phrase, but "marimekko" names a bar form.
+    const withMarimekko = createSuggester(TRIGGERS, PRIORS, SIGNALS, {
+      ...VARIANTS,
+      bar: [
+        ...(VARIANTS['bar'] ?? []),
+        {
+          id: 'bar-marimekko',
+          name: 'Marimekko',
+          produces: null,
+          phrases: ['marimekko', 'mekko'],
+        },
+      ],
+    });
+    const { type, variants } = pick('a marimekko of market share', (p) =>
+      withMarimekko.suggestChartTypes(p)
+    );
+    expect(type).toBe('bar');
+    expect(variants.map((v) => v.id)).toEqual(['bar-marimekko']);
+  });
+  it('a keyword another type shares needs the base type in the prompt', () => {
+    // "critical path" alone stays with pert's "critical path method".
+    expect(pick('critical path method for the launch').type).toBe('pert');
+    // "ring chart" (pie-donut) shares "ring" with the ring type.
+    expect(pick('ring diagram of concentric rings').type).toBe('ring');
+    expect(
+      scoreChartType('a ring chart of teams', {
+        id: 'pie',
+        description: '',
+      }).variants
+    ).toEqual([]);
   });
 });
 

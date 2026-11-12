@@ -7,7 +7,15 @@
       "network arcs"
     ],
     "concepts": [],
-    "prior": 5
+    "prior": 5,
+    "variants": [
+      {
+        "id": "arc-ordered",
+        "name": "Ordered",
+        "produces": null,
+        "phrases": ["ordered arc"]
+      }
+    ]
   },
   "bar": {
     "phrases": [
@@ -37,7 +45,21 @@
       "revenue by segment"
     ],
     "concepts": [],
-    "prior": 3
+    "prior": 3,
+    "variants": [
+      {
+        "id": "bar-grouped",
+        "name": "Grouped",
+        "produces": null,
+        "phrases": ["grouped", "clustered", "grouped bar", "clustered bar"]
+      },
+      {
+        "id": "bar-horizontal",
+        "name": "Horizontal",
+        "produces": null,
+        "phrases": ["horizontal", "horizontal bar"]
+      }
+    ]
   },
   "boxes-and-lines": {
     "phrases": [
@@ -75,7 +97,33 @@
       "microservices",
       "microservice architecture"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "c4-components",
+        "name": "Components",
+        "produces": null,
+        "phrases": ["component diagram", "c4 level 3"]
+      },
+      {
+        "id": "c4-containers",
+        "name": "Containers",
+        "produces": null,
+        "phrases": ["container diagram", "c4 level 2"]
+      },
+      {
+        "id": "c4-context",
+        "name": "Context",
+        "produces": null,
+        "phrases": ["system context", "c4 level 1"]
+      },
+      {
+        "id": "c4-deployment",
+        "name": "Deployment",
+        "produces": null,
+        "phrases": ["deployment diagram"]
+      }
+    ]
   },
   "class": {
     "phrases": [
@@ -89,7 +137,15 @@
   },
   "cycle": {
     "phrases": ["loop", "cycle", "flywheel", "cyclical"],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "cycle-counterclockwise",
+        "name": "Counterclockwise",
+        "produces": null,
+        "phrases": ["counterclockwise", "anticlockwise"]
+      }
+    ]
   },
   "er": {
     "phrases": [
@@ -100,7 +156,15 @@
       "tables and relationships",
       "foreign keys"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "er-labels",
+        "name": "Labels",
+        "produces": null,
+        "phrases": ["labeled relationships", "labelled er"]
+      }
+    ]
   },
   "flowchart": {
     "phrases": [
@@ -114,7 +178,15 @@
       "end to end",
       "ci pipeline"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "flowchart-lr",
+        "name": "Lr",
+        "produces": null,
+        "phrases": ["left to right", "horizontal flowchart"]
+      }
+    ]
   },
   "function": {
     "phrases": [
@@ -150,7 +222,15 @@
       "project timeline",
       "project milestones"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "gantt-critical-path",
+        "name": "Critical Path",
+        "produces": null,
+        "phrases": ["critical path"]
+      }
+    ]
   },
   "goal": {
     "phrases": [
@@ -166,7 +246,21 @@
       "progress bar"
     ],
     "concepts": [],
-    "prior": 0
+    "prior": 0,
+    "variants": [
+      {
+        "id": "goal-gauge",
+        "name": "Gauge",
+        "produces": null,
+        "phrases": ["gauge", "dial"]
+      },
+      {
+        "id": "goal-thermometer",
+        "name": "Thermometer",
+        "produces": null,
+        "phrases": ["thermometer goal", "fundraising thermometer"]
+      }
+    ]
   },
   "heatmap": {
     "phrases": [
@@ -261,7 +355,15 @@
       "temperature by month",
       "monthly temperature"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "line-area",
+        "name": "Area",
+        "produces": null,
+        "phrases": ["area", "area chart", "filled line"]
+      }
+    ]
   },
   "map": {
     "phrases": [
@@ -341,7 +443,15 @@
       "doughnut chart"
     ],
     "concepts": [],
-    "prior": 5
+    "prior": 5,
+    "variants": [
+      {
+        "id": "pie-donut",
+        "name": "Donut",
+        "produces": "hole",
+        "phrases": ["donut", "doughnut", "ring chart"]
+      }
+    ]
   },
   "polar-area": {
     "phrases": ["polar area", "radial bar chart"],
@@ -363,7 +473,15 @@
       "trophic levels",
       "apex predators"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "pyramid-inverted",
+        "name": "Inverted",
+        "produces": null,
+        "phrases": ["inverted pyramid", "funnel pyramid"]
+      }
+    ]
   },
   "quadrant": {
     "phrases": [
@@ -395,7 +513,15 @@
       "decision matrix",
       "driver approver"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "raci-rasci",
+        "name": "Rasci",
+        "produces": null,
+        "phrases": ["rasci", "responsible accountable"]
+      }
+    ]
   },
   "radar": {
     "phrases": [
@@ -470,7 +596,21 @@
       "handshake",
       "services talk to"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "sequence-groups",
+        "name": "Groups",
+        "produces": null,
+        "phrases": ["grouped sequence", "sequence sections"]
+      },
+      {
+        "id": "sequence-protocols",
+        "name": "Protocols",
+        "produces": null,
+        "phrases": ["protocol sequence"]
+      }
+    ]
   },
   "sitemap": {
     "phrases": [

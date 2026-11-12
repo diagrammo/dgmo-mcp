@@ -1060,6 +1060,18 @@ tool(
 const OPTION_LETTERS = 'ABCDEFGH';
 
 /**
+ * The variants a candidate's prompt asked for, one phrase each: "Donut
+ * (pie-donut) — use `hole`". The switch is named when the registry records
+ * one; otherwise the variant's id points at its part of the type's reference
+ * (diagrammo/diagrammo#1945).
+ */
+function variantLines(r: ChartTypeScore): string[] {
+  return (r.variants ?? []).map(
+    (v) => `${v.name} (${v.id})${v.produces ? ` — use \`${v.produces}\`` : ''}`
+  );
+}
+
+/**
  * Format ranked candidates for Claude. Locked-in layout so the tool output
  * is easy to parse at a glance and remains stable across releases.
  *
@@ -1105,6 +1117,7 @@ export function formatSuggestions(
       );
       if (r.matched.length)
         lines.push(`      matched: ${r.matched.join(', ')}`);
+      for (const v of variantLines(r)) lines.push(`      variant: ${v}`);
       if (hasExamples(r.type.id))
         lines.push(
           `      starter template, once chosen: mcp__dgmo__get_examples('${r.type.id}')`
@@ -1127,6 +1140,7 @@ export function formatSuggestions(
     lines.push(
       `  Matched triggers: ${r.matched.join(', ') || '(none — secondary score from description)'}`
     );
+    for (const v of variantLines(r)) lines.push(`  Variant: ${v}`);
     if (hasExamples(r.type.id))
       lines.push(
         `  For a starter template, call mcp__dgmo__get_examples('${r.type.id}').`

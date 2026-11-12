@@ -88,3 +88,39 @@ describe('formatSuggestions — ask-the-user flow', () => {
     expect(out).toContain('Secondary: line');
   });
 });
+
+describe('formatSuggestions — the variant the prompt asked for', () => {
+  const withVariant = (id: string, score: number): ChartTypeScore => ({
+    ...cand(id, score, ['doughnut']),
+    variants: [{ id: 'pie-donut', name: 'Donut', produces: 'hole' }],
+  });
+
+  it('a confident pick names the variant and its switch', () => {
+    const out = formatSuggestions([withVariant('pie', 1300)], false, 'high');
+    expect(out).toContain('Top match: pie');
+    expect(out).toContain('Variant: Donut (pie-donut) — use `hole`');
+  });
+  it('an ask-the-user list names it too', () => {
+    const out = formatSuggestions(
+      [withVariant('pie', 2), cand('bar', 1.9, ['bar chart'])],
+      false,
+      'ambiguous'
+    );
+    expect(out).toContain('variant: Donut (pie-donut) — use `hole`');
+  });
+  it('a variant with no recorded switch is named by id', () => {
+    const r: ChartTypeScore = {
+      ...cand('goal', 1200, ['fundraising thermometer']),
+      variants: [
+        { id: 'goal-thermometer', name: 'Thermometer', produces: null },
+      ],
+    };
+    const out = formatSuggestions([r], false, 'high');
+    expect(out).toContain('Variant: Thermometer (goal-thermometer)');
+    expect(out).not.toContain('use `');
+  });
+  it('no variant, no variant line', () => {
+    const out = formatSuggestions([cand('pie', 200)], false, 'high');
+    expect(out).not.toContain('Variant:');
+  });
+});

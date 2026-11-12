@@ -20,10 +20,24 @@
 //                words ("waf", "firewall", "rps") are the case: "an architecture
 //                diagram ... behind a WAF" is infra, though "architecture diagram"
 //                is the longer phrase match (diagrammo#1447).
+//   • variants — GENERATED like phrases: each keyword-bearing registry variant
+//                of this type (id, name, the switch it produces, its keywords).
+//                A variant keyword picks this type and names the variant
+//                ("doughnut" → pie, use `hole`; diagrammo#1945).
 //   concepts + prior + signals are MCP-owned TUNING and stay authored here.
 //
 // Keyed by id; validated against @diagrammo/dgmo chartTypes by suggest.test.ts.
 import data from './triggers.json';
+
+/** A registry variant of a type, as projected onto that type's entry. */
+export interface VariantEntry {
+  readonly id: string;
+  readonly name: string;
+  /** The directive or flag that turns the base type into this variant, when
+   *  the registry records one (`hole` for pie-donut). */
+  readonly produces: string | null;
+  readonly phrases: readonly string[];
+}
 
 export interface TriggerEntry {
   readonly phrases: readonly string[];
@@ -33,6 +47,8 @@ export interface TriggerEntry {
   readonly prior?: number;
   /** Precedence phrases: one in the prompt puts this type first. Optional. */
   readonly signals?: readonly string[];
+  /** Keyword-bearing variants of this type. Optional. */
+  readonly variants?: readonly VariantEntry[];
 }
 
 /** Full per-type authoring data (phrases + concept hints + optional prior). */
@@ -57,3 +73,12 @@ export const SIGNALS: Record<string, readonly string[]> = Object.fromEntries(
     .filter(([, entry]) => (entry.signals?.length ?? 0) > 0)
     .map(([id, entry]) => [id, entry.signals ?? []])
 );
+
+/** The variant vocabulary the scorer consumes — `{ base id: [variants] }`
+ *  (only types that have keyword-bearing variants). */
+export const VARIANTS: Record<string, readonly VariantEntry[]> =
+  Object.fromEntries(
+    Object.entries(TRIGGER_DATA)
+      .filter(([, entry]) => (entry.variants?.length ?? 0) > 0)
+      .map(([id, entry]) => [id, entry.variants ?? []])
+  );

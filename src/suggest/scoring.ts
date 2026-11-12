@@ -29,7 +29,8 @@
 // the instances bound to the committed `TRIGGERS`.
 
 import { chartTypes } from '@diagrammo/dgmo/advanced';
-import { TRIGGERS, PRIORS, SIGNALS } from './triggers.js';
+import { TRIGGERS, PRIORS, SIGNALS, VARIANTS } from './triggers.js';
+import type { VariantEntry } from './triggers.js';
 
 /** The registry shape we depend on (dgmo owns this; triggers are local). */
 interface RegistryType {
@@ -62,6 +63,12 @@ export type TriggerMap = Record<string, readonly string[]>;
 /** Per-type popularity prior: "when a prompt is ambiguous, how typically does a
  *  user mean THIS chart?" 0 = no bias (default). A small integer (0–PRIOR_MAX). */
 export type PriorMap = Record<string, number>;
+
+/** Keyword-bearing variants per base type id (diagrammo#1945). */
+type VariantMap = Record<string, readonly VariantEntry[]>;
+
+/** A variant the prompt asked for, by one of its keywords. */
+type VariantHit = Omit<VariantEntry, 'phrases'>;
 
 const TYPOGRAPHIC_REPLACEMENTS: [RegExp, string][] = [
   [/[‘’]/g, "'"], // curly single quotes
@@ -123,6 +130,8 @@ export interface ChartTypeScore {
   readonly score: number;
   readonly matched: string[];
   readonly breakdown?: ScoreBreakdown;
+  /** The variants of this type whose keywords the prompt holds. */
+  readonly variants?: readonly VariantHit[];
 }
 
 // Generic English function words + generic chart vocabulary, stripped before
@@ -229,6 +238,17 @@ const NAMED_TYPE_DOMINANCE = 10_000;
  *  NAMED_TYPE_DOMINANCE so a named type still wins. Credited inside
  *  `breakdown.contig`. */
 const SIGNAL_DOMINANCE = 1_000;
+/** Variant keywords no other type uses but which are everyday words, so they
+ *  pick their variant only when the prompt also names the base type
+ *  (diagrammo#1945). Measured on the prompts in the change: as signals,
+ *  "an architecture of clustered services" went to bar, "a left to right
+ *  timeline of releases" to flowchart, and "gauge customer sentiment over
+ *  time" (the verb) to goal. */
+const GENERIC_VARIANT_KEYWORDS = new Set([
+  'clustered',
+  'left to right',
+  'gauge',
+]);
 /** The nouns that turn a type id into a request for it. */
 const NAMING_NOUNS = ['diagram', 'diagrams', 'chart', 'charts'];
 
@@ -267,11 +287,16 @@ export interface SuggestionResult {
   readonly fellBack: boolean;
 }
 
+/** One type's score against one prompt. */
+interface TypeScore {
+  score: number;
+  matched: string[];
+  breakdown: ScoreBreakdown;
+  variants: VariantHit[];
+}
+
 export interface Suggester {
-  scoreChartType(
-    prompt: string,
-    type: RegistryType
-  ): { score: number; matched: string[]; breakdown: ScoreBreakdown };
+  scoreChartType(prompt: string, type: RegistryType): TypeScore;
   suggestChartTypes(prompt: string): SuggestionResult;
 }
 
@@ -283,7 +308,8 @@ export interface Suggester {
 export function createSuggester(
   triggers: TriggerMap,
   priors: PriorMap = {},
-  signals: TriggerMap = {}
+  signals: TriggerMap = {},
+  variants: VariantMap = {}
 ): Suggester {
   const triggersFor = (id: string): readonly string[] => triggers[id] ?? [];
   // Signals match plural-stemmed, so "load balancers" holds "load balancer".
@@ -316,6 +342,59 @@ export function createSuggester(
     const d = triggerDocFreq.get(tok) ?? 1;
     return d <= 2 ? 1 : 1 / Math.sqrt(d - 1);
   };
+
+  // VARIANT KEYWORDS (diagrammo#1945). A variant keyword picks its BASE type
+  // and names the variant. Two strengths, decided per keyword by one rule:
+  //   • DISTINCTIVE — none of its tokens appears in any OTHER type's phrases,
+  //     signals, variant keywords or id ("doughnut", "marimekko", "rasci").
+  //     It names a chart form outright, so it acts as a signal for the base
+  //     type (SIGNAL_DOMINANCE): "a marimekko of market share" is bar, though
+  //     "market share" is a pie phrase.
+  //   • SHARED — a token belongs to another type too ("horizontal", "area",
+  //     "critical path", "c4 level 2" via pyramid's "levels"). It counts as an
+  //     ordinary phrase, and ONLY when the prompt already matches the base type
+  //     some other way ("critical path gantt" is gantt; "critical path" alone
+  //     is left to pert's "critical path method").
+  //   • GENERIC_VARIANT_KEYWORDS below are treated as SHARED although the rule
+  //     calls them distinctive: everyday words that ask for no chart form.
+  // Variant keywords are not in the IDF table, so they move no type-phrase score.
+  const tokensOutside = (base: string): Set<string> => {
+    const out = new Set<string>();
+    const add = (text: string) => {
+      for (const tok of matchTokens(text)) out.add(tok);
+    };
+    for (const type of REGISTRY) {
+      if (type.id === base) continue;
+      add(type.id);
+      for (const t of triggersFor(type.id)) add(t);
+      for (const t of signals[type.id] ?? []) add(t);
+      for (const v of variants[type.id] ?? [])
+        for (const t of v.phrases) add(t);
+    }
+    return out;
+  };
+  const variantPhrases = new Map(
+    Object.entries(variants).map(([base, list]) => {
+      const outside = tokensOutside(base);
+      return [
+        base,
+        list.flatMap(({ phrases, ...hit }) =>
+          phrases.map((text) => {
+            const own = matchTokens(text);
+            return {
+              text,
+              tokens: normalize(text),
+              hit,
+              distinctive:
+                own.length > 0 &&
+                own.every((tok) => !outside.has(tok)) &&
+                !GENERIC_VARIANT_KEYWORDS.has(text),
+            };
+          })
+        ),
+      ];
+    })
+  );
 
   // The phrases that can SHADOW a type's name: every type's triggers plus its
   // own id. "mind map diagram" holds "map diagram", but mindmap's "mind map"
@@ -356,10 +435,7 @@ export function createSuggester(
     return lastNamed.named;
   };
 
-  function scoreChartType(
-    prompt: string,
-    type: RegistryType
-  ): { score: number; matched: string[]; breakdown: ScoreBreakdown } {
+  function scoreChartType(prompt: string, type: RegistryType): TypeScore {
     const promptTokensArr = normalize(prompt);
     const promptMatchTokens = new Set(matchTokens(prompt));
     const matched: string[] = [];
@@ -405,8 +481,33 @@ export function createSuggester(
     const signal = signalTokens
       .get(type.id)
       ?.find(({ tokens }) => matchesContiguously(promptStemmed, tokens));
-    const signalled = signal !== undefined;
-    if (signalled && !matched.includes(signal.text)) matched.push(signal.text);
+    let signalled = signal !== undefined;
+    if (signal !== undefined && !matched.includes(signal.text))
+      matched.push(signal.text);
+
+    // VARIANT KEYWORDS: distinctive ones first, since a hit counts as base
+    // evidence for the shared ones.
+    const hits: VariantHit[] = [];
+    const phrases = variantPhrases.get(type.id) ?? [];
+    const credit = (p: (typeof phrases)[number]) => {
+      if (!matched.includes(p.text)) {
+        matched.push(p.text);
+        contig += p.tokens.length;
+      }
+      if (!hits.some((h) => h.id === p.hit.id)) hits.push(p.hit);
+    };
+    for (const p of phrases) {
+      if (!p.distinctive || !matchesContiguously(promptTokensArr, p.tokens))
+        continue;
+      credit(p);
+      signalled = true;
+    }
+    const evidenced =
+      contig > 0 || idf > 0 || desc > 0 || namedAs !== undefined || signalled;
+    if (evidenced)
+      for (const p of phrases)
+        if (!p.distinctive && matchesContiguously(promptTokensArr, p.tokens))
+          credit(p);
 
     const contigScore =
       contig * CONTIGUITY_DOMINANCE +
@@ -422,14 +523,21 @@ export function createSuggester(
       score: match + prior,
       matched,
       breakdown: { contig: contigScore, idf, desc, prior },
+      variants: hits,
     };
   }
 
   function suggestChartTypes(prompt: string): SuggestionResult {
     const scored: ChartTypeScore[] = [];
     for (const type of REGISTRY) {
-      const { score, matched, breakdown } = scoreChartType(prompt, type);
-      if (score > 0) scored.push({ type, score, matched, breakdown });
+      const {
+        score,
+        matched,
+        breakdown,
+        variants: hit,
+      } = scoreChartType(prompt, type);
+      if (score > 0)
+        scored.push({ type, score, matched, breakdown, variants: hit });
     }
     scored.sort((a, b) => b.score - a.score);
 
@@ -452,13 +560,11 @@ export function createSuggester(
   return { scoreChartType, suggestChartTypes };
 }
 
-// Default instances bound to the committed TRIGGERS vocabulary + PRIORS + SIGNALS.
-const defaultSuggester = createSuggester(TRIGGERS, PRIORS, SIGNALS);
+// Default instances bound to the committed TRIGGERS vocabulary + PRIORS +
+// SIGNALS + VARIANTS.
+const defaultSuggester = createSuggester(TRIGGERS, PRIORS, SIGNALS, VARIANTS);
 
-export function scoreChartType(
-  prompt: string,
-  type: RegistryType
-): { score: number; matched: string[]; breakdown: ScoreBreakdown } {
+export function scoreChartType(prompt: string, type: RegistryType): TypeScore {
   return defaultSuggester.scoreChartType(prompt, type);
 }
 

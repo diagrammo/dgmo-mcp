@@ -7,6 +7,7 @@
  *
  * Split of concerns (per the design's DESCRIPTIVE vs TUNING line):
  *   • phrases   ← registry type-entity keywords         (DESCRIPTIVE — the model owns)
+ *   • variants  ← registry variant-entity keywords, on their base type (DESCRIPTIVE)
  *   • concepts  ← preserved from triggers.json           (MCP authoring hints)
  *   • prior     ← preserved from triggers.json           (TUNING — MCP owns)
  *
@@ -43,12 +44,38 @@ const phrasesByType = new Map(
     .map((e) => [e.id, e.keywords.map((k) => k.text)])
 );
 
+// base type id → its variants that carry keywords (diagrammo/diagrammo#1945).
+// A variant's keywords project onto its BASE type, under `variants`, with the
+// variant's id, name and the switch it produces, so the scorer can pick the
+// base type AND say which variant the prompt asked for ("doughnut" → pie, use
+// `hole`). They stay out of `phrases`, so the type-phrase vocabulary — and the
+// IDF table built from it — is unchanged by them.
+const variantsByType = new Map();
+for (const e of registry.entities) {
+  if (e.kind !== 'variant' || !e.base || !(e.keywords?.length > 0)) continue;
+  const list = variantsByType.get(e.base) ?? [];
+  list.push({
+    id: e.id,
+    name: e.name,
+    produces: e.produces ?? null,
+    phrases: e.keywords.map((k) => k.text),
+  });
+  variantsByType.set(e.base, list);
+}
+
 // Rebuild each entry: clone (preserves concepts + optional prior + key order),
-// overwrite phrases from the model. Types absent from the registry keep theirs.
+// overwrite phrases (and variants) from the model. Types absent from the
+// registry keep their phrases.
 const out = {};
 for (const [id, entry] of Object.entries(triggers)) {
   const projected = phrasesByType.get(id);
-  out[id] = { ...entry, phrases: projected ?? entry.phrases };
+  const { variants: _stale, ...rest } = entry;
+  const variants = variantsByType.get(id);
+  out[id] = {
+    ...rest,
+    phrases: projected ?? entry.phrases,
+    ...(variants ? { variants } : {}),
+  };
 }
 
 // Prettier-formatted, so the file the gate's format:check accepts is also
