@@ -24,6 +24,9 @@ import { chartTypes } from '@diagrammo/dgmo';
 import { RECOGNIZED_COLOR_NAMES } from '@diagrammo/dgmo/advanced';
 import { server, formatSuggestions } from '../src/index.js';
 import { internalChartTypeIds } from '../src/internal-flag.js';
+import { UNGROUPED_LABEL } from '../src/chart-families.js';
+import familyJson from '../src/chart-families.json';
+import { spawnSync } from 'node:child_process';
 
 /** Types that route but are never OFFERED — see src/internal-flag.ts. */
 const internalIds = internalChartTypeIds(chartTypes);
@@ -151,6 +154,94 @@ describe('list_chart_types', () => {
     }
     for (const id of internal) expect(text).not.toContain(id);
   });
+});
+
+interface FamilyProjection {
+  families: {
+    id: string;
+    label: string;
+    subheads?: { label: string; intents: string[] }[];
+  }[];
+  types: Record<string, { family: string; intent: string | null } | undefined>;
+}
+const familyProjection = familyJson as FamilyProjection;
+
+// The listing groups types by the registry's families and sub-heads
+// (diagrammo/diagrammo#1970). Read the tool's text back into id → place.
+function placements(text: string) {
+  const at = new Map<string, { family: string; subhead: string | null }>();
+  const families: string[] = [];
+  let family = '';
+  let subhead: string | null = null;
+  for (const raw of text.split('\n')) {
+    if (raw.startsWith('## ')) {
+      family = raw.slice(3);
+      subhead = null;
+      families.push(family);
+    } else if (raw.startsWith('### ')) {
+      subhead = raw.slice(4);
+    } else {
+      const m = /^- ([a-z0-9-]+)/.exec(raw);
+      if (m) at.set(m[1], { family, subhead });
+    }
+  }
+  return { at, families };
+}
+
+describe('list_chart_types grouping', () => {
+  const registryPath = join(here, '../../dgmo-content/registry.json');
+
+  it('lists families in the registry projection order, with its labels', async () => {
+    const { text } = await call('list_chart_types', {});
+    const { at, families } = placements(text);
+    const used = new Set([...at.values()].map((p) => p.family));
+    const expected = familyProjection.families
+      .map((f) => f.label)
+      .filter((label) => used.has(label));
+    expect(families).toEqual(expected);
+    expect(families).not.toContain(UNGROUPED_LABEL);
+  });
+
+  it('puts each data and business type under the sub-head holding its first intent', async () => {
+    const { text } = await call('list_chart_types', {});
+    const { at } = placements(text);
+    let checked = 0;
+    for (const [id, place] of at) {
+      const t = familyProjection.types[id];
+      const fam = familyProjection.families.find((f) => f.id === t?.family);
+      if (!fam?.subheads) continue;
+      const sub = fam.subheads.find((s) => s.intents.includes(t?.intent ?? ''));
+      expect(place, id).toEqual({ family: fam.label, subhead: sub?.label });
+      checked++;
+    }
+    expect(checked).toBeGreaterThan(10);
+  });
+
+  it('lists sankey, map and word cloud under Data', async () => {
+    const { text } = await call('list_chart_types', {});
+    const { at } = placements(text);
+    for (const id of ['sankey', 'map', 'wordcloud'])
+      expect(at.get(id)?.family, id).toBe('Data');
+  });
+
+  it.skipIf(!existsSync(registryPath))(
+    'the committed projection matches dgmo-content/registry.json',
+    () => {
+      const registry = JSON.parse(readFileSync(registryPath, 'utf8')) as Pick<
+        FamilyProjection,
+        'families'
+      >;
+      expect(familyProjection.families.map((f) => [f.id, f.label])).toEqual(
+        registry.families.map((f) => [f.id, f.label])
+      );
+      const r = spawnSync(
+        process.execPath,
+        [join(here, '../scripts/project-families.mjs'), '--check'],
+        { encoding: 'utf8' }
+      );
+      expect(r.status, r.stderr).toBe(0);
+    }
+  );
 });
 
 describe('suggest_chart_type', () => {

@@ -30,6 +30,7 @@ import {
   type CloudSpaceTarget,
 } from '@diagrammo/dgmo/advanced';
 import { betaChartTypeIds, internalChartTypeIds } from './internal-flag.js';
+import { groupChartTypes } from './chart-families.js';
 
 // Map name/route resolution needs the bundled gazetteer. `loadMapData` reads it
 // via a Node dynamic import; cache the promise so repeated validate calls in one
@@ -619,7 +620,7 @@ tool(
 
 tool(
   'list_chart_types',
-  'List all supported DGMO chart types with descriptions.',
+  'List all supported DGMO chart types with descriptions, grouped by family and, in data and business, by purpose.',
   {},
   {
     title: 'List Chart Types',
@@ -641,16 +642,28 @@ tool(
     // suggested. It is said out loud so a model choosing one on somebody's
     // behalf can mention that it is unfinished (dgmo issue #221).
     const beta = betaChartTypeIds(chartTypes);
-    const lines = types.map((id) => {
+    const line = (id: string) => {
       const desc = CHART_TYPE_DESCRIPTIONS[id];
       const mark = beta.has(id) ? ' [beta — expect rough edges]' : '';
       return desc ? `- ${id}${mark}: ${desc}` : `- ${id}${mark}`;
-    });
+    };
+    // Grouped by the registry's families, and inside data and business by
+    // purpose sub-head — the same map as the app's picker and the docs
+    // (diagrammo/diagrammo#1970). Only the grouping is new; every type above
+    // is still listed.
+    const blocks = groupChartTypes(types).map(({ family, groups }) =>
+      [
+        `## ${family}`,
+        ...groups.map(({ subhead, ids }) =>
+          [...(subhead ? [`### ${subhead}`] : []), ...ids.map(line)].join('\n')
+        ),
+      ].join('\n\n')
+    );
     return {
       content: [
         {
           type: 'text' as const,
-          text: `Supported chart types (${types.length}):\n\n${lines.join('\n')}`,
+          text: `Supported chart types (${types.length}):\n\n${blocks.join('\n\n')}`,
         },
       ],
     };

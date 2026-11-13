@@ -60,6 +60,8 @@
     "lint:fix": "eslint . --fix",
     "project:triggers": "node scripts/project-triggers.mjs",
     "check:triggers": "node scripts/project-triggers.mjs --check",
+    "project:families": "node scripts/project-families.mjs",
+    "check:families": "node scripts/project-families.mjs --check",
     "format": "prettier --write .",
     "format:check": "prettier --check .",
     "check:deadcode": "knip",

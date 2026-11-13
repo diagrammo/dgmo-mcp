@@ -1,0 +1,283 @@
+{
+  "families": [
+    {
+      "id": "software",
+      "label": "Software"
+    },
+    {
+      "id": "project",
+      "label": "Project"
+    },
+    {
+      "id": "business",
+      "label": "Business",
+      "subheads": [
+        {
+          "id": "ideas-and-frameworks",
+          "label": "Ideas and frameworks",
+          "intents": ["concept-framework"]
+        },
+        {
+          "id": "structures-and-hierarchies",
+          "label": "Structures and hierarchies",
+          "intents": ["hierarchy"]
+        },
+        {
+          "id": "processes-and-journeys",
+          "label": "Processes and journeys",
+          "intents": ["flow-process"]
+        }
+      ]
+    },
+    {
+      "id": "life",
+      "label": "Life"
+    },
+    {
+      "id": "data",
+      "label": "Data",
+      "subheads": [
+        {
+          "id": "compare-values",
+          "label": "Compare values",
+          "intents": ["compare-values"]
+        },
+        {
+          "id": "change-over-time",
+          "label": "Change over time",
+          "intents": ["trend-over-time"]
+        },
+        {
+          "id": "distribution",
+          "label": "Distribution",
+          "intents": ["distribution"]
+        },
+        {
+          "id": "part-of-a-whole",
+          "label": "Part of a whole",
+          "intents": ["part-to-whole"]
+        },
+        {
+          "id": "flows-and-links",
+          "label": "Flows and links",
+          "intents": ["flow-process", "relationships"]
+        },
+        {
+          "id": "places",
+          "label": "Places",
+          "intents": ["geospatial"]
+        }
+      ]
+    },
+    {
+      "id": "freeform",
+      "label": "Freeform"
+    }
+  ],
+  "types": {
+    "arc": {
+      "family": "data",
+      "intent": "relationships"
+    },
+    "bar": {
+      "family": "data",
+      "intent": "compare-values"
+    },
+    "block": {
+      "family": "software",
+      "intent": "relationships"
+    },
+    "body": {
+      "family": "life",
+      "intent": "part-to-whole"
+    },
+    "boxes-and-lines": {
+      "family": "freeform",
+      "intent": "relationships"
+    },
+    "bracket": {
+      "family": "life",
+      "intent": "hierarchy"
+    },
+    "c4": {
+      "family": "software",
+      "intent": "relationships"
+    },
+    "class": {
+      "family": "software",
+      "intent": "relationships"
+    },
+    "clock": {
+      "family": "life",
+      "intent": "change-over-time"
+    },
+    "countdown": {
+      "family": "life",
+      "intent": "change-over-time"
+    },
+    "cycle": {
+      "family": "business",
+      "intent": "concept-framework"
+    },
+    "er": {
+      "family": "software",
+      "intent": "relationships"
+    },
+    "event-line": {
+      "family": "project",
+      "intent": "trend-over-time"
+    },
+    "family": {
+      "family": "life",
+      "intent": "relationships"
+    },
+    "flowchart": {
+      "family": "software",
+      "intent": "flow-process"
+    },
+    "function": {
+      "family": "data",
+      "intent": "trend-over-time"
+    },
+    "funnel": {
+      "family": "business",
+      "intent": "flow-process"
+    },
+    "gantt": {
+      "family": "project",
+      "intent": "schedule"
+    },
+    "goal": {
+      "family": "life",
+      "intent": "part-to-whole"
+    },
+    "heatmap": {
+      "family": "data",
+      "intent": "distribution"
+    },
+    "infra": {
+      "family": "software",
+      "intent": "relationships"
+    },
+    "journey-map": {
+      "family": "business",
+      "intent": "flow-process"
+    },
+    "kanban": {
+      "family": "project",
+      "intent": "schedule"
+    },
+    "line": {
+      "family": "data",
+      "intent": "trend-over-time"
+    },
+    "map": {
+      "family": "data",
+      "intent": "geospatial"
+    },
+    "mindmap": {
+      "family": "business",
+      "intent": "hierarchy"
+    },
+    "org": {
+      "family": "business",
+      "intent": "hierarchy"
+    },
+    "pert": {
+      "family": "project",
+      "intent": "flow-process"
+    },
+    "pie": {
+      "family": "data",
+      "intent": "part-to-whole"
+    },
+    "polar-area": {
+      "family": "data",
+      "intent": "compare-values"
+    },
+    "pyramid": {
+      "family": "business",
+      "intent": "hierarchy"
+    },
+    "quadrant": {
+      "family": "business",
+      "intent": "concept-framework"
+    },
+    "swot": {
+      "family": "business",
+      "intent": "concept-framework"
+    },
+    "raci": {
+      "family": "project",
+      "intent": "schedule"
+    },
+    "radar": {
+      "family": "data",
+      "intent": "compare-values"
+    },
+    "ring": {
+      "family": "business",
+      "intent": "concept-framework"
+    },
+    "sankey": {
+      "family": "data",
+      "intent": "flow-process"
+    },
+    "scatter": {
+      "family": "data",
+      "intent": "distribution"
+    },
+    "sequence": {
+      "family": "software",
+      "intent": "interaction"
+    },
+    "sitemap": {
+      "family": "software",
+      "intent": "hierarchy"
+    },
+    "slope": {
+      "family": "data",
+      "intent": "compare-values"
+    },
+    "state": {
+      "family": "software",
+      "intent": "interaction"
+    },
+    "swimlane": {
+      "family": "business",
+      "intent": "flow-process"
+    },
+    "tech-radar": {
+      "family": "business",
+      "intent": "concept-framework"
+    },
+    "timeline": {
+      "family": "project",
+      "intent": "trend-over-time"
+    },
+    "treemap": {
+      "family": "data",
+      "intent": "part-to-whole"
+    },
+    "venn": {
+      "family": "business",
+      "intent": "concept-framework"
+    },
+    "version-control": {
+      "family": "software",
+      "intent": "interaction"
+    },
+    "whiteboard": {
+      "family": "freeform",
+      "intent": "relationships"
+    },
+    "wireframe": {
+      "family": "software",
+      "intent": "concept-framework"
+    },
+    "wordcloud": {
+      "family": "data",
+      "intent": "distribution"
+    }
+  }
+}
