@@ -278,6 +278,12 @@ tool(
       .describe(
         "Color palette (slate, atlas, blueprint, tidewater, nord, catppuccin, tokyo-night). Given, it beats the diagram's own palette line; omitted, the diagram's own palette is used, else slate."
       ),
+    highlight: z
+      .string()
+      .optional()
+      .describe(
+        "Story view for this render only: the element names to emphasise. Given, it replaces the diagram's own highlight line; 'none' clears it. Omitted, the diagram's own line is used. Which elements a name matches: get_language_reference."
+      ),
     width: z
       .number()
       .int()
@@ -304,7 +310,7 @@ tool(
     openWorldHint: false,
     idempotentHint: true,
   },
-  async ({ dgmo, format, theme, palette, width, height }) => {
+  async ({ dgmo, format, theme, palette, highlight, width, height }) => {
     // Resolve the palette here (not only inside render) so the fallback warning
     // that render() swallows is surfaced to the caller (Story 110.2 AC3).
     const paletteNotes: { type: 'text'; text: string }[] = [];
@@ -316,6 +322,7 @@ tool(
     const result = await renderPipeline(dgmo, {
       theme,
       paletteOverride: palette,
+      ...(highlight !== undefined && { highlight }),
       ...(width !== undefined && { width }),
       ...(height !== undefined && { height }),
     });

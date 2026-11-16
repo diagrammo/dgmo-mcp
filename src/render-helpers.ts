@@ -208,6 +208,8 @@ export async function renderPipeline(
     palette?: string | undefined;
     /** An explicit caller choice that beats the diagram's own palette. */
     paletteOverride?: string | undefined;
+    /** Per-render `highlight`: replaces the diagram's own line; `none` clears it. */
+    highlight?: string | undefined;
     /**
      * Canvas width in px. Exact for a chart type that lays its content out
      * into the canvas (the data charts); an upper bound for one that fits a
@@ -252,6 +254,7 @@ export async function renderPipeline(
       ...(opts.paletteOverride !== undefined && {
         paletteOverride: opts.paletteOverride,
       }),
+      ...(opts.highlight !== undefined && { highlight: opts.highlight }),
       // `render()` takes basemaps by dependency injection and draws nothing at
       // all without them — it does not load them itself. Omitting this is why
       // every map chart returned an empty SVG through this path, in every
