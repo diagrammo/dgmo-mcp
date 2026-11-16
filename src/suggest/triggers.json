@@ -259,6 +259,12 @@
         "name": "Thermometer",
         "produces": null,
         "phrases": ["thermometer goal", "fundraising thermometer"]
+      },
+      {
+        "id": "goal-bullet",
+        "name": "Bullet chart",
+        "produces": null,
+        "phrases": ["bullet chart", "bullet graph", "kpi dashboard"]
       }
     ]
   },
