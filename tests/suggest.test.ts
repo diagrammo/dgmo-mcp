@@ -132,6 +132,11 @@ describe('a variant keyword picks the base type and names the variant', () => {
     expect(type).toBe('gantt');
     expect(variants.map((v) => v.id)).toEqual(['gantt-critical-path']);
   });
+  it('"a BPMN process for insurance claims" → swimlane, the BPMN variant (diagrammo/diagrammo#1874)', () => {
+    const { type, variants } = pick('a BPMN process for insurance claims');
+    expect(type).toBe('swimlane');
+    expect(variants.map((v) => v.id)).toEqual(['swimlane-bpmn']);
+  });
   it('"fundraising thermometer" → goal, the thermometer variant', () => {
     const { type, variants } = pick('fundraising thermometer');
     expect(type).toBe('goal');

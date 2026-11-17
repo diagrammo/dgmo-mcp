@@ -58,6 +58,52 @@
         "name": "Horizontal",
         "produces": null,
         "phrases": ["horizontal", "horizontal bar"]
+      },
+      {
+        "id": "bar-sorted",
+        "name": "Sorted",
+        "produces": null,
+        "phrases": ["sorted bar chart", "ranked bar chart", "ordered bar chart"]
+      },
+      {
+        "id": "bar-lollipop",
+        "name": "Lollipop",
+        "produces": null,
+        "phrases": ["lollipop chart", "lollipop plot", "stem and dot chart"]
+      },
+      {
+        "id": "bar-diverging",
+        "name": "Diverging",
+        "produces": null,
+        "phrases": [
+          "diverging bar chart",
+          "diverging stacked bar",
+          "likert chart",
+          "likert scale chart",
+          "survey results chart"
+        ]
+      },
+      {
+        "id": "bar-stack-100",
+        "name": "100% stacked",
+        "produces": null,
+        "phrases": [
+          "100% stacked bar chart",
+          "percent stacked bar",
+          "stacked percentage bar",
+          "share of total bar chart"
+        ]
+      },
+      {
+        "id": "bar-clustered-stack",
+        "name": "Clustered stacked",
+        "produces": null,
+        "phrases": [
+          "clustered stacked bar chart",
+          "clustered stacked column chart",
+          "stacked grouped bar chart",
+          "grouped stacked bar chart"
+        ]
       }
     ]
   },
@@ -264,7 +310,12 @@
         "id": "goal-bullet",
         "name": "Bullet chart",
         "produces": null,
-        "phrases": ["bullet chart", "bullet graph", "kpi dashboard"]
+        "phrases": [
+          "bullet chart",
+          "bullet graph",
+          "kpi dashboard",
+          "several targets"
+        ]
       }
     ]
   },
@@ -368,6 +419,35 @@
         "name": "Area",
         "produces": null,
         "phrases": ["area", "area chart", "filled line"]
+      },
+      {
+        "id": "line-stack",
+        "name": "Stacked area",
+        "produces": null,
+        "phrases": [
+          "stacked area chart",
+          "stacked area",
+          "100% stacked area chart",
+          "percent stacked area"
+        ]
+      },
+      {
+        "id": "line-step",
+        "name": "Step",
+        "produces": null,
+        "phrases": ["step chart", "step line", "staircase chart"]
+      },
+      {
+        "id": "line-band",
+        "name": "Uncertainty Band",
+        "produces": null,
+        "phrases": ["fan chart", "confidence band", "forecast interval"]
+      },
+      {
+        "id": "line-fill-between",
+        "name": "Fill Between",
+        "produces": null,
+        "phrases": ["difference chart", "surplus and deficit chart"]
       }
     ]
   },
@@ -456,6 +536,12 @@
         "name": "Donut",
         "produces": "hole",
         "phrases": ["donut", "doughnut", "ring chart"]
+      },
+      {
+        "id": "pie-waffle",
+        "name": "Waffle",
+        "produces": "waffle",
+        "phrases": ["waffle", "waffle chart", "gridplot", "square pie"]
       }
     ]
   },
@@ -580,7 +666,15 @@
       "height and weight",
       "correlate"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "scatter-connect",
+        "name": "Connected",
+        "produces": null,
+        "phrases": ["connected scatter plot", "connected scatter"]
+      }
+    ]
   },
   "sequence": {
     "phrases": [
@@ -750,7 +844,15 @@
       "cross-team process",
       "lanes"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "swimlane-bpmn",
+        "name": "BPMN process",
+        "produces": null,
+        "phrases": ["bpmn", "bpmn 2.0", "business process", "process model"]
+      }
+    ]
   },
   "version-control": {
     "phrases": [

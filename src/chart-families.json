@@ -187,6 +187,10 @@
       "family": "business",
       "intent": "hierarchy"
     },
+    "ownership": {
+      "family": "business",
+      "intent": "hierarchy"
+    },
     "pert": {
       "family": "project",
       "intent": "flow-process"
