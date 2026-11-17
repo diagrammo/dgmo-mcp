@@ -10,7 +10,6 @@
 import { describe, it, expect } from 'vitest';
 import { chartTypes } from '@diagrammo/dgmo';
 import {
-  createSuggester,
   suggestChartTypes,
   scoreChartType,
   confidence,
@@ -19,7 +18,7 @@ import {
   CONTIGUITY_DOMINANCE,
   MIN_PRIMARY_SCORE,
 } from '../src/suggest/scoring';
-import { TRIGGERS, PRIORS, SIGNALS, VARIANTS } from '../src/suggest/triggers';
+import { TRIGGERS, VARIANTS } from '../src/suggest/triggers';
 import { internalChartTypeIds } from '../src/internal-flag';
 
 const validIds = new Set(chartTypes.map((c) => c.id));
@@ -142,26 +141,20 @@ describe('a variant keyword picks the base type and names the variant', () => {
     expect(type).toBe('goal');
     expect(variants.map((v) => v.id)).toEqual(['goal-thermometer']);
   });
-  it("a distinctive variant keyword outranks another type's phrase", () => {
-    // A fixture variant until bar-marimekko is in the registry (#1872):
-    // "market share" is a pie phrase, but "marimekko" names a bar form.
-    const withMarimekko = createSuggester(TRIGGERS, PRIORS, SIGNALS, {
-      ...VARIANTS,
-      bar: [
-        ...(VARIANTS['bar'] ?? []),
-        {
-          id: 'bar-marimekko',
-          name: 'Marimekko',
-          produces: null,
-          phrases: ['marimekko', 'mekko'],
-        },
-      ],
-    });
-    const { type, variants } = pick('a marimekko of market share', (p) =>
-      withMarimekko.suggestChartTypes(p)
+  it('"a marimekko chart of market share by region" → bar, the Marimekko variant, `widths` (diagrammo/diagrammo#1872)', () => {
+    // "market share" is a pie phrase; "marimekko" is distinctive and wins.
+    const { type, variants } = pick(
+      'a marimekko chart of market share by region'
     );
     expect(type).toBe('bar');
-    expect(variants.map((v) => v.id)).toEqual(['bar-marimekko']);
+    expect(variants).toContainEqual(
+      expect.objectContaining({ id: 'bar-marimekko', produces: 'widths' })
+    );
+  });
+  it('"mekko" and "mosaic" name it too', () => {
+    expect(
+      pick('a mekko of revenue by segment').variants.map((v) => v.id)
+    ).toContain('bar-marimekko');
   });
   it('a keyword another type shares needs the base type in the prompt', () => {
     // "critical path" alone stays with pert's "critical path method".

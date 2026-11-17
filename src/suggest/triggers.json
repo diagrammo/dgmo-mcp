@@ -95,6 +95,19 @@
         ]
       },
       {
+        "id": "bar-marimekko",
+        "name": "Marimekko",
+        "produces": "widths",
+        "phrases": [
+          "marimekko",
+          "mekko",
+          "mosaic",
+          "variable-width bar",
+          "variable width stacked",
+          "market map"
+        ]
+      },
+      {
         "id": "bar-clustered-stack",
         "name": "Clustered stacked",
         "produces": null,
