@@ -155,6 +155,10 @@
       "family": "data",
       "intent": "distribution"
     },
+    "calendar-heatmap": {
+      "family": "data",
+      "intent": "trend-over-time"
+    },
     "infra": {
       "family": "software",
       "intent": "relationships"
