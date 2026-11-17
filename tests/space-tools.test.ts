@@ -127,6 +127,7 @@ describe('space tools', () => {
     const r = await call('list_space_diagrams', { space_id: 's-1' });
     expect(r.isError).toBe(true);
     expect(r.text).toContain('DGMO_API_KEY is not set');
+    expect(r.text).toContain('https://online.diagrammo.app/account');
     expect(requests).toEqual([]);
   });
 

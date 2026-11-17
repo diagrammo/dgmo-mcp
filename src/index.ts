@@ -432,8 +432,16 @@ tool(
         isError: true,
       };
     }
+    // The second item names the Cloud door (#2063): this link is a snapshot,
+    // and an agent has no other way to learn a live one exists.
     return {
-      content: [{ type: 'text' as const, text: result.url }],
+      content: [
+        { type: 'text' as const, text: result.url },
+        {
+          type: 'text' as const,
+          text: 'This link is a snapshot. For a live link that updates as the diagram changes, sign in free at https://online.diagrammo.app.',
+        },
+      ],
     };
   }
 );
@@ -1374,7 +1382,7 @@ async function withSpace(
   const apiKey = process.env['DGMO_API_KEY']?.trim();
   if (!apiKey)
     return errorResult(
-      "DGMO_API_KEY is not set in the MCP server's environment. Mint a space API key on the Diagrammo account page and add it to the server's env config."
+      "DGMO_API_KEY is not set in the MCP server's environment. Sign in at https://online.diagrammo.app/account, make a space API key under API keys, and add it to the server's env config. The panel that shows the new key also shows the space id this tool needs."
     );
   try {
     return await act({ apiKey, spaceId });
@@ -1392,7 +1400,9 @@ const jsonResult = (value: unknown): ToolResult => ({
 const SPACE_ID = z
   .string()
   .min(1)
-  .describe('The space the API key belongs to (the key does not name it).');
+  .describe(
+    'The space the API key belongs to (the key does not name it). Shown beside the key when it is made at https://online.diagrammo.app/account.'
+  );
 const FOLDER = z
   .string()
   .optional()
