@@ -990,5 +990,29 @@
       "situation analysis"
     ],
     "concepts": []
+    },
+  "ownership": {
+    "phrases": [
+      "ownership chart",
+      "ownership structure",
+      "corporate structure",
+      "entity structure",
+      "legal entity chart",
+      "cap table",
+      "shareholding",
+      "holding company"
+    ],
+    "concepts": []
+  },
+  "calendar-heatmap": {
+    "phrases": [
+      "calendar heatmap",
+      "contribution graph",
+      "contribution calendar",
+      "daily activity",
+      "streak calendar",
+      "habit tracker"
+    ],
+    "concepts": []
   }
 }
