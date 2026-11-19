@@ -811,7 +811,32 @@
       "multi-level pie",
       "category and subcategory"
     ],
-    "concepts": []
+    "concepts": [],
+    "variants": [
+      {
+        "id": "treemap-sunburst",
+        "name": "Sunburst",
+        "produces": null,
+        "phrases": [
+          "sunburst diagram",
+          "ring chart of a hierarchy",
+          "nested rings"
+        ]
+      },
+      {
+        "id": "treemap-icicle",
+        "name": "Icicle",
+        "produces": null,
+        "phrases": [
+          "icicle chart",
+          "icicle plot",
+          "icicle diagram",
+          "partition chart",
+          "hierarchy as columns",
+          "depth left to right"
+        ]
+      }
+    ]
   },
   "venn": {
     "phrases": [
