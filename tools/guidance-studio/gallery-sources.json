@@ -6,10 +6,10 @@
     "arc Email Volume Between Team Members\n\nAlice -> Bob 24\nAlice -> Carol 15\nBob -> Carol 18\nBob -> Dave 9\nCarol -> Dave 12\nDave -> Alice 7\nCarol -> Eve 6\nEve -> Alice 4\n\norder degree\n"
   ],
   "bar": [
-    "bar Quarterly Sales by Region\n\nstack\n  North America\n  Europe\n  Asia Pacific\n  Latin America\n\ny-label USD thousands\n\nQ1 820 610 430 180\nQ2 910 645 520 205\nQ3 870 700 640 240\nQ4 1040 760 810 300\n",
-    "bar Monthly Active Users\ny-label Users\nJan 1200\nFeb 1850\nMar 2400\nApr 3100\nMay 3950\nJun 4800\n",
-    "bar Revenue by Product Line\ny-label Revenue ($K)\nWidgets 420\nGadgets 380\nGizmos 290\nDoohickeys 510\nContraptions 175\n",
-    "bar Average Commute Time\ny-label Minutes\nNew York 41\nLos Angeles 34\nChicago 36\nHouston 28\nPhoenix 27\nPhiladelphia 33\n"
+    "bar Quarterly Sales by Region\n\nstack\n  North America\n  Europe\n  Asia Pacific\n  Latin America\n\ny-axis USD thousands\n\nQ1 820 610 430 180\nQ2 910 645 520 205\nQ3 870 700 640 240\nQ4 1040 760 810 300\n",
+    "bar Monthly Active Users\ny-axis Users\nJan 1200\nFeb 1850\nMar 2400\nApr 3100\nMay 3950\nJun 4800\n",
+    "bar Revenue by Product Line\ny-axis Revenue ($K)\nWidgets 420\nGadgets 380\nGizmos 290\nDoohickeys 510\nContraptions 175\n",
+    "bar Average Commute Time\ny-axis Minutes\nNew York 41\nLos Angeles 34\nChicago 36\nHouston 28\nPhoenix 27\nPhiladelphia 33\n"
   ],
   "block": [
     "block Web System Architecture\n\ntag Tier as t\n  Client blue\n  Serving green\n  Data orange\n\n[Client] t: Client\n  [Browser]\n\n[Serving] t: Serving\n  [Load Balancer] [Web Server] [App Server]\n\n[Data] t: Data\n  [Cache] [Database] [Object Store]\n",
@@ -81,10 +81,10 @@
     "flowchart Returns and Refund Decision\n(Return Request) -> <Within Window?>\n  -no-> [Deny Return] -> (End)\n  -yes-> [Inspect Condition] -> <Condition?>\n    -good-> [Issue Refund] -> (End)\n    -worn-> [Offer Store Credit] -> (End)\n    -damaged-> [Deny Return] -> (End)\n"
   ],
   "function": [
-    "function Functions\n\nx -6 to 6\n\nsin(x) blue: sin(x)\nx / 2 red: x / 2\n",
-    "function Sine vs Linear\nx-label x\ny-label y\nx -6 to 6\n\nsin(x) blue: sin(x)\nx / 2 red: x / 2\n",
-    "function Polynomial vs Exponential Growth\nx-label x\ny-label y\nx 0 to 6\n\nx^2 blue: x^2\n2^x red: 2^x\n",
-    "function Damped Oscillation\nx-label x\ny-label y\nx 0 to 20\n\ndamped oscillation blue: e^(-x/3) * cos(x)\n"
+    "function Functions\n\nx-axis -6..6\n\nsin(x) blue: sin(x)\nx / 2 red: x / 2\n",
+    "function Sine vs Linear\ny-axis y\nx-axis x -6..6\n\nsin(x) blue: sin(x)\nx / 2 red: x / 2\n",
+    "function Polynomial vs Exponential Growth\ny-axis y\nx-axis x 0..6\n\nx^2 blue: x^2\n2^x red: 2^x\n",
+    "function Damped Oscillation\ny-axis y\nx-axis x 0..20\n\ndamped oscillation blue: e^(-x/3) * cos(x)\n"
   ],
   "funnel": [
     "funnel Signup Funnel\n\nVisited site 48000\nSigned up 12400\nActivated 6100\nSubscribed 2300\nPaid annual 940\n",
@@ -156,10 +156,10 @@
     "pyramid Workforce Structure\n\nExecutives\nManagers\nSenior Staff\nIndividual Contributors\n"
   ],
   "quadrant": [
-    "quadrant Energy use vs GDP per capita\n\nx-label Low GDP, High GDP\ny-label Low Energy, High Energy\n\nUnited States 76300 12700\nCanada 53400 14400\nMexico 11500 2300\nPanama 17900 2350\nCosta Rica 13400 2050\nGuatemala 5400 650\nHonduras 3050 900\nTrinidad & Tobago 18400 6400\nDominican Republic 10100 1750\nJamaica 6050 1250\nUruguay 17000 3050\nChile 16500 3900\nArgentina 13000 3200\nBrazil 8900 2750\nPeru 7100 1450\nColombia 6650 1350\nParaguay 6000 1650\nBolivia 3600 850\n",
-    "quadrant Feature Prioritization\nx-label Low Effort, High Effort\ny-label Low Value, High Value\n\ntop-left Quick Wins green\ntop-right Big Bets blue\nbottom-left Fill-Ins yellow\nbottom-right Time Sinks red\n\nSingle Sign-On 0.8 0.9\nDark Mode 0.2 0.6\nExport to PDF 0.3 0.4\nRealtime Collaboration 0.9 0.85\nCustom Themes 0.25 0.2\nAdvanced Search 0.6 0.7\n",
-    "quadrant Competitive Landscape\nx-label Low Market Share, High Market Share\ny-label Low Growth, High Growth\n\ntop-left Rising Stars green\ntop-right Leaders blue\nbottom-left Niche Players yellow\nbottom-right Incumbents red\n\nAcme Corp 0.85 0.4\nBolt Inc 0.2 0.8\nCirrus 0.6 0.75\nDelta Systems 0.7 0.3\nEcho Labs 0.25 0.35\n",
-    "quadrant Eisenhower Matrix\nx-label Not Urgent, Urgent\ny-label Not Important, Important\n\ntop-left Schedule blue\ntop-right Do First red\nbottom-left Eliminate yellow\nbottom-right Delegate green\n\nFix production outage 0.95 0.9\nPlan Q3 roadmap 0.2 0.85\nReply to newsletter 0.7 0.15\nStrategy offsite prep 0.3 0.8\nRoutine status email 0.6 0.2\n"
+    "quadrant Energy use vs GDP per capita\n\nx-axis Low GDP, High GDP\ny-axis Low Energy, High Energy\n\nUnited States 76300 12700\nCanada 53400 14400\nMexico 11500 2300\nPanama 17900 2350\nCosta Rica 13400 2050\nGuatemala 5400 650\nHonduras 3050 900\nTrinidad & Tobago 18400 6400\nDominican Republic 10100 1750\nJamaica 6050 1250\nUruguay 17000 3050\nChile 16500 3900\nArgentina 13000 3200\nBrazil 8900 2750\nPeru 7100 1450\nColombia 6650 1350\nParaguay 6000 1650\nBolivia 3600 850\n",
+    "quadrant Feature Prioritization\nx-axis Low Effort, High Effort\ny-axis Low Value, High Value\n\ntop-left Quick Wins green\ntop-right Big Bets blue\nbottom-left Fill-Ins yellow\nbottom-right Time Sinks red\n\nSingle Sign-On 0.8 0.9\nDark Mode 0.2 0.6\nExport to PDF 0.3 0.4\nRealtime Collaboration 0.9 0.85\nCustom Themes 0.25 0.2\nAdvanced Search 0.6 0.7\n",
+    "quadrant Competitive Landscape\nx-axis Low Market Share, High Market Share\ny-axis Low Growth, High Growth\n\ntop-left Rising Stars green\ntop-right Leaders blue\nbottom-left Niche Players yellow\nbottom-right Incumbents red\n\nAcme Corp 0.85 0.4\nBolt Inc 0.2 0.8\nCirrus 0.6 0.75\nDelta Systems 0.7 0.3\nEcho Labs 0.25 0.35\n",
+    "quadrant Eisenhower Matrix\nx-axis Not Urgent, Urgent\ny-axis Not Important, Important\n\ntop-left Schedule blue\ntop-right Do First red\nbottom-left Eliminate yellow\nbottom-right Delegate green\n\nFix production outage 0.95 0.9\nPlan Q3 roadmap 0.2 0.85\nReply to newsletter 0.7 0.15\nStrategy offsite prep 0.3 0.8\nRoutine status email 0.6 0.2\n"
   ],
   "raci": [
     "raci Project RACI Matrix\nroles PM, Eng Lead, Designer, QA\n\nDefine requirements\n  PM: A\n  Eng Lead: C\n  Designer: C\n  QA: I\n\nBuild feature\n  PM: I\n  Eng Lead: R\n  Designer: C\n  QA: I\n\nDesign UI\n  PM: C\n  Eng Lead: I\n  Designer: R\n  QA: I\n\nTest release\n  PM: I\n  Eng Lead: C\n  Designer: I\n  QA: R\n\nApprove launch\n  PM: A\n  Eng Lead: C\n  Designer: I\n  QA: C\n",
@@ -180,10 +180,10 @@
     "sankey Energy Flow\n\nCoal\n  Electricity 400\nGas\n  Electricity 300\n  Heating 200\nSolar green\n  Electricity 150\n\nElectricity\n  Useful Energy 500 green\n  Losses 350 red\n\nHeating\n  Useful Energy 120 green\n  Losses 80 red\n"
   ],
   "scatter": [
-    "scatter Energy Use vs GDP per Capita\n\nx-label GDP per capita (USD)\ny-label Electricity use per capita (kWh/yr)\n\n[North America]\n  United States 76300 12700\n  Canada 53400 14400\n  Mexico 11500 2300\n\n[Central America]\n  Panama 17900 2350\n  Costa Rica 13400 2050\n  Guatemala 5400 650\n  Honduras 3050 900\n\n[Caribbean]\n  Trinidad & Tobago 18400 6400\n  Dominican Republic 10100 1750\n  Jamaica 6050 1250\n\n[South America]\n  Uruguay 17000 3050\n  Chile 16500 3900\n  Argentina 13000 3200\n  Brazil 8900 2750\n  Peru 7100 1450\n  Colombia 6650 1350\n  Paraguay 6000 1650\n  Bolivia 3600 850\n",
-    "scatter Ad Spend vs Sales\nx-label Ad Spend ($K)\ny-label Sales ($K)\n\nSpring Launch 12 45\nSummer Sale 28 88\nBack to School 18 61\nHoliday Push 40 120\nBrand Awareness 22 50\nRetargeting 8 38\nInfluencer 15 72\nSearch Ads 33 96\n",
-    "scatter House Size vs Price\nx-label Size (sq ft)\ny-label Price ($K)\n\n101 Oak 1200 320\n14 Maple 1800 410\n9 Birch 950 265\n220 Elm 2400 560\n7 Cedar 1500 375\n33 Pine 2100 490\n58 Willow 1350 340\n12 Aspen 2800 640\n",
-    "scatter Study Hours vs Exam Score\nx-label Study Hours\ny-label Exam Score\n\n[Section A] blue\n  Ava 5 72\n  Ben 8 85\n  Cora 3 61\n  Dan 10 91\n  Eli 6 78\n\n[Section B] green\n  Finn 7 80\n  Gina 4 65\n  Hugo 9 88\n  Iris 2 55\n  Jack 6 74\n"
+    "scatter Energy Use vs GDP per Capita\n\nx-axis GDP per capita (USD)\ny-axis Electricity use per capita (kWh/yr)\n\n[North America]\n  United States 76300 12700\n  Canada 53400 14400\n  Mexico 11500 2300\n\n[Central America]\n  Panama 17900 2350\n  Costa Rica 13400 2050\n  Guatemala 5400 650\n  Honduras 3050 900\n\n[Caribbean]\n  Trinidad & Tobago 18400 6400\n  Dominican Republic 10100 1750\n  Jamaica 6050 1250\n\n[South America]\n  Uruguay 17000 3050\n  Chile 16500 3900\n  Argentina 13000 3200\n  Brazil 8900 2750\n  Peru 7100 1450\n  Colombia 6650 1350\n  Paraguay 6000 1650\n  Bolivia 3600 850\n",
+    "scatter Ad Spend vs Sales\nx-axis Ad Spend ($K)\ny-axis Sales ($K)\n\nSpring Launch 12 45\nSummer Sale 28 88\nBack to School 18 61\nHoliday Push 40 120\nBrand Awareness 22 50\nRetargeting 8 38\nInfluencer 15 72\nSearch Ads 33 96\n",
+    "scatter House Size vs Price\nx-axis Size (sq ft)\ny-axis Price ($K)\n\n101 Oak 1200 320\n14 Maple 1800 410\n9 Birch 950 265\n220 Elm 2400 560\n7 Cedar 1500 375\n33 Pine 2100 490\n58 Willow 1350 340\n12 Aspen 2800 640\n",
+    "scatter Study Hours vs Exam Score\nx-axis Study Hours\ny-axis Exam Score\n\n[Section A] blue\n  Ava 5 72\n  Ben 8 85\n  Cora 3 61\n  Dan 10 91\n  Eli 6 78\n\n[Section B] green\n  Finn 7 80\n  Gina 4 65\n  Hugo 9 88\n  Iris 2 55\n  Jack 6 74\n"
   ],
   "sequence": [
     "sequence Checkout Flow\nUser -Place order-> Web App\nWeb App -Charge $42.00-> Payment API\nPayment API -Authorize-> Bank\nBank -Approved-> Payment API\nPayment API -Payment ok-> Web App\nWeb App -Order confirmed-> User\n",

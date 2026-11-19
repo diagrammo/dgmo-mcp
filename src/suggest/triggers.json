@@ -1039,5 +1039,34 @@
       "habit tracker"
     ],
     "concepts": []
+  },
+  "boxplot": {
+    "phrases": [
+      "box plot",
+      "boxplot",
+      "box and whisker",
+      "box-and-whisker",
+      "whisker plot",
+      "quartiles",
+      "interquartile range",
+      "outliers",
+      "spread across groups",
+      "cycle time distribution",
+      "response time distribution",
+      "test score distribution",
+      "six sigma"
+    ],
+    "concepts": []
+  },
+  "histogram": {
+    "phrases": [
+      "histogram",
+      "distribution of values",
+      "frequency distribution",
+      "bin the values",
+      "how often",
+      "spread of values"
+    ],
+    "concepts": []
   }
 }
