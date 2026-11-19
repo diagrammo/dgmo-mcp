@@ -159,6 +159,10 @@
       "family": "data",
       "intent": "trend-over-time"
     },
+    "boxplot": {
+      "family": "data",
+      "intent": "distribution"
+    },
     "infra": {
       "family": "software",
       "intent": "relationships"
@@ -232,6 +236,10 @@
       "intent": "flow-process"
     },
     "scatter": {
+      "family": "data",
+      "intent": "distribution"
+    },
+    "histogram": {
       "family": "data",
       "intent": "distribution"
     },
