@@ -108,6 +108,12 @@
         ]
       },
       {
+        "id": "bar-pareto",
+        "name": "Pareto",
+        "produces": "pareto",
+        "phrases": ["pareto chart", "pareto", "80/20 chart", "pareto analysis"]
+      },
+      {
         "id": "bar-clustered-stack",
         "name": "Clustered stacked",
         "produces": null,
@@ -116,6 +122,18 @@
           "clustered stacked column chart",
           "stacked grouped bar chart",
           "grouped stacked bar chart"
+        ]
+      },
+      {
+        "id": "bar-mirror",
+        "name": "Mirror",
+        "produces": null,
+        "phrases": [
+          "butterfly chart",
+          "population pyramid",
+          "age pyramid",
+          "back-to-back bar chart",
+          "mirror bar chart"
         ]
       }
     ]
@@ -461,6 +479,12 @@
         "name": "Fill Between",
         "produces": null,
         "phrases": ["difference chart", "surplus and deficit chart"]
+      },
+      {
+        "id": "line-moving-average",
+        "name": "Moving Average",
+        "produces": "moving-average",
+        "phrases": ["moving average", "rolling average", "smoothed line"]
       }
     ]
   },
@@ -610,6 +634,7 @@
       "responsibility matrix",
       "responsibility assignment",
       "who does what",
+      "who is responsible",
       "accountability matrix",
       "accountable",
       "who owns",
@@ -686,6 +711,17 @@
         "name": "Connected",
         "produces": null,
         "phrases": ["connected scatter plot", "connected scatter"]
+      },
+      {
+        "id": "scatter-trend",
+        "name": "Trend Line",
+        "produces": "trend",
+        "phrases": [
+          "trend line",
+          "line of best fit",
+          "regression line",
+          "scatter plot with trend line"
+        ]
       }
     ]
   },
@@ -1023,9 +1059,11 @@
       "corporate structure",
       "entity structure",
       "legal entity chart",
-      "cap table",
-      "shareholding",
-      "holding company"
+      "cap table structure",
+      "subsidiaries",
+      "holding company",
+      "group structure chart",
+      "who owns whom"
     ],
     "concepts": []
   },
@@ -1033,10 +1071,12 @@
     "phrases": [
       "calendar heatmap",
       "contribution graph",
-      "contribution calendar",
+      "github contribution calendar",
+      "activity calendar",
       "daily activity",
-      "streak calendar",
-      "habit tracker"
+      "streak",
+      "habit tracker",
+      "commits per day"
     ],
     "concepts": []
   },
