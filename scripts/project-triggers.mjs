@@ -18,6 +18,15 @@
  *
  *   (default)  rewrite src/suggest/triggers.json from registry.json
  *   --check    exit 1 if triggers.json differs from the projection (CI drift guard)
+ *
+ * A registry type with no triggers.json entry is a FAILURE under --check, not
+ * a note: the scorer cannot pick a type it has no entry for, so a new chart
+ * type would be invisible to the AI picker (diagrammo/diagrammo#2288). The
+ * default run creates the missing entry from the registry's keywords, with no
+ * concepts and no prior, so the fix is always "run the projection".
+ *
+ *   --registry <path>  read this registry.json instead (tests)
+ *   --triggers <path>  read and write this triggers.json instead (tests)
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -26,8 +35,14 @@ import { format, resolveConfig } from 'prettier';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MCP_ROOT = join(HERE, '..');
-const TRIGGERS = join(MCP_ROOT, 'src/suggest/triggers.json');
-const REGISTRY = join(MCP_ROOT, '../dgmo-content/registry.json');
+const arg = (name) => {
+  const i = process.argv.indexOf(name);
+  return i === -1 ? undefined : process.argv[i + 1];
+};
+const TRIGGERS =
+  arg('--triggers') ?? join(MCP_ROOT, 'src/suggest/triggers.json');
+const REGISTRY =
+  arg('--registry') ?? join(MCP_ROOT, '../dgmo-content/registry.json');
 const CHECK = process.argv.includes('--check');
 
 const registry = JSON.parse(await readFile(REGISTRY, 'utf8'));
@@ -63,6 +78,9 @@ for (const e of registry.entities) {
   variantsByType.set(e.base, list);
 }
 
+// report any type the registry knows that triggers.json doesn't (selection needs it)
+const missing = [...phrasesByType.keys()].filter((id) => !(id in triggers));
+
 // Rebuild each entry: clone (preserves concepts + optional prior + key order),
 // overwrite phrases (and variants) from the model. Types absent from the
 // registry keep their phrases.
@@ -77,6 +95,15 @@ for (const [id, entry] of Object.entries(triggers)) {
     ...(variants ? { variants } : {}),
   };
 }
+// A missing type gets a fresh entry, so the picker can select it at once.
+for (const id of missing) {
+  const variants = variantsByType.get(id);
+  out[id] = {
+    phrases: phrasesByType.get(id),
+    concepts: [],
+    ...(variants ? { variants } : {}),
+  };
+}
 
 // Prettier-formatted, so the file the gate's format:check accepts is also
 // the file this check calls in sync.
@@ -85,11 +112,8 @@ const text = await format(JSON.stringify(out, null, 2), {
   filepath: TRIGGERS,
 });
 
-// report any type the registry knows that triggers.json doesn't (selection needs it)
-const missing = [...phrasesByType.keys()].filter((id) => !(id in triggers));
-
 if (CHECK) {
-  if (text === current) {
+  if (text === current && missing.length === 0) {
     console.log('✓ triggers.json phrases in sync with registry.json');
     process.exit(0);
   }
@@ -98,7 +122,7 @@ if (CHECK) {
   );
   if (missing.length)
     console.error(
-      `  registry types missing a triggers entry: ${missing.join(', ')}`
+      `  registry types missing a triggers entry (the AI picker cannot choose them): ${missing.join(', ')}`
     );
   process.exit(1);
 }
@@ -110,5 +134,5 @@ console.log(
 );
 if (missing.length)
   console.log(
-    `  note: registry types with no triggers entry: ${missing.join(', ')}`
+    `  added triggers entries (no concepts, no prior — tune them): ${missing.join(', ')}`
   );

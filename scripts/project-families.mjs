@@ -15,6 +15,13 @@
  *
  *   (default)  rewrite src/chart-families.json from registry.json
  *   --check    exit 1 if chart-families.json differs from the projection
+ *
+ * Both modes exit 1 when a registry type has no family, or names a family the
+ * registry does not define: list_chart_types would drop it from every group
+ * (diagrammo/diagrammo#2288). The fix belongs in registry.json, not here.
+ *
+ *   --registry <path>  read this registry.json instead (tests)
+ *   --out <path>       read and write this chart-families.json instead (tests)
  */
 import { readFile, writeFile } from 'node:fs/promises';
 import { fileURLToPath } from 'node:url';
@@ -23,8 +30,13 @@ import { format, resolveConfig } from 'prettier';
 
 const HERE = dirname(fileURLToPath(import.meta.url));
 const MCP_ROOT = join(HERE, '..');
-const OUT = join(MCP_ROOT, 'src/chart-families.json');
-const REGISTRY = join(MCP_ROOT, '../dgmo-content/registry.json');
+const arg = (name) => {
+  const i = process.argv.indexOf(name);
+  return i === -1 ? undefined : process.argv[i + 1];
+};
+const OUT = arg('--out') ?? join(MCP_ROOT, 'src/chart-families.json');
+const REGISTRY =
+  arg('--registry') ?? join(MCP_ROOT, '../dgmo-content/registry.json');
 const CHECK = process.argv.includes('--check');
 
 const registry = JSON.parse(await readFile(REGISTRY, 'utf8'));
@@ -47,6 +59,18 @@ const types = {};
 for (const e of registry.entities) {
   if (e.kind !== 'type') continue;
   types[e.id] = { family: e.family, intent: e.intent?.[0] ?? null };
+}
+
+const familyIds = new Set(families.map((f) => f.id));
+const orphans = Object.entries(types)
+  .filter(([, t]) => !familyIds.has(t.family))
+  .map(([id, t]) => `${id} (family: ${t.family ?? 'none'})`);
+if (orphans.length) {
+  console.error(
+    `✗ registry types with no known family (list_chart_types would drop them): ${orphans.join(', ')}`
+  );
+  console.error('  fix: give each a family defined in registry.json');
+  process.exit(1);
 }
 
 const projected = { families, types };
