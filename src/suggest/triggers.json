@@ -691,6 +691,7 @@
       "splits into",
       "comes from"
     ],
+    "prior": 5,
     "concepts": []
   },
   "scatter": {
@@ -1067,16 +1068,19 @@
     ],
     "concepts": []
   },
-  "calendar-heatmap": {
+  "calendar": {
     "phrases": [
-      "calendar heatmap",
+      "calendar",
       "contribution graph",
       "github contribution calendar",
       "activity calendar",
       "daily activity",
       "streak",
       "habit tracker",
-      "commits per day"
+      "commits per day",
+      "wall calendar",
+      "time off calendar",
+      "habit calendar"
     ],
     "concepts": []
   },
@@ -1106,6 +1110,30 @@
       "bin the values",
       "how often",
       "spread of values"
+    ],
+    "concepts": []
+  },
+  "waterfall": {
+    "phrases": [
+      "waterfall chart",
+      "bridge chart",
+      "revenue bridge",
+      "variance bridge",
+      "budget to actual",
+      "walk chart",
+      "cost bridge"
+    ],
+    "concepts": []
+  },
+  "dot": {
+    "phrases": [
+      "dot plot",
+      "dumbbell chart",
+      "cleveland dot plot",
+      "dot strip",
+      "gap between two values",
+      "range per category",
+      "connected dot plot"
     ],
     "concepts": []
   }

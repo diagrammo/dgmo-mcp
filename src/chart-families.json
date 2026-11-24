@@ -155,13 +155,21 @@
       "family": "data",
       "intent": "distribution"
     },
-    "calendar-heatmap": {
+    "calendar": {
       "family": "data",
       "intent": "trend-over-time"
     },
     "boxplot": {
       "family": "data",
       "intent": "distribution"
+    },
+    "waterfall": {
+      "family": "data",
+      "intent": "part-to-whole"
+    },
+    "dot": {
+      "family": "data",
+      "intent": "compare-values"
     },
     "infra": {
       "family": "software",
