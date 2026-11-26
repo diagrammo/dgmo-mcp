@@ -410,7 +410,7 @@ tool(
 
 tool(
   'share_diagram',
-  'Generate a shareable diagrammo.app URL for a DGMO diagram. The source is compressed into the URL fragment, so nothing is uploaded and the link works for anyone who opens it; returns the URL as text. Errors when the compressed source exceeds the URL size limit (the error reports both sizes) — split or simplify the diagram, or use open_in_app / render_diagram instead. The source is not validated here; call validate_diagram first.',
+  'Generate a shareable diagrammo.app URL for a DGMO diagram. The source is compressed into the URL fragment (after the #), which a browser never sends to a server, so nothing is uploaded and the link works for anyone who opens it; returns the URL as text. Errors when the compressed source exceeds the URL size limit (the error reports both sizes) — split or simplify the diagram, or use open_in_app / render_diagram instead. The source is not validated here; call validate_diagram first.',
   {
     dgmo: z.string().describe('DGMO diagram markup'),
   },
