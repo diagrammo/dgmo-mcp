@@ -72,6 +72,20 @@ export function extractCategorizeRule(markdown: string): string | null {
 }
 
 /**
+ * Extract the universal "keep comment lines under 40 characters" rule (the
+ * `<!-- COMMENTS start -->` / `<!-- COMMENTS end -->` block inside the STYLING
+ * core). Prepended to EVERY per-type slice like the color, title and
+ * categorize rules, so a model wraps long `//` comments in every chart type.
+ * Returns null if the markers are absent (older bundled reference).
+ */
+export function extractCommentRule(markdown: string): string | null {
+  const m = markdown.match(
+    /<!--\s*COMMENTS start\s*-->([\s\S]*?)<!--\s*COMMENTS end\s*-->/
+  );
+  return m ? m[1].trim() : null;
+}
+
+/**
  * Slice the per-type block for `chartType`, resolving aliases first. A block
  * runs from just after its `<!-- TYPE:<id> -->` marker to the next TYPE marker
  * or the next `^## ` (H2) heading, whichever comes first. The opening TYPE

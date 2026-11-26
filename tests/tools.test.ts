@@ -274,6 +274,15 @@ describe('get_language_reference', () => {
     if (!isError) expect(text.toLowerCase()).toMatch(/sequence/);
   });
 
+  // #2387: the comment-width rule rides every per-type slice, not just the
+  // STYLING core, so a model wraps long `//` comments in any chart type.
+  it('per-type slice carries the 40-character comment rule', async () => {
+    const { text, isError } = await call('get_language_reference', {
+      chart_type: 'flowchart',
+    });
+    if (!isError) expect(text).toMatch(/comment lines under 40 characters/);
+  });
+
   it('rejects an unknown chart type at the schema layer', async () => {
     const { isError } = await call('get_language_reference', {
       chart_type: 'not-a-real-type',

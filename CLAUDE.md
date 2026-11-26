@@ -42,7 +42,7 @@ Two things follow, and both are load-bearing:
 - 🔴 **A tool description says what the tool does and when to call it; it never teaches DGMO syntax** — decided 2026-09-22 on diagrammo/diagrammo#855. That holds for every parameter `.describe()` too. `dgmo/SKILL.md` and the language reference it is generated from are the one authority, and a syntax rule copied in here is prose nothing checks against the spec. Anything about how to write a diagram is a pointer to `get_language_reference`. `tests/tools.test.ts` fails on a description naming a DGMO colour, which is how the one inlined rule this held (the trailing colour token, six copies) got in
 - Chart-type **selection** (`src/suggest/`, `triggers.json`) lives here, not in dgmo — it is AI-authoring-only and no renderer needs it
 - Every output tool funnels through `renderPipeline()` in `render-helpers.ts`, a **hard color gate**: hex and CSS color names are refused via `INVALID_COLOR_CODE` even where the library merely warns, so an authoring model is forced to correct rather than silently take a fallback color
-- Per-type reference slicing (`reference.ts`) keys on the `<!-- TYPE:id -->` / `<!-- TYPE-ALIASES: -->` anchors dgmo's generator writes; the universal color, title and categorize rules are prepended to every slice because the slice omits the shared core
+- Per-type reference slicing (`reference.ts`) keys on the `<!-- TYPE:id -->` / `<!-- TYPE-ALIASES: -->` anchors dgmo's generator writes; the universal color, title, categorize and comment-width rules are prepended to every slice because the slice omits the shared core
 - `DGMO_MCP_TEST` (set by `vitest.config.ts`) skips the stdio bootstrap so tests drive the server over an in-memory transport
 
 ## Transports — stdio, and streamable HTTP since 0.19.0

@@ -22,6 +22,7 @@ import {
   extractColorRule,
   extractTitleRule,
   extractCategorizeRule,
+  extractCommentRule,
 } from '../src/reference.js';
 
 const here = dirname(fileURLToPath(import.meta.url));
@@ -169,6 +170,19 @@ describe('categorize rule rides every per-type slice (color-by-grouping push)', 
     const rule = extractCategorizeRule(ref);
     expect(rule).toBeTruthy();
     expect(rule).toMatch(/tag group/i);
+    expect(rule).not.toMatch(/<!--/); // markers stripped from the extracted rule
+  });
+});
+
+describe('comment rule rides every per-type slice (narrow-comment contract)', () => {
+  const ref = workspaceReference();
+  const anchored = ref != null && /<!--\s*TYPE:/.test(ref);
+
+  it('the real reference defines the COMMENTS block with the 40-char limit', () => {
+    if (!anchored) return;
+    const rule = extractCommentRule(ref);
+    expect(rule).toBeTruthy();
+    expect(rule).toMatch(/40 characters/);
     expect(rule).not.toMatch(/<!--/); // markers stripped from the extracted rule
   });
 });
